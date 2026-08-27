@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Stingray Store Admin</title>
+<link rel="icon" href="assets/school-seal.png" type="image/png" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/admin.css" />
+</head>
+<body class="admin-body">
+
+<header class="topbar">
+  <img class="topbar__logo" src="assets/school-seal.png" alt="School logo" />
+  <div class="topbar__titles">
+    <div class="school" id="schoolNameLabel">School</div>
+    <div class="store">Stingray Store Admin</div>
+  </div>
+  <div class="topbar__spacer"></div>
+  <a class="admin-back" href="index.html">Back to store</a>
+</header>
+
+<main class="admin-main">
+
+  <section id="gateSection" class="admin-card">
+    <h1>Admin Access</h1>
+    <p>Enter the admin access phrase to continue.</p>
+    <form id="gateForm">
+      <input type="password" id="gateInput" placeholder="Access phrase" autocomplete="off" />
+      <button type="submit">Continue</button>
+    </form>
+    <div class="admin-msg" id="gateMsg"></div>
+  </section>
+
+  <section id="toolSection" class="admin-card" hidden>
+    <h1>Monthly Points Upload</h1>
+
+    <div class="admin-notice">
+      This page does not save anything and does not connect to GitHub on its
+      own. It only turns a list of codes and points into the file format the
+      store reads. This repository is public, so the access phrase above is
+      a speed bump for casual visitors, not real security. The actual
+      security is GitHub's own login, required to commit the file this page
+      generates.
+    </div>
+
+    <h2>1. Paste this month's codes and points</h2>
+    <p>One student per line: code, commendation points, conduct points. Comma or tab separated. Do not include names or student IDs.</p>
+    <textarea id="rowsInput" rows="8" placeholder="SR-4821-BLUE, 14, 1&#10;SR-1092-GOLD, 7, 4"></textarea>
+    <button id="generateBtn">Generate File</button>
+    <div class="admin-msg" id="generateMsg"></div>
+
+    <div id="resultSection" hidden>
+      <h2>2. Copy the generated file</h2>
+      <textarea id="jsonOutput" rows="10" readonly></textarea>
+      <div class="admin-actions">
+        <button id="copyJsonBtn">Copy</button>
+        <button id="downloadBtn">Download points.json</button>
+      </div>
+
+      <h2>3. Commit it to GitHub</h2>
+      <p>Open the file in GitHub's editor, select all the existing text, paste in the copied file, then commit. You must be logged in to GitHub with write access to this repository.</p>
+      <a id="editLink" class="admin-edit-link" href="#" target="_blank" rel="noopener">Open data/points.json in GitHub</a>
+    </div>
+  </section>
+
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

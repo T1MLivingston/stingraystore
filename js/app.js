@@ -43,6 +43,10 @@
     copyRequestBtn: document.getElementById("copyRequestBtn"),
     copyStatus: document.getElementById("copyStatus"),
     closeModalBtn: document.getElementById("closeModalBtn"),
+    falseClaimField: document.getElementById("falseClaimField"),
+    falseClaimCheck: document.getElementById("falseClaimCheck"),
+    falseClaimPenaltyText: document.getElementById("falseClaimPenaltyText"),
+    adminBtn: document.getElementById("adminBtn"),
   };
 
   function applyConfig() {
@@ -55,6 +59,7 @@
     els.footWebsite.href = CONFIG.websiteUrl;
     els.footCodeOfConduct.href = CONFIG.codeOfConductUrl;
     els.footUniformPolicy.href = CONFIG.uniformPolicyUrl;
+    els.falseClaimPenaltyText.textContent = CONFIG.falseClaimPenalty;
     if (CONFIG.logoPath) {
       els.logoImg.src = CONFIG.logoPath;
     }
@@ -147,34 +152,47 @@
     return state.cart.reduce((sum, id) => sum + (itemById(id)?.cost || 0), 0);
   }
 
+  function renderCategorySection(cat) {
+    const section = document.createElement("section");
+    const title = document.createElement("h2");
+    title.className = "category-title";
+    title.textContent = cat;
+    section.appendChild(title);
+
+    const grid = document.createElement("div");
+    grid.className = "grid";
+
+    ITEMS.filter((i) => i.category === cat).forEach((item) => {
+      grid.appendChild(renderCard(item));
+    });
+
+    section.appendChild(grid);
+    return section;
+  }
+
   function renderCatalog() {
     const categories = [...new Set(ITEMS.map((i) => i.category))];
     els.catalog.innerHTML = "";
 
-    categories.forEach((cat) => {
-      const section = document.createElement("section");
-      const title = document.createElement("h2");
-      title.className = "category-title";
-      title.textContent = cat;
-      if (cat === "Recognition") {
-        const icon = document.createElement("img");
-        icon.src = "assets/sammy-medal.png";
-        icon.alt = "";
-        icon.className = "category-icon";
-        title.appendChild(icon);
+    // Categories with only one or two items are paired side by side to
+    // save vertical space; larger categories always get their own row.
+    let i = 0;
+    while (i < categories.length) {
+      const cat = categories[i];
+      const isSmall = (c) => ITEMS.filter((item) => item.category === c).length <= 2;
+
+      if (isSmall(cat) && i + 1 < categories.length && isSmall(categories[i + 1])) {
+        const row = document.createElement("div");
+        row.className = "category-row";
+        row.appendChild(renderCategorySection(cat));
+        row.appendChild(renderCategorySection(categories[i + 1]));
+        els.catalog.appendChild(row);
+        i += 2;
+      } else {
+        els.catalog.appendChild(renderCategorySection(cat));
+        i += 1;
       }
-      section.appendChild(title);
-
-      const grid = document.createElement("div");
-      grid.className = "grid";
-
-      ITEMS.filter((i) => i.category === cat).forEach((item) => {
-        grid.appendChild(renderCard(item));
-      });
-
-      section.appendChild(grid);
-      els.catalog.appendChild(section);
-    });
+    }
   }
 
   function renderCard(item) {
@@ -322,8 +340,14 @@
       <div class="line"><span>Total cost</span><span>${total} pts</span></div>
       <div class="line"><span>Your balance</span><span>${getCommendations()} pts ${state.verified ? "(verified)" : "(self-reported)"}</span></div>
     `;
+    els.falseClaimField.hidden = state.verified;
+    els.falseClaimCheck.checked = false;
     els.copyStatus.textContent = "";
     els.modalWrap.classList.add("open");
+  }
+
+  function requiresFalseClaimAck() {
+    return !state.verified && !els.falseClaimCheck.checked;
   }
   function closeModal() {
     els.modalWrap.classList.remove("open");
@@ -336,6 +360,11 @@
       els.copyStatus.style.color = "#c42836";
       return;
     }
+    if (requiresFalseClaimAck()) {
+      els.copyStatus.textContent = "Please confirm your points balance is accurate first.";
+      els.copyStatus.style.color = "#c42836";
+      return;
+    }
     const subject = encodeURIComponent(`Stingray Store Request, Code ${els.studentCode.value.trim()}`);
     const body = encodeURIComponent(buildRequestText());
     window.location.href = `mailto:${CONFIG.adminEmail}?subject=${subject}&body=${body}`;
@@ -345,6 +374,11 @@
     if (!els.studentCode.value.trim()) {
       els.studentCode.focus();
       els.copyStatus.textContent = "Please enter your redemption code first.";
+      els.copyStatus.style.color = "#c42836";
+      return;
+    }
+    if (requiresFalseClaimAck()) {
+      els.copyStatus.textContent = "Please confirm your points balance is accurate first.";
       els.copyStatus.style.color = "#c42836";
       return;
     }
@@ -379,6 +413,15 @@
   els.closeModalBtn.addEventListener("click", closeModal);
   els.sendRequestBtn.addEventListener("click", sendRequest);
   els.copyRequestBtn.addEventListener("click", copyRequest);
+  els.adminBtn.addEventListener("click", () => {
+    const entered = prompt("Enter the admin access phrase:");
+    if (entered === null) return;
+    if (entered.trim() === CONFIG.adminAccessPhrase) {
+      window.location.href = "admin.html";
+    } else {
+      alert("That is not the right phrase.");
+    }
+  });
 
   applyConfig();
   renderAll();

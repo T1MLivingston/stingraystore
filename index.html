@@ -20,18 +20,17 @@
     <span id="miniBalanceValue">0</span> pts
   </div>
   <button class="cart-btn" id="openCartBtn" aria-haspopup="dialog">
-    <span class="label">My Requests</span> <span class="cart-count" id="cartCount">0</span>
+    <span class="label">Make a Request</span> <span class="cart-count" id="cartCount">0</span>
   </button>
 </header>
 
 <section class="hero">
-  <img class="hero__sammy" src="assets/sammy-monitor.png" alt="Sammy the Stingray" />
-  <h1>Welcome to the <span>Stingray Store</span></h1>
+  <h1>Welcome to the <span>Stingray Store</span> <img class="hero__sammy" src="assets/sammy-monitor.png" alt="Sammy the Stingray" /></h1>
   <p class="motto" id="mottoText">
     We support each other, contribute to our community, and strive for excellence in all we do.
   </p>
-  <div class="accent-line"></div>
 </section>
+<div class="accent-line"></div>
 
 <section class="lookup-section">
   <div class="lookup-grid">
@@ -61,6 +60,7 @@
     </div>
 
     <div class="steps-wrap">
+      <img class="steps-list__sammy" src="assets/sammy-backpack.png" alt="Backpack Sammy" />
       <ol class="steps-list">
         <li>
           <span class="steps-list__num">1</span>
@@ -91,7 +91,6 @@
           </div>
         </li>
       </ol>
-      <img class="steps-list__sammy" src="assets/sammy-backpack.png" alt="" />
     </div>
   </div>
 </section>
@@ -102,9 +101,9 @@
 
 <div class="overlay" id="overlay"></div>
 
-<aside class="drawer" id="cartDrawer" role="dialog" aria-label="My requested rewards">
+<aside class="drawer" id="cartDrawer" role="dialog" aria-label="Make a request">
   <div class="drawer__header">
-    <h2>My Requests</h2>
+    <h2>Make a Request</h2>
     <button id="closeCartBtn" aria-label="Close">&times;</button>
   </div>
   <div class="drawer__body" id="cartBody">
@@ -137,6 +136,13 @@
         <label for="studentNote">Note to staff (optional)</label>
         <textarea id="studentNote" rows="2" placeholder="e.g. Which class period, or which teacher for a lunch pass"></textarea>
       </div>
+
+      <div class="field" id="falseClaimField" hidden>
+        <label class="checkbox-label">
+          <input type="checkbox" id="falseClaimCheck" />
+          <span>I confirm this points balance is accurate. A false claim results in a <span id="falseClaimPenaltyText">5</span> point deduction.</span>
+        </label>
+      </div>
     </div>
     <div class="modal__footer">
       <button class="checkout-btn" id="sendRequestBtn">Send Request by Email</button>
@@ -148,7 +154,7 @@
 </div>
 
 <footer>
-  <img class="footer__sammy" src="assets/sammy-peek.png" alt="" />
+  <img class="footer__sammy" src="assets/sammy-medal.png" alt="" />
   <div class="foot-motto" id="footMotto">"We support each other, contribute to our community, and strive for excellence in all we do."</div>
   <p>
     <span id="footSchoolName">Your School Name</span> ·
@@ -157,6 +163,7 @@
     <a id="footUniformPolicy" href="#" target="_blank" rel="noopener">Uniform Policy</a>
   </p>
   <p style="opacity:0.8;">No student data is stored by this site. Point balances come from an anonymous code lookup (or a self-report, if your code isn't in the system yet) and are confirmed by staff before any reward is given.</p>
+  <button class="admin-btn" id="adminBtn">Admin</button>
 </footer>
 
 <script src="js/config.js"></script>

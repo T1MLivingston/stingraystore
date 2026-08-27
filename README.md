@@ -50,12 +50,31 @@ Format:
   }
 }
 ```
-Build it from the behavior report export (a quick spreadsheet formula or
-script mapping each student's existing code to their totals works fine).
 **Never add a name, student ID, email, or any other identifying column** —
-the whole point is that this file is safe to publish. Replace the file and
-redeploy (or host it elsewhere and point `pointsDataUrl` in `js/config.js`
-at it) once a month.
+the whole point is that this file is safe to publish.
+
+**`admin.html`** is a small tool that builds this file for you: paste rows
+of `code, commendations, conduct` (straight out of a spreadsheet column
+export), click Generate, then copy or download the result. It is linked
+from the small "Admin" button at the bottom of the store's footer, gated by
+`CONFIG.adminAccessPhrase`.
+
+Read this before you rely on that gate: **this repository is public**, so
+that phrase is visible to anyone who looks at `js/config.js`, on the live
+site or on GitHub, no matter how long you make it. It is a speed bump that
+keeps casual visitors out of the tool, not real security. The tool itself
+also never touches GitHub. The last step is always: open the link it gives
+you to `data/points.json` in GitHub's own web editor, paste the generated
+file over the old one, and commit. That GitHub login is the actual security
+boundary here, and it is already correctly protected by GitHub. If you want
+this admin gate to be more than a speed bump, either make the repository
+private (GitHub Pages from a private repo needs a paid GitHub plan) or
+change `adminAccessPhrase` to something you rotate and don't rely on
+for anything sensitive.
+
+Once the file is committed, redeploy (a push to the Pages branch triggers
+this automatically) — or host `points.json` elsewhere entirely and point
+`pointsDataUrl` in `js/config.js` at it.
 
 ### If you outgrow this later
 If you want the store to also track *redemptions* (so a spent point can't
@@ -77,14 +96,20 @@ Everything you're likely to change lives in two files:
 Colors and layout live in `css/style.css`, controlled by CSS variables at
 the top (`--blue-dark`, `--blue`, `--blue-light`, `--red`).
 
-### Adding your real logo and Sammy the Stingray art
-The two seminolescience.org logo files and the "Sammy the Stingray" mascot
-images from the CHAMPS board couldn't be downloaded automatically in this
-session (blocked by network policy), so the site still uses a placeholder
-stingray icon. Drop your real files into `assets/` (e.g.
-`assets/logo-round.png`, `assets/logo-long.png`, `assets/sammy.png`) and
-update `logoPath` in `js/config.js` — or send them to whoever's iterating on
-this next and they can wire them in directly.
+### Branding assets
+`assets/` holds the real school seal (`school-seal.png`, used as the logo
+and favicon) and three Sammy the Stingray poses: `sammy-monitor.png` (hero),
+`sammy-backpack.png` (steps list), and `sammy-medal.png` (footer). Swap any
+of these for a different pose or crop by replacing the file and keeping the
+same name, or update the paths in `index.html` / `js/app.js` / `js/config.js`
+to point at new files.
+
+### False claim policy
+`CONFIG.falseClaimPenalty` (default 5) is shown to students in the
+confirmation checkbox they must check before sending a **self-reported**
+request (a verified, code-matched balance skips this, since it's already
+accurate). The site only displays the policy — actually applying the
+deduction happens in your real system.
 
 ### Setting up email
 The default "Send Request by Email" button uses a `mailto:` link — this

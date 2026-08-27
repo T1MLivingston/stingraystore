@@ -42,4 +42,29 @@ const CONFIG = {
   dressDownMaxConduct: 3,
   dressDownNote:
     "You qualify for a free Dress-Down Day this month. This is separate from the Full Dress-Down Day pass below, which anyone can redeem with points any day.",
+
+  // Penalty for submitting a request with a self-reported balance that
+  // turns out to be false. Shown to students before they can send an
+  // unverified request. Actually applying the deduction happens in your
+  // real system, this site only displays the policy.
+  falseClaimPenalty: 5,
+
+  // ---- Admin access ----
+  // This phrase gates the admin page (admin.html), where staff turn a
+  // spreadsheet of codes and points into the data/points.json file.
+  // IMPORTANT: this repository is public, and this site is a static page
+  // with no backend. A phrase stored here is visible to anyone who views
+  // this file's source, on the live site or on GitHub, no matter how long
+  // it is. Treat it as a speed bump that keeps casual visitors out of the
+  // admin tool, not as real security. The actual security boundary is
+  // GitHub's own login, which is required to commit the generated file.
+  // Change this phrase before publishing, and never gate anything more
+  // sensitive than "help me format a JSON file" behind it.
+  adminAccessPhrase: "sammy-swims-under-the-blue-and-red-bridge",
+
+  // Direct link to edit the points file in GitHub's own web editor,
+  // shown at the end of the admin tool. Update the branch name if you
+  // rename or merge it.
+  pointsFileEditUrl:
+    "https://github.com/T1MLivingston/stingraystore/edit/claude/stingray-commendation-store-tmnbhp/data/points.json",
 };

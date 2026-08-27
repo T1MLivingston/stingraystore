@@ -1,0 +1,90 @@
+.admin-body { background: linear-gradient(180deg, var(--blue-lighter) 0%, #ffffff 320px); }
+
+.admin-back {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.admin-main {
+  max-width: 640px;
+  margin: 40px auto;
+  padding: 0 20px 60px;
+}
+
+.admin-card {
+  background: var(--white);
+  border: 1px solid #dcedfb;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+}
+
+.admin-card h1 { margin: 0 0 8px; color: var(--blue-dark); font-size: 1.4rem; }
+.admin-card h2 { margin: 24px 0 6px; color: var(--blue-dark); font-size: 1rem; }
+.admin-card > p { margin: 0 0 16px; color: var(--muted); }
+.admin-card p { color: var(--muted); font-size: 0.9rem; }
+
+#gateForm { display: flex; gap: 10px; }
+#gateForm input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid #cfe1f5;
+  border-radius: 10px;
+  font-size: 0.95rem;
+}
+#gateForm button {
+  border: none;
+  background: var(--blue-dark);
+  color: var(--white);
+  font-weight: 700;
+  padding: 0 20px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+#gateForm button:hover { background: var(--blue); }
+
+.admin-notice {
+  background: #fff8e6;
+  border: 1px solid #f3dfa0;
+  color: #8a6414;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.admin-card textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #cfe1f5;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-family: ui-monospace, Consolas, monospace;
+  resize: vertical;
+}
+
+#generateBtn, #copyJsonBtn, #downloadBtn {
+  border: none;
+  background: var(--blue-dark);
+  color: var(--white);
+  font-weight: 700;
+  padding: 11px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+#generateBtn:hover, #copyJsonBtn:hover, #downloadBtn:hover { background: var(--blue); }
+
+.admin-actions { display: flex; gap: 10px; }
+.admin-actions button { margin-top: 10px; }
+
+.admin-msg { margin-top: 10px; font-size: 0.85rem; }
+.admin-msg.error { color: var(--red-dark); }
+.admin-msg.ok { color: #1c6b3a; }
+
+.admin-edit-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-weight: 700;
+}
