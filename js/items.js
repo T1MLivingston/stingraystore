@@ -1,0 +1,107 @@
+// ============================================================
+// STINGRAY STORE — CATALOG
+// Add, remove, or edit reward items here. Each item:
+//   id          unique short string, no spaces
+//   name        shown to students
+//   desc        one-line description
+//   cost        commendation points required
+//   category    groups items on the page
+//   icon        one emoji used as the card's icon
+//   maxConduct  (optional) item is locked if the student's entered
+//               conduct points are greater than this number
+// ============================================================
+
+const ITEMS = [
+  {
+    id: "untucked",
+    name: "Untucked Shirt Pass",
+    desc: "Wear your uniform shirt untucked for the day.",
+    cost: 15,
+    category: "Dress Code Passes",
+    icon: "👕",
+  },
+  {
+    id: "fancy-shoes",
+    name: "Fancy Shoes Pass",
+    desc: "Swap uniform shoes for the shoes of your choice.",
+    cost: 15,
+    category: "Dress Code Passes",
+    icon: "👟",
+  },
+  {
+    id: "hat-pass",
+    name: "Wear a Hat Pass",
+    desc: "Wear a hat in class for the day.",
+    cost: 15,
+    category: "Dress Code Passes",
+    icon: "🧢",
+  },
+  {
+    id: "dress-down",
+    name: "Full Dress-Down Day",
+    desc: "Skip the uniform entirely — dress down all day.",
+    cost: 40,
+    category: "Dress Code Passes",
+    icon: "🎽",
+    maxConduct: 2,
+  },
+  {
+    id: "lunch-bunch",
+    name: "Lunch Bunch Pass",
+    desc: "Eat lunch with friends outside your usual spot.",
+    cost: 25,
+    category: "Food & Social",
+    icon: "🍔",
+  },
+  {
+    id: "lunch-teacher",
+    name: "Lunch With a Teacher",
+    desc: "Enjoy a lunch invite with a teacher of your choice.",
+    cost: 20,
+    category: "Food & Social",
+    icon: "🍕",
+  },
+  {
+    id: "homework-pass",
+    name: "Homework Pass",
+    desc: "Skip one homework assignment, no questions asked.",
+    cost: 30,
+    category: "Academic Perks",
+    icon: "📝",
+    maxConduct: 1,
+  },
+  {
+    id: "extra-credit",
+    name: "Extra Credit Points",
+    desc: "Redeem for a small extra-credit boost in one class.",
+    cost: 35,
+    category: "Academic Perks",
+    icon: "⭐",
+    maxConduct: 1,
+  },
+  {
+    id: "call-home",
+    name: "Positive Call Home",
+    desc: "A teacher or admin calls home with great news about you.",
+    cost: 20,
+    category: "Recognition",
+    icon: "📞",
+  },
+  {
+    id: "email-home",
+    name: "Positive Email Home",
+    desc: "A teacher or admin sends a shout-out email to your family.",
+    cost: 15,
+    category: "Recognition",
+    icon: "📧",
+  },
+  {
+    id: "vfriends",
+    name: "V-Friends Card",
+    desc: "Earn an exclusive V-Friends recognition card.",
+    cost: 50,
+    category: "Recognition",
+    icon: "🎴",
+    maxConduct: 2,
+  },
+];
