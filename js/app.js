@@ -39,7 +39,6 @@
     studentCode: document.getElementById("studentCode"),
     studentNote: document.getElementById("studentNote"),
     sendRequestBtn: document.getElementById("sendRequestBtn"),
-    copyRequestBtn: document.getElementById("copyRequestBtn"),
     copyStatus: document.getElementById("copyStatus"),
     closeModalBtn: document.getElementById("closeModalBtn"),
     falseClaimField: document.getElementById("falseClaimField"),
@@ -74,7 +73,6 @@
     els.footCodeOfConduct.href = CONFIG.codeOfConductUrl;
     els.footUniformPolicy.href = CONFIG.uniformPolicyUrl;
     els.falseClaimPenaltyText.textContent = CONFIG.falseClaimPenalty;
-    els.sendRequestBtn.textContent = CONFIG.requestsFormUrl ? "Submit Request" : "Send Request by Email";
     if (CONFIG.logoPath) {
       els.logoImg.src = CONFIG.logoPath;
     }
@@ -429,50 +427,18 @@
       return;
     }
 
-    if (CONFIG.requestsFormUrl) {
-      const text = buildRequestText();
-      navigator.clipboard
-        .writeText(text)
-        .then(() => {
-          els.copyStatus.style.color = "#1c6b3a";
-          els.copyStatus.textContent = "Copied. Paste it into the form that just opened, then submit there.";
-        })
-        .catch(() => {
-          els.copyStatus.style.color = "#c42836";
-          els.copyStatus.textContent = "Could not copy automatically. Use Copy Request Details, then paste it into the form that just opened.";
-        });
-      window.open(CONFIG.requestsFormUrl, "_blank", "noopener");
-      return;
-    }
-
-    const subject = encodeURIComponent(`Stingray Store Request, Code ${els.studentCode.value.trim()}`);
-    const body = encodeURIComponent(buildRequestText());
-    window.location.href = `mailto:${CONFIG.adminEmail}?subject=${subject}&body=${body}`;
-  }
-
-  async function copyRequest() {
-    if (!els.studentCode.value.trim()) {
-      els.studentCode.focus();
-      els.copyStatus.textContent = "Please enter your redemption code first.";
-      els.copyStatus.style.color = "#c42836";
-      return;
-    }
-    if (requiresFalseClaimAck()) {
-      els.copyStatus.textContent = "Please confirm your points balance is accurate first.";
-      els.copyStatus.style.color = "#c42836";
-      return;
-    }
     const text = buildRequestText();
-    try {
-      await navigator.clipboard.writeText(text);
-      els.copyStatus.style.color = "#1c6b3a";
-      els.copyStatus.textContent = CONFIG.requestsFormUrl
-        ? "Copied. Paste it into the request form."
-        : "Copied! Paste it into an email to " + CONFIG.adminEmail;
-    } catch (e) {
-      els.copyStatus.style.color = "#c42836";
-      els.copyStatus.textContent = "Could not copy automatically. Please select and copy the text manually.";
-    }
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        els.copyStatus.style.color = "#1c6b3a";
+        els.copyStatus.textContent = "Copied. Paste it into the form that just opened, then submit there.";
+      })
+      .catch(() => {
+        els.copyStatus.style.color = "#c42836";
+        els.copyStatus.textContent = "Could not copy automatically. Select and copy the text yourself, then paste it into the form that just opened.";
+      });
+    window.open(CONFIG.requestsFormUrl, "_blank", "noopener");
   }
 
   function escapeHtml(s) {
@@ -558,7 +524,6 @@
   });
   els.closeModalBtn.addEventListener("click", closeModal);
   els.sendRequestBtn.addEventListener("click", sendRequest);
-  els.copyRequestBtn.addEventListener("click", copyRequest);
   els.pointsModalCloseBtn.addEventListener("click", closePointsModal);
   els.detailModalCloseBtn.addEventListener("click", closeDetailModal);
   els.quoteSubmitBtn.addEventListener("click", submitQuote);

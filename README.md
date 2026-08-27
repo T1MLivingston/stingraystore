@@ -34,14 +34,11 @@ anywhere in the app**.
    in-store "Full Dress-Down Day" pass anyone can buy with points, any day).
    Requesting more than your known balance covers requires checking a box
    acknowledging `CONFIG.falseClaimPenalty` first.
-5. **Request, don't auto-redeem.** By default, "Send Request" builds a
-   `mailto:` link (pre-filled subject/body) to your admin inbox. Set
-   `CONFIG.requestsFormUrl` to switch to the queue model instead: it copies
-   the request to the clipboard and opens a Google Form, so submissions
-   collect as rows in a sheet you review directly (see "Request queue"
-   below). Either way, a "Copy Request Details" button is a fallback, and
-   staff still do a final human check before fulfilling — there's no live
-   inventory/redemption ledger tracking what's already been spent.
+5. **Request, don't auto-redeem.** "Submit Request" copies the request to
+   the clipboard and opens a Google Form, so submissions collect as rows in
+   a sheet you review directly (see "Request queue" below). Staff still do
+   a final human check before fulfilling — there's no live inventory/
+   redemption ledger tracking what's already been spent.
 
 ### No admin panel, on purpose
 There is no in-site staff tool. Updating this store is three things done
@@ -103,8 +100,11 @@ does this automatically) to publish.
 
 ### Request queue: Google Form to Sheet, no backend
 
-By default "Send Request" is a `mailto:` link. To collect requests
-somewhere staff can review them together instead:
+Requests never go by email. "Submit Request" copies the formatted request
+to the clipboard and opens a Google Form in a new tab for the student to
+paste and submit — Google is what actually writes the row, so no
+credential capable of writing to your Sheet or repo ever has to live in
+this public site's code. To set it up:
 
 1. Create a Google Form with one field (a paragraph/long-answer question,
    e.g. "Request details") and turn on **Responses → link a Sheet** —
@@ -115,14 +115,12 @@ somewhere staff can review them together instead:
    the points sheet, and set `requestsSheetCsvUrl` in `js/config.js` to its
    CSV export URL (kept for your own reference; the site itself doesn't
    read it — there is no in-site requests table).
-4. Set `requestsFormUrl` to the form's own public URL (its "Send" link).
+4. Set `requestsFormUrl` to the form's own public responder link (click
+   **Publish**, top right of the form editor, then copy the link from
+   there).
 
-Once both are set, "Send Request" copies the formatted request to the
-clipboard and opens your form in a new tab for the student to paste and
-submit — Google is what actually writes the row, so no credential capable
-of writing to your Sheet or repo ever has to live in this public site's
-code. Review submissions and match codes against your private roster
-directly in the sheet.
+Review submissions and match codes against your private roster directly in
+the sheet.
 
 Approving or denying by typing into a Status column, rather than building
 real buttons for it, was a deliberate choice: buttons that actually write
@@ -146,8 +144,8 @@ scope for this static version on purpose.
 
 Everything you're likely to change lives in two files:
 
-- **`js/config.js`** — school name, motto, admin email address, logo path,
-  website link, and the conduct-points explainer text.
+- **`js/config.js`** — school name, motto, logo path, website link, and
+  the conduct-points explainer text.
 - **`js/items.js`** — the reward catalog. Add/remove/edit items, set the
   point cost, and optionally set `maxConduct` to lock an item above a
   certain conduct-point total.

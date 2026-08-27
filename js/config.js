@@ -9,23 +9,19 @@ const CONFIG = {
   storeName: "Stingray Store",
   motto: "We support each other, contribute to our community, and strive for excellence in all we do.",
 
-  // Where redemption requests get emailed. Only used while
-  // requestsFormUrl below is blank.
-  adminEmail: "stingraystore@seminolescience.org",
-
-  // ---- Request submission (optional upgrade from email) ----
-  // If set, "Send Request" copies the request details to the clipboard
-  // and opens this Google Form in a new tab, where the student pastes
-  // them into a single text field and submits. Each submission becomes
-  // a timestamped row in the form's linked response sheet automatically,
-  // no backend needed. Leave blank to keep the default mailto: flow.
-  // See README.md for the two-minute steps to create this form.
+  // ---- Request submission ----
+  // "Submit Request" copies the request details to the clipboard and
+  // opens this Google Form in a new tab, where the student pastes them
+  // into a single text field and submits. Each submission becomes a
+  // timestamped row in the form's linked response sheet automatically,
+  // no backend and no email needed. See README.md for the two-minute
+  // steps to create this form.
   requestsFormUrl:
     "https://docs.google.com/forms/d/e/1FAIpQLScYm1e2RswURXJGdlW6FCQgtas27P5Cfn7kMsXbfDxDzqeTsQ/viewform",
 
   // CSV export URL of that form's response sheet. Not read by this site;
   // just open the sheet directly to review submissions and approve or
-  // deny them. Leave blank if requestsFormUrl above is blank too.
+  // deny them.
   requestsSheetCsvUrl:
     "https://docs.google.com/spreadsheets/d/1MYX75By-rqXhXbGsTY3mlvCtABVesfQuB1Po0qXfw6A/export?format=csv&gid=0",
 
