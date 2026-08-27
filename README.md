@@ -63,8 +63,11 @@ ignored by the site — but see the warning below). Share it
 **File → Share → General access → Anyone with the link → Viewer**, then
 set two things in `js/config.js`:
 - `pointsSheetEditUrl`: the normal sheet URL, for staff to open and edit.
-- `pointsSheetCsvUrl`: `https://docs.google.com/spreadsheets/d/<SHEET_ID>/export?format=csv&gid=0`
-  (swap in your sheet's ID; `gid=0` is its first tab).
+- `pointsSheetCsvUrl`: `https://docs.google.com/spreadsheets/d/<SHEET_ID>/gviz/tq?tqx=out:csv`
+  (swap in your sheet's ID; this format defaults to the sheet's first tab
+  and works reliably even signed out of Google, unlike the `/export?format=csv&gid=0`
+  form, which needs the exact numeric tab ID and can fail with "unable to
+  open the file" if you guess it wrong).
 
 Edits take effect immediately, no redeploy needed.
 

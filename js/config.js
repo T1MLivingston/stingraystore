@@ -23,7 +23,7 @@ const CONFIG = {
   // just open the sheet directly to review submissions and approve or
   // deny them.
   requestsSheetCsvUrl:
-    "https://docs.google.com/spreadsheets/d/1MYX75By-rqXhXbGsTY3mlvCtABVesfQuB1Po0qXfw6A/export?format=csv&gid=0",
+    "https://docs.google.com/spreadsheets/d/1MYX75By-rqXhXbGsTY3mlvCtABVesfQuB1Po0qXfw6A/gviz/tq?tqx=out:csv",
 
   // School seal, shown in the top bar.
   logoPath: "assets/school-seal.png",
@@ -62,7 +62,7 @@ const CONFIG = {
   // don't rely on the site ignoring them for real privacy). Leave blank
   // to use data/points.json instead.
   pointsSheetCsvUrl:
-    "https://docs.google.com/spreadsheets/d/1JtMTjT3ksYRvyjQM6CxNptt5LlBBf7Jf7t9iRGgJFSI/export?format=csv&gid=0",
+    "https://docs.google.com/spreadsheets/d/1JtMTjT3ksYRvyjQM6CxNptt5LlBBf7Jf7t9iRGgJFSI/gviz/tq?tqx=out:csv",
 
   // Normal Google Sheets link. Not read by the site, just kept here so
   // whoever maintains this file has it on hand to open and edit rows.
@@ -82,7 +82,7 @@ const CONFIG = {
   // directly in the sheet. The student's code rides along in the sheet
   // for accountability, but the site never displays it publicly.
   wallOfFameSheetCsvUrl:
-    "https://docs.google.com/spreadsheets/d/1lUorAsYcrtM-ehNfTJRcKaPaHbP-yq9A8Sv3jLoKRCs/export?format=csv&gid=0",
+    "https://docs.google.com/spreadsheets/d/1lUorAsYcrtM-ehNfTJRcKaPaHbP-yq9A8Sv3jLoKRCs/gviz/tq?tqx=out:csv",
 
   // Normal Google Sheets link, for staff to review submissions and type
   // "Approved" into a row's Status column. Not read by the site.
