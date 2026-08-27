@@ -8,6 +8,8 @@
 //   category    groups items on the page
 //   maxConduct  (optional) item is locked if the student's entered
 //               conduct points are greater than this number
+// A new category picks up a default gray accent unless you add it to
+// CATEGORY_COLORS below.
 // ============================================================
 
 const ITEMS = [
@@ -41,11 +43,11 @@ const ITEMS = [
     maxConduct: 2,
   },
   {
-    id: "lunch-bunch",
-    name: "Lunch Bunch Pass",
-    desc: "Eat lunch with friends outside your usual spot.",
-    cost: 6,
-    category: "Food & Social",
+    id: "locker-pass",
+    name: "Early Locker Pass",
+    desc: "Leave class 2 minutes before the bell to go to your locker.",
+    cost: 4,
+    category: "Privileges",
   },
   {
     id: "lunch-teacher",
@@ -53,22 +55,6 @@ const ITEMS = [
     desc: "Enjoy a lunch invite with a teacher of your choice.",
     cost: 8,
     category: "Food & Social",
-  },
-  {
-    id: "homework-pass",
-    name: "Homework Pass",
-    desc: "Skip one homework assignment, no questions asked.",
-    cost: 10,
-    category: "Academic Perks",
-    maxConduct: 1,
-  },
-  {
-    id: "extra-credit",
-    name: "Extra Credit Points",
-    desc: "Redeem for a small extra-credit boost in one class.",
-    cost: 10,
-    category: "Academic Perks",
-    maxConduct: 1,
   },
   {
     id: "call-home",
@@ -85,11 +71,34 @@ const ITEMS = [
     category: "Recognition",
   },
   {
-    id: "vfriends",
-    name: "V-Friends Card",
-    desc: "Earn an exclusive V-Friends recognition card.",
-    cost: 12,
+    id: "wall-of-fame",
+    name: "Wall of Fame Donation",
+    desc: "Donate points to the schoolwide fund. At 5,000 points, Mr. Livingston shaves his head.",
+    cost: 10,
     category: "Recognition",
+  },
+  {
+    id: "veefriends",
+    name: "VeeFriends Card",
+    desc: "Earn an exclusive VeeFriends collectible card.",
+    cost: 50,
+    category: "Collectibles",
     maxConduct: 2,
   },
+  {
+    id: "pizza-party",
+    name: "Pizza Party",
+    desc: "Order a pizza delivered during lunch to share with your friends.",
+    cost: 100,
+    category: "Collectibles",
+  },
 ];
+
+// Left-border accent color for each category on the storefront.
+const CATEGORY_COLORS = {
+  "Dress Code Passes": "#e63946",
+  Privileges: "#4263eb",
+  "Food & Social": "#f59f00",
+  Recognition: "#7048e8",
+  Collectibles: "#0c8599",
+};

@@ -7,10 +7,12 @@
 }
 
 .admin-main {
-  max-width: 640px;
+  max-width: 760px;
   margin: 40px auto;
   padding: 0 20px 60px;
 }
+
+#toolSection { display: flex; flex-direction: column; gap: 20px; }
 
 .admin-card {
   background: var(--white);
@@ -64,7 +66,7 @@
   resize: vertical;
 }
 
-#generateBtn, #copyJsonBtn, #downloadBtn {
+#generateBtn, #copyJsonBtn, #downloadBtn, #refreshRequestsBtn, #downloadRequestsBtn {
   border: none;
   background: var(--blue-dark);
   color: var(--white);
@@ -74,7 +76,8 @@
   cursor: pointer;
   margin-top: 10px;
 }
-#generateBtn:hover, #copyJsonBtn:hover, #downloadBtn:hover { background: var(--blue); }
+#generateBtn:hover, #copyJsonBtn:hover, #downloadBtn:hover,
+#refreshRequestsBtn:hover, #downloadRequestsBtn:hover { background: var(--blue); }
 
 .admin-actions { display: flex; gap: 10px; }
 .admin-actions button { margin-top: 10px; }
@@ -88,3 +91,14 @@
   margin-top: 6px;
   font-weight: 700;
 }
+
+.requests-table-scroll { overflow-x: auto; margin-top: 12px; }
+.requests-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.requests-table th, .requests-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid #eef4fb;
+  vertical-align: top;
+  white-space: pre-wrap;
+}
+.requests-table th { color: var(--blue-dark); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }

@@ -21,7 +21,6 @@
     lookupCode: document.getElementById("lookupCode"),
     lookupBtn: document.getElementById("lookupBtn"),
     lookupResult: document.getElementById("lookupResult"),
-    manualEntry: document.getElementById("manualEntry"),
     miniBalance: document.getElementById("miniBalance"),
     miniBalanceValue: document.getElementById("miniBalanceValue"),
     catalog: document.getElementById("catalog"),
@@ -60,6 +59,7 @@
     els.footCodeOfConduct.href = CONFIG.codeOfConductUrl;
     els.footUniformPolicy.href = CONFIG.uniformPolicyUrl;
     els.falseClaimPenaltyText.textContent = CONFIG.falseClaimPenalty;
+    els.sendRequestBtn.textContent = CONFIG.requestsFormUrl ? "Submit Request" : "Send Request by Email";
     if (CONFIG.logoPath) {
       els.logoImg.src = CONFIG.logoPath;
     }
@@ -120,8 +120,7 @@
       document.getElementById("clearLookupBtn").addEventListener("click", resetLookup);
     } else {
       clearVerification();
-      els.lookupResult.innerHTML = `<div class="lookup-msg warn">This code is not in this month's upload yet. Enter your points below. Staff will verify by hand.</div>`;
-      els.commendationInput.focus();
+      els.lookupResult.innerHTML = `<div class="lookup-msg warn">This code is not in this month's upload yet. Please check with a staff member.</div>`;
     }
     renderAll();
   }
@@ -157,6 +156,7 @@
     const title = document.createElement("h2");
     title.className = "category-title";
     title.textContent = cat;
+    title.style.borderLeftColor = CATEGORY_COLORS[cat] || "var(--red)";
     section.appendChild(title);
 
     const grid = document.createElement("div");
@@ -199,7 +199,7 @@
     const card = document.createElement("div");
     const locked = isLocked(item);
     const inCart = state.cart.includes(item.id);
-    card.className = "card" + (locked ? " locked" : "");
+    card.className = "card" + (locked ? " locked" : "") + (inCart ? " in-cart" : "");
 
     card.innerHTML = `
       ${inCart ? '<div class="in-cart-badge">In cart</div>' : ""}
@@ -307,7 +307,7 @@
 
     const verificationLine = state.verified
       ? `Verification: VERIFIED via store lookup against this month's points upload`
-      : `Verification: SELF-REPORTED, not found in this month's upload, please verify manually`;
+      : `Verification: NOT CHECKED, please confirm this code and balance before fulfilling`;
 
     return [
       `STINGRAY STORE REDEMPTION REQUEST`,
@@ -338,16 +338,16 @@
     els.modalSummary.innerHTML = `
       <div class="line"><span>Items requested</span><span>${state.cart.length}</span></div>
       <div class="line"><span>Total cost</span><span>${total} pts</span></div>
-      <div class="line"><span>Your balance</span><span>${getCommendations()} pts ${state.verified ? "(verified)" : "(self-reported)"}</span></div>
+      <div class="line"><span>Your balance</span><span>${getCommendations()} pts ${state.verified ? "(verified)" : "(not checked)"}</span></div>
     `;
-    els.falseClaimField.hidden = state.verified;
+    els.falseClaimField.hidden = total <= getCommendations();
     els.falseClaimCheck.checked = false;
     els.copyStatus.textContent = "";
     els.modalWrap.classList.add("open");
   }
 
   function requiresFalseClaimAck() {
-    return !state.verified && !els.falseClaimCheck.checked;
+    return cartTotal() > getCommendations() && !els.falseClaimCheck.checked;
   }
   function closeModal() {
     els.modalWrap.classList.remove("open");
@@ -365,6 +365,23 @@
       els.copyStatus.style.color = "#c42836";
       return;
     }
+
+    if (CONFIG.requestsFormUrl) {
+      const text = buildRequestText();
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          els.copyStatus.style.color = "#1c6b3a";
+          els.copyStatus.textContent = "Copied. Paste it into the form that just opened, then submit there.";
+        })
+        .catch(() => {
+          els.copyStatus.style.color = "#c42836";
+          els.copyStatus.textContent = "Could not copy automatically. Use Copy Request Details, then paste it into the form that just opened.";
+        });
+      window.open(CONFIG.requestsFormUrl, "_blank", "noopener");
+      return;
+    }
+
     const subject = encodeURIComponent(`Stingray Store Request, Code ${els.studentCode.value.trim()}`);
     const body = encodeURIComponent(buildRequestText());
     window.location.href = `mailto:${CONFIG.adminEmail}?subject=${subject}&body=${body}`;
@@ -386,7 +403,9 @@
     try {
       await navigator.clipboard.writeText(text);
       els.copyStatus.style.color = "#1c6b3a";
-      els.copyStatus.textContent = "Copied! Paste it into an email to " + CONFIG.adminEmail;
+      els.copyStatus.textContent = CONFIG.requestsFormUrl
+        ? "Copied. Paste it into the request form."
+        : "Copied! Paste it into an email to " + CONFIG.adminEmail;
     } catch (e) {
       els.copyStatus.style.color = "#c42836";
       els.copyStatus.textContent = "Could not copy automatically. Please select and copy the text manually.";

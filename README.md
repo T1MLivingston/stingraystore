@@ -7,22 +7,22 @@ anywhere in the app**.
 
 ## How it works (matches Ms. Malca's monthly workflow)
 
-1. **Monthly upload, codes only.** At the end of each month, once
-   Mr. McGaha runs the behavior report, whoever manages the store replaces
-   `data/points.json` with each student's real commendation/conduct totals
-   — keyed by their private redemption code (e.g. `SR-4821-BLUE`), **never
-   by name**. The code → real identity mapping lives only in the school's
-   own private roster, completely outside this app. Because a code alone
-   isn't personally identifying, `data/points.json` can safely ship as part
-   of the static site with no student-privacy exposure.
+1. **Live points, codes only.** Staff keep a Google Sheet (or `data/points.json`,
+   see below) mapping each student's private redemption code to their real
+   commendation/conduct totals — **never by name**. The code → real identity
+   mapping lives only in a separate private roster, completely outside this
+   app. Because a code alone isn't personally identifying, the points data
+   this site actually fetches can safely be link-shared with no
+   student-privacy exposure, as long as nothing else identifying rides
+   along in it.
 2. **Check My Points.** A student types their code into the lookup card at
-   the top of the page. If it's in this month's file, the site shows their
-   *real, verified* commendation and conduct totals (read-only) — this is
-   the "as secure as the dismissal portal" property Ms. Malca asked for:
-   the number displayed is exactly what staff uploaded, not something the
-   student can edit. If a code isn't found yet (new student, upload not
-   done yet), the student can fall back to typing their points in by hand —
-   clearly labeled as self-reported, so staff know to double check it.
+   the top of the page. If it's found, the site shows their *real, verified*
+   commendation and conduct totals (read-only) — this is the "as secure as
+   the dismissal portal" property Ms. Malca asked for: the number displayed
+   is exactly what staff entered, never something the student can edit.
+   There is no self-report fallback: without a matching code, a student can
+   still browse the catalog, but their balance shows as 0 until staff can
+   confirm one.
 3. **Free Dress-Down Day, automatically.** Per Ms. Malca's rule, a verified
    student with conduct points at or below `CONFIG.dressDownMaxConduct`
    (default 3) sees a banner congratulating them on qualifying for the
@@ -32,17 +32,61 @@ anywhere in the app**.
    optionally be locked behind a conduct-point ceiling (`maxConduct` in
    `js/items.js`), separate from the schoolwide freebie above (e.g. the
    in-store "Full Dress-Down Day" pass anyone can buy with points, any day).
-5. **Request, don't auto-redeem.** "Send Request" builds a `mailto:` link
-   (pre-filled subject/body) to your admin inbox with the code, the cart,
-   the claimed balance, and whether it was verified via lookup or
-   self-reported. A "Copy Request Details" button is a fallback for devices
-   where `mailto:` doesn't open a mail app. Staff still do a final human
-   check before fulfilling — the lookup makes that check fast and accurate
-   instead of removing it, since there's still no live inventory/redemption
-   ledger tracking what's already been spent.
+   Requesting more than your known balance covers requires checking a box
+   acknowledging `CONFIG.falseClaimPenalty` first.
+5. **Request, don't auto-redeem.** By default, "Send Request" builds a
+   `mailto:` link (pre-filled subject/body) to your admin inbox. Set
+   `CONFIG.requestsFormUrl` to switch to the queue model instead: it copies
+   the request to the clipboard and opens a Google Form, so submissions
+   collect as rows in a sheet the admin page can list (see "Request queue"
+   below). Either way, a "Copy Request Details" button is a fallback, and
+   staff still do a final human check before fulfilling — there's no live
+   inventory/redemption ledger tracking what's already been spent.
 
-### Generating `data/points.json` each month
-Format:
+### The admin gate, and why it's only a speed bump
+`admin.html` is linked from the small "Admin" button at the bottom of the
+store's footer, gated by `CONFIG.adminAccessPhrase`.
+
+Read this before you rely on that gate: **this repository is public**, so
+that phrase is visible to anyone who looks at `js/config.js`, on the live
+site or on GitHub, no matter how long you make it. It is a speed bump that
+keeps casual visitors out of the tool, not real security. Nothing behind it
+should be more sensitive than "help me format some data" — the real
+security boundaries are Google's login on your sheets and GitHub's login on
+this repo, both described below.
+
+### Two ways to publish points: live sheet or static file
+
+**Option A: Live Google Sheet (recommended).** A sheet with header row
+`Code, Commendations, Conduct` (any other columns, like a Name column, are
+ignored by the site — but see the warning below). Share it
+**File → Share → General access → Anyone with the link → Viewer**, then
+set two things in `js/config.js`:
+- `pointsSheetEditUrl`: the normal sheet URL, for staff to open and edit.
+- `pointsSheetCsvUrl`: `https://docs.google.com/spreadsheets/d/<SHEET_ID>/export?format=csv&gid=0`
+  (swap in your sheet's ID; `gid=0` is its first tab).
+
+Edits take effect immediately, no redeploy. The admin page's "Points Sheet"
+section links straight to it.
+
+A test sheet already exists at the URLs currently in `js/config.js`
+(**Stingray Store Points (Test)**, created for this conversation) with three
+demo rows (Mr. Livingston, Ms. Malcolm, Mr. McGaha) — replace it with your
+own before going live with real students, and **do the "Anyone with the
+link" sharing step yourself**; no available tool can set that permission
+type, only share with one named person at a time, so it still needs you to
+click it once.
+
+**Never put a real student's name in the sheet this site fetches.** Once
+you share it as "Anyone with the link," every column in it is exactly as
+public as `data/points.json` in this public repo — the site choosing to
+ignore a Name column doesn't stop anyone else from reading it directly. Keep
+the code → real name mapping in a **second, separate sheet you never share
+that way** — that's `rosterSheetUrl` in config, a convenience link on the
+admin page, never fetched by the site itself.
+
+**Option B: static `data/points.json`.** Used automatically whenever
+`pointsSheetCsvUrl` is blank. Format:
 ```json
 {
   "codes": {
@@ -50,31 +94,44 @@ Format:
   }
 }
 ```
-**Never add a name, student ID, email, or any other identifying column** —
-the whole point is that this file is safe to publish.
+The admin page's "Static File Generator" section builds this for you: paste
+`code, commendations, conduct` rows, Generate, then copy/download the
+result and commit it via the link the tool gives you to GitHub's own web
+editor — that GitHub login is the actual security boundary for this option.
+Redeploy (a push to the Pages branch does this automatically) to publish.
 
-**`admin.html`** is a small tool that builds this file for you: paste rows
-of `code, commendations, conduct` (straight out of a spreadsheet column
-export), click Generate, then copy or download the result. It is linked
-from the small "Admin" button at the bottom of the store's footer, gated by
-`CONFIG.adminAccessPhrase`.
+### Request queue: Google Form to Sheet, no backend
 
-Read this before you rely on that gate: **this repository is public**, so
-that phrase is visible to anyone who looks at `js/config.js`, on the live
-site or on GitHub, no matter how long you make it. It is a speed bump that
-keeps casual visitors out of the tool, not real security. The tool itself
-also never touches GitHub. The last step is always: open the link it gives
-you to `data/points.json` in GitHub's own web editor, paste the generated
-file over the old one, and commit. That GitHub login is the actual security
-boundary here, and it is already correctly protected by GitHub. If you want
-this admin gate to be more than a speed bump, either make the repository
-private (GitHub Pages from a private repo needs a paid GitHub plan) or
-change `adminAccessPhrase` to something you rotate and don't rely on
-for anything sensitive.
+By default "Send Request" is a `mailto:` link. To collect requests
+somewhere staff can review them together instead:
 
-Once the file is committed, redeploy (a push to the Pages branch triggers
-this automatically) — or host `points.json` elsewhere entirely and point
-`pointsDataUrl` in `js/config.js` at it.
+1. Create a Google Form with one field (a paragraph/long-answer question,
+   e.g. "Request details") and turn on **Responses → link a Sheet** —
+   Google auto-creates it and timestamps every submission.
+2. Add a `Status` column to that response sheet yourself. Approve or deny a
+   request by typing into that column directly — there's no write-back
+   from the admin page, on purpose (see below).
+3. Share the response sheet the same "Anyone with the link → Viewer" way as
+   the points sheet, and set `requestsSheetCsvUrl` in `js/config.js` to its
+   CSV export URL.
+4. Set `requestsFormUrl` to the form's own public URL (its "Send" link).
+
+Once both are set, "Send Request" copies the formatted request to the
+clipboard and opens your form in a new tab for the student to paste and
+submit — Google is what actually writes the row, so no credential capable
+of writing to your Sheet or repo ever has to live in this public site's
+code. The admin page's "Requests" section then lists every submission with
+a Download CSV button, so staff can add real names to a copy and match them
+against the private roster.
+
+This was a deliberate choice over building real Approve/Deny buttons into
+the admin page: that would need a small script (Google Apps Script) deployed
+by hand as a "Web App," a real option if you want it later, just more setup
+than this version needed to be useful today.
+
+I could not create the Form itself here — Google Drive's file-creation tool
+only makes native Docs, Sheets, and Slides, not Forms — so step 1 above is
+on you, and takes about two minutes.
 
 ### If you outgrow this later
 If you want the store to also track *redemptions* (so a spent point can't
@@ -99,26 +156,17 @@ the top (`--blue-dark`, `--blue`, `--blue-light`, `--red`).
 ### Branding assets
 `assets/` holds the real school seal (`school-seal.png`, used as the logo
 and favicon) and three Sammy the Stingray poses: `sammy-monitor.png` (hero),
-`sammy-backpack.png` (steps list), and `sammy-medal.png` (footer). Swap any
-of these for a different pose or crop by replacing the file and keeping the
-same name, or update the paths in `index.html` / `js/app.js` / `js/config.js`
-to point at new files.
+`sammy-backpack.png` (next to "Check My Points"), and `sammy-medal.png`
+(footer, by the motto). Swap any of these for a different pose or crop by
+replacing the file and keeping the same name, or update the paths in
+`index.html` / `js/config.js` to point at new files.
 
 ### False claim policy
-`CONFIG.falseClaimPenalty` (default 5) is shown to students in the
-confirmation checkbox they must check before sending a **self-reported**
-request (a verified, code-matched balance skips this, since it's already
-accurate). The site only displays the policy — actually applying the
-deduction happens in your real system.
-
-### Setting up email
-The default "Send Request by Email" button uses a `mailto:` link — this
-requires no third-party account or API key, but does require the student's
-device to have a configured mail app. If you want a "send without leaving
-the browser" option instead (e.g. via EmailJS), that can be layered on top
-of `buildRequestText()` in `js/app.js` later; it would need a free EmailJS
-account (service ID, template ID, public key) since it's a hosted
-third-party mail-relay.
+`CONFIG.falseClaimPenalty` (default 5) is shown to students in a
+confirmation checkbox they must check before sending a request that costs
+more than their known balance (a request within balance skips this, since
+there's nothing to falsely claim). The site only displays the policy —
+actually applying the deduction happens in your real system.
 
 ## Running locally
 
@@ -138,9 +186,9 @@ python3 -m http.server 8000
 
 ## Suggested reward catalog (included, edit freely)
 
-Costs are ballparked off Ms. Malca's examples (6 pts for lunch bunch, 3 pts
-for an untucked-shirt pass) — treat every number here as a starting point to
-tune once you see real monthly point totals.
+Costs are ballparked off Ms. Malca's examples (3 pts for an untucked-shirt
+pass) — treat every number here as a starting point to tune once you see
+real monthly point totals.
 
 | Category | Item | Cost |
 |---|---|---|
@@ -148,10 +196,16 @@ tune once you see real monthly point totals.
 | Dress Code | Fancy Shoes Pass | 3 |
 | Dress Code | Wear a Hat Pass | 3 |
 | Dress Code | Full Dress-Down Day (locked above 2 conduct pts) | 10 |
-| Food & Social | Lunch Bunch Pass | 6 |
+| Privileges | Early Locker Pass | 4 |
 | Food & Social | Lunch With a Teacher | 8 |
-| Academic | Homework Pass (locked above 1 conduct pt) | 10 |
-| Academic | Extra Credit Points (locked above 1 conduct pt) | 10 |
 | Recognition | Positive Call Home | 6 |
 | Recognition | Positive Email Home | 4 |
-| Recognition | V-Friends Card (locked above 2 conduct pts) | 12 |
+| Recognition | Wall of Fame Donation | 10 |
+| Collectibles | VeeFriends Card (locked above 2 conduct pts) | 50 |
+| Collectibles | Pizza Party | 100 |
+
+**Wall of Fame Donation** is a running group goal (5,000 points → a public
+head-shave), not a per-student reward. This static site has no shared
+counter to track that total live — staff need to tally donations from
+submitted requests (the Requests table in `admin.html` is the source for
+that) and announce progress separately.

@@ -33,41 +33,68 @@
     <div class="admin-msg" id="gateMsg"></div>
   </section>
 
-  <section id="toolSection" class="admin-card" hidden>
-    <h1>Monthly Points Upload</h1>
+  <section id="toolSection" hidden>
 
-    <div class="admin-notice">
-      This page does not save anything and does not connect to GitHub on its
-      own. It only turns a list of codes and points into the file format the
-      store reads. This repository is public, so the access phrase above is
-      a speed bump for casual visitors, not real security. The actual
-      security is GitHub's own login, required to commit the file this page
-      generates.
-    </div>
-
-    <h2>1. Paste this month's codes and points</h2>
-    <p>One student per line: code, commendation points, conduct points. Comma or tab separated. Do not include names or student IDs.</p>
-    <textarea id="rowsInput" rows="8" placeholder="SR-4821-BLUE, 14, 1&#10;SR-1092-GOLD, 7, 4"></textarea>
-    <button id="generateBtn">Generate File</button>
-    <div class="admin-msg" id="generateMsg"></div>
-
-    <div id="resultSection" hidden>
-      <h2>2. Copy the generated file</h2>
-      <textarea id="jsonOutput" rows="10" readonly></textarea>
-      <div class="admin-actions">
-        <button id="copyJsonBtn">Copy</button>
-        <button id="downloadBtn">Download points.json</button>
+    <div class="admin-card">
+      <h1>Points Sheet</h1>
+      <div class="admin-notice">
+        This access phrase is a speed bump for casual visitors, not real
+        security. This repository, and this page's source, are public.
+        The real security is Google's own login on the sheet below, and
+        GitHub's own login for the static-file option further down.
       </div>
-
-      <h2>3. Commit it to GitHub</h2>
-      <p>Open the file in GitHub's editor, select all the existing text, paste in the copied file, then commit. You must be logged in to GitHub with write access to this repository.</p>
-      <a id="editLink" class="admin-edit-link" href="#" target="_blank" rel="noopener">Open data/points.json in GitHub</a>
+      <p>Edit rows here any time. Students see the change immediately, no upload or redeploy needed.</p>
+      <a id="pointsSheetEditLink" class="admin-edit-link" href="#" target="_blank" rel="noopener">Open the Points Sheet</a>
+      <p id="rosterLinkWrap" hidden>Your private roster (never read by this site): <a id="rosterLink" href="#" target="_blank" rel="noopener">Open Roster Sheet</a></p>
+      <p id="noSheetMsg" hidden>No live sheet configured yet. Set <code>pointsSheetCsvUrl</code> and <code>pointsSheetEditUrl</code> in <code>js/config.js</code>, or use the static file generator below instead.</p>
     </div>
+
+    <div class="admin-card">
+      <h1>Requests</h1>
+      <div id="requestsNotConfigured">
+        <p>No request sheet configured yet. Once you create the request form (see README.md) and set <code>requestsSheetCsvUrl</code> in <code>js/config.js</code>, submitted requests will list here.</p>
+      </div>
+      <div id="requestsConfigured" hidden>
+        <p>Approve or deny a request by editing its Status column directly in the sheet. This table is read-only.</p>
+        <div class="admin-actions">
+          <button id="refreshRequestsBtn">Refresh</button>
+          <button id="downloadRequestsBtn">Download CSV</button>
+        </div>
+        <div class="admin-msg" id="requestsMsg"></div>
+        <div id="requestsTableWrap"></div>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <h1>Static File Generator</h1>
+      <p>Only needed if you're using data/points.json instead of the live sheet above.</p>
+
+      <h2>1. Paste this month's codes and points</h2>
+      <p>One student per line: code, commendation points, conduct points. Comma or tab separated. Do not include names or student IDs.</p>
+      <textarea id="rowsInput" rows="8" placeholder="SR-4821-BLUE, 14, 1&#10;SR-1092-GOLD, 7, 4"></textarea>
+      <button id="generateBtn">Generate File</button>
+      <div class="admin-msg" id="generateMsg"></div>
+
+      <div id="resultSection" hidden>
+        <h2>2. Copy the generated file</h2>
+        <textarea id="jsonOutput" rows="10" readonly></textarea>
+        <div class="admin-actions">
+          <button id="copyJsonBtn">Copy</button>
+          <button id="downloadBtn">Download points.json</button>
+        </div>
+
+        <h2>3. Commit it to GitHub</h2>
+        <p>Open the file in GitHub's editor, select all the existing text, paste in the copied file, then commit. You must be logged in to GitHub with write access to this repository.</p>
+        <a id="editLink" class="admin-edit-link" href="#" target="_blank" rel="noopener">Open data/points.json in GitHub</a>
+      </div>
+    </div>
+
   </section>
 
 </main>
 
 <script src="js/config.js"></script>
+<script src="js/csv.js"></script>
 <script src="js/admin.js"></script>
 </body>
 </html>

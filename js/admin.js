@@ -16,10 +16,86 @@
     copyJsonBtn: document.getElementById("copyJsonBtn"),
     downloadBtn: document.getElementById("downloadBtn"),
     editLink: document.getElementById("editLink"),
+    pointsSheetEditLink: document.getElementById("pointsSheetEditLink"),
+    rosterLinkWrap: document.getElementById("rosterLinkWrap"),
+    rosterLink: document.getElementById("rosterLink"),
+    noSheetMsg: document.getElementById("noSheetMsg"),
+    requestsNotConfigured: document.getElementById("requestsNotConfigured"),
+    requestsConfigured: document.getElementById("requestsConfigured"),
+    requestsMsg: document.getElementById("requestsMsg"),
+    requestsTableWrap: document.getElementById("requestsTableWrap"),
+    refreshRequestsBtn: document.getElementById("refreshRequestsBtn"),
+    downloadRequestsBtn: document.getElementById("downloadRequestsBtn"),
   };
 
   els.schoolNameLabel.textContent = CONFIG.schoolName;
   els.editLink.href = CONFIG.pointsFileEditUrl;
+
+  if (CONFIG.pointsSheetEditUrl) {
+    els.pointsSheetEditLink.href = CONFIG.pointsSheetEditUrl;
+  } else {
+    els.pointsSheetEditLink.hidden = true;
+    els.noSheetMsg.hidden = false;
+  }
+  if (CONFIG.rosterSheetUrl) {
+    els.rosterLink.href = CONFIG.rosterSheetUrl;
+    els.rosterLinkWrap.hidden = false;
+  }
+
+  let lastRequestsCsv = "";
+
+  function renderRequestsTable(csvText) {
+    lastRequestsCsv = csvText;
+    const rows = CsvUtil.parse(csvText);
+    if (rows.length < 2) {
+      els.requestsTableWrap.innerHTML = "<p>No requests yet.</p>";
+      return;
+    }
+    const header = rows[0];
+    const body = rows.slice(1).reverse(); // newest first
+    const thead = `<tr>${header.map((h) => `<th>${h}</th>`).join("")}</tr>`;
+    const tbody = body
+      .map((r) => `<tr>${header.map((_, i) => `<td>${r[i] || ""}</td>`).join("")}</tr>`)
+      .join("");
+    els.requestsTableWrap.innerHTML = `<div class="requests-table-scroll"><table class="requests-table"><thead>${thead}</thead><tbody>${tbody}</tbody></table></div>`;
+  }
+
+  function loadRequests() {
+    if (!CONFIG.requestsSheetCsvUrl) return;
+    els.requestsMsg.textContent = "Loading.";
+    els.requestsMsg.className = "admin-msg";
+    fetch(CONFIG.requestsSheetCsvUrl)
+      .then((res) => {
+        if (!res.ok) throw new Error("not reachable");
+        return res.text();
+      })
+      .then((text) => {
+        renderRequestsTable(text);
+        els.requestsMsg.textContent = "";
+      })
+      .catch(() => {
+        els.requestsMsg.textContent = "Could not load the requests sheet. Check that it's shared as \"Anyone with the link\" can view.";
+        els.requestsMsg.className = "admin-msg error";
+      });
+  }
+
+  if (CONFIG.requestsSheetCsvUrl) {
+    els.requestsNotConfigured.hidden = true;
+    els.requestsConfigured.hidden = false;
+    loadRequests();
+    els.refreshRequestsBtn.addEventListener("click", loadRequests);
+    els.downloadRequestsBtn.addEventListener("click", () => {
+      const blob = new Blob([lastRequestsCsv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "stingray-requests.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
 
   const SESSION_KEY = "stingray-admin-unlocked";
 
