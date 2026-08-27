@@ -8,8 +8,11 @@
 //   category    groups items on the page
 //   maxConduct  (optional) item is locked if the student's entered
 //               conduct points are greater than this number
+//   detail      (optional) extra text shown in a popup when a student
+//               clicks "Learn more" on the card
 // A new category picks up a default gray accent unless you add it to
-// CATEGORY_COLORS below.
+// CATEGORY_COLORS below. Categories render in the order their first item
+// appears here, so a category placed last in this list renders last.
 // ============================================================
 
 const ITEMS = [
@@ -50,10 +53,24 @@ const ITEMS = [
     category: "Privileges",
   },
   {
+    id: "tardy-pass",
+    name: "Tardy Pass",
+    desc: "Show up up to 1 minute late without getting a conduct point.",
+    cost: 5,
+    category: "Privileges",
+  },
+  {
     id: "lunch-teacher",
     name: "Lunch With a Teacher",
     desc: "Enjoy a lunch invite with a teacher of your choice.",
     cost: 8,
+    category: "Food & Social",
+  },
+  {
+    id: "group-lunch-teacher",
+    name: "Group Lunch With a Teacher",
+    desc: "Bring two friends along to lunch with a teacher of your choice.",
+    cost: 30,
     category: "Food & Social",
   },
   {
@@ -71,17 +88,20 @@ const ITEMS = [
     category: "Recognition",
   },
   {
-    id: "wall-of-fame",
-    name: "Wall of Fame Donation",
-    desc: "Donate points to the schoolwide fund. At 5,000 points, Mr. Livingston shaves his head.",
-    cost: 10,
-    category: "Recognition",
+    id: "collectible-card",
+    name: "Collectible Card",
+    desc: "Earn an exclusive collectible card.",
+    cost: 50,
+    category: "Collectibles",
+    maxConduct: 2,
+    detail:
+      "This design is a VeeFriends for students exclusive. Collect them all.",
   },
   {
-    id: "veefriends",
-    name: "VeeFriends Card",
-    desc: "Earn an exclusive VeeFriends collectible card.",
-    cost: 50,
+    id: "veefriends-comic",
+    name: "VeeFriends Comic",
+    desc: "Earn a VeeFriends for students exclusive comic book.",
+    cost: 100,
     category: "Collectibles",
     maxConduct: 2,
   },
@@ -92,6 +112,34 @@ const ITEMS = [
     cost: 100,
     category: "Collectibles",
   },
+  {
+    id: "wof-head-shave",
+    name: "Head Shave Fund",
+    desc: "Donate to the goal. At 5,000 points, Mr. Livingston shaves his head.",
+    cost: 10,
+    category: "Wall of Fame",
+  },
+  {
+    id: "wof-dress-up",
+    name: "Dress-Up Day Fund",
+    desc: "Donate to the goal. At 3,000 points, Mr. McGaha dresses up as a historical figure for the day.",
+    cost: 10,
+    category: "Wall of Fame",
+  },
+  {
+    id: "wof-talent-show",
+    name: "Talent Show Fund",
+    desc: "Donate to the goal. At 2,000 points, Mr. Livingston and Mr. McGaha perform a talent show act for the school.",
+    cost: 10,
+    category: "Wall of Fame",
+  },
+  {
+    id: "wof-trivia",
+    name: "Trivia Showdown Fund",
+    desc: "Donate to the goal. At 1,000 points, Mr. Livingston and Mr. McGaha face off in a trivia contest. Loser gets a pie in the face.",
+    cost: 10,
+    category: "Wall of Fame",
+  },
 ];
 
 // Left-border accent color for each category on the storefront.
@@ -101,4 +149,5 @@ const CATEGORY_COLORS = {
   "Food & Social": "#f59f00",
   Recognition: "#7048e8",
   Collectibles: "#0c8599",
+  "Wall of Fame": "#d6336c",
 };

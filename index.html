@@ -36,8 +36,8 @@
   <div class="lookup-grid">
     <div class="lookup-card">
       <h2>Check My Points <img class="lookup-card__sammy" src="assets/sammy-backpack.png" alt="Backpack Sammy" /></h2>
-      <p class="lookup-lead">The private code the dean gave you.</p>
-      <p class="lookup-sub">This is not your name. It is how the system stores points without keeping any student data.</p>
+      <p class="lookup-lead">This is the private code Mr. McGaha gave you.</p>
+      <p class="lookup-sub">It stores your points without keeping any student data.</p>
       <div class="lookup-row">
         <input type="text" id="lookupCode" placeholder="e.g. SR-4821-BLUE" autocomplete="off" />
         <button id="lookupBtn">Check</button>
@@ -136,6 +136,28 @@
       <button class="secondary" id="copyRequestBtn">Copy Request Details</button>
       <div class="copy-status" id="copyStatus"></div>
       <button class="secondary" id="closeModalBtn">Back to Store</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-wrap points-modal-wrap" id="pointsModalWrap" role="dialog" aria-label="Your points">
+  <div class="modal points-modal" id="pointsModalBox">
+    <div class="confetti-layer" id="confettiLayer"></div>
+    <div class="points-modal__body" id="pointsModalBody"></div>
+    <button class="checkout-btn" id="pointsModalCloseBtn">Nice!</button>
+  </div>
+</div>
+
+<div class="modal-wrap" id="detailModalWrap" role="dialog" aria-label="Reward details">
+  <div class="modal">
+    <div class="modal__header">
+      <h2 id="detailModalTitle"></h2>
+    </div>
+    <div class="modal__body">
+      <p id="detailModalText"></p>
+    </div>
+    <div class="modal__footer">
+      <button class="secondary" id="detailModalCloseBtn">Close</button>
     </div>
   </div>
 </div>

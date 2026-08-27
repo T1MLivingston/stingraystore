@@ -46,6 +46,14 @@
     falseClaimCheck: document.getElementById("falseClaimCheck"),
     falseClaimPenaltyText: document.getElementById("falseClaimPenaltyText"),
     adminBtn: document.getElementById("adminBtn"),
+    pointsModalWrap: document.getElementById("pointsModalWrap"),
+    pointsModalBody: document.getElementById("pointsModalBody"),
+    pointsModalCloseBtn: document.getElementById("pointsModalCloseBtn"),
+    confettiLayer: document.getElementById("confettiLayer"),
+    detailModalWrap: document.getElementById("detailModalWrap"),
+    detailModalTitle: document.getElementById("detailModalTitle"),
+    detailModalText: document.getElementById("detailModalText"),
+    detailModalCloseBtn: document.getElementById("detailModalCloseBtn"),
   };
 
   function applyConfig() {
@@ -105,24 +113,67 @@
     if (record) {
       clearVerification();
       setVerifiedInputs(record.commendations, record.conduct);
-      const dressDown =
-        record.conduct <= CONFIG.dressDownMaxConduct
-          ? `<div class="dress-down-banner">${CONFIG.dressDownNote}</div>`
-          : "";
       els.lookupResult.innerHTML = `
         <div class="lookup-msg ok">
           Verified. You have <strong>${record.commendations} commendation pts</strong> and
           <strong>${record.conduct} conduct pts</strong> this month.
           <button class="link-btn" id="clearLookupBtn">Not you? Clear</button>
         </div>
-        ${dressDown}
       `;
       document.getElementById("clearLookupBtn").addEventListener("click", resetLookup);
+      openPointsModal(record);
     } else {
       clearVerification();
-      els.lookupResult.innerHTML = `<div class="lookup-msg warn">This code is not in this month's upload yet. Please check with a staff member.</div>`;
+      els.lookupResult.innerHTML = `<div class="lookup-msg warn">This code is not in this month's upload. This code is not recognized.</div>`;
     }
     renderAll();
+  }
+
+  function launchConfetti() {
+    const colors = ["#e63946", "#2d6cdf", "#f59f00", "#2f9e44", "#7048e8", "#0c8599"];
+    els.confettiLayer.innerHTML = "";
+    for (let i = 0; i < 40; i++) {
+      const piece = document.createElement("div");
+      piece.className = "confetti-piece";
+      piece.style.left = `${Math.random() * 100}%`;
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.animationDelay = `${Math.random() * 0.3}s`;
+      els.confettiLayer.appendChild(piece);
+    }
+    setTimeout(() => {
+      els.confettiLayer.innerHTML = "";
+    }, 2200);
+  }
+
+  function openPointsModal(record) {
+    const dressDown =
+      record.conduct <= CONFIG.dressDownMaxConduct
+        ? `<div class="dress-down-banner">${CONFIG.dressDownNote}</div>`
+        : "";
+    els.pointsModalBody.innerHTML = `
+      <h2>You're verified!</h2>
+      <div class="points-modal__stats">
+        <div class="points-modal__stat"><span class="num">${record.commendations}</span><span class="label">Commendations</span></div>
+        <div class="points-modal__stat"><span class="num">${record.conduct}</span><span class="label">Conduct</span></div>
+      </div>
+      ${dressDown}
+    `;
+    els.pointsModalWrap.classList.add("open");
+    launchConfetti();
+  }
+
+  function closePointsModal() {
+    els.pointsModalWrap.classList.remove("open");
+  }
+
+  function openDetailModal(item) {
+    els.detailModalTitle.textContent = item.name;
+    els.detailModalText.textContent = item.detail;
+    els.detailModalWrap.classList.add("open");
+  }
+
+  function closeDetailModal() {
+    els.detailModalWrap.classList.remove("open");
   }
 
   function resetLookup() {
@@ -205,6 +256,7 @@
       ${inCart ? '<div class="in-cart-badge">In cart</div>' : ""}
       <h3>${item.name}</h3>
       <p class="desc">${item.desc}</p>
+      ${item.detail ? `<button class="detail-link">Learn more</button>` : ""}
       <div class="cost">${item.cost} pts</div>
       ${locked ? `<div class="restriction">Unavailable. Requires ${item.maxConduct} or fewer conduct points.</div>` : ""}
       <button class="add" ${locked || inCart ? "disabled" : ""}>${inCart ? "Added" : locked ? "Locked" : "Add to Requests"}</button>
@@ -213,6 +265,11 @@
     const btn = card.querySelector("button.add");
     if (!locked && !inCart) {
       btn.addEventListener("click", () => addToCart(item.id));
+    }
+
+    const detailBtn = card.querySelector(".detail-link");
+    if (detailBtn) {
+      detailBtn.addEventListener("click", () => openDetailModal(item));
     }
 
     return card;
@@ -432,6 +489,8 @@
   els.closeModalBtn.addEventListener("click", closeModal);
   els.sendRequestBtn.addEventListener("click", sendRequest);
   els.copyRequestBtn.addEventListener("click", copyRequest);
+  els.pointsModalCloseBtn.addEventListener("click", closePointsModal);
+  els.detailModalCloseBtn.addEventListener("click", closeDetailModal);
   els.adminBtn.addEventListener("click", () => {
     const entered = prompt("Enter the admin access phrase:");
     if (entered === null) return;
