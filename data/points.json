@@ -1,0 +1,9 @@
+{
+  "_comment": "SAMPLE DATA for demo purposes only. Replace this file each month after Mr. McGaha runs the behavior report. Keys are student redemption codes (never names). Never add a name, student ID, or any identifying field to this file — that mapping stays in the school's private roster only.",
+  "codes": {
+    "SR-4821-BLUE": { "commendations": 14, "conduct": 1 },
+    "SR-1092-GOLD": { "commendations": 7, "conduct": 4 },
+    "SR-3350-TEAL": { "commendations": 22, "conduct": 0 },
+    "SR-6673-RED": { "commendations": 3, "conduct": 2 }
+  }
+}

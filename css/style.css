@@ -1,15 +1,16 @@
 :root {
-  --blue-dark: #0b3d91;
-  --blue: #1565c0;
-  --blue-light: #8ecff7;
-  --blue-lighter: #eaf6ff;
+  /* Matched to the school's existing CHAMPS board palette */
+  --blue-dark: #17345f;   /* navy */
+  --blue: #2d6cdf;        /* strikeBlue */
+  --blue-light: #9fbdf4;  /* accent-light */
+  --blue-lighter: #e6f1ff; /* light */
   --red: #e63946;
   --red-dark: #c42836;
   --ink: #10233f;
-  --muted: #5c7699;
+  --muted: #4a6491;
   --white: #ffffff;
   --radius: 16px;
-  --shadow: 0 10px 30px rgba(11, 61, 145, 0.12);
+  --shadow: 0 10px 30px rgba(23, 52, 95, 0.14);
   font-size: 16px;
 }
 
@@ -89,6 +90,20 @@ a { color: var(--blue); }
 .points-field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .points-field input:focus { outline: none; }
 
+.mini-balance {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--blue-lighter);
+  border: 1px solid var(--blue-light);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 800;
+  color: var(--blue-dark);
+  font-size: 0.9rem;
+}
+.mini-balance.verified { border-color: #bfe8cd; background: #e9f8ee; color: #1c6b3a; }
+
 .cart-btn {
   position: relative;
   border: none;
@@ -155,6 +170,84 @@ a { color: var(--blue); }
   border-radius: 999px;
   background: linear-gradient(90deg, var(--blue), var(--red));
 }
+
+/* ---------- Points lookup ---------- */
+.lookup-section {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.lookup-card {
+  background: var(--white);
+  border: 1px solid #dcedfb;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  text-align: center;
+}
+
+.lookup-card h2 { margin: 0 0 8px; color: var(--blue-dark); font-size: 1.25rem; }
+.lookup-card > p { margin: 0 0 16px; color: var(--muted); font-size: 0.9rem; }
+
+.lookup-row { display: flex; gap: 10px; }
+.lookup-row input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid #cfe1f5;
+  border-radius: 10px;
+  font-size: 0.95rem;
+}
+.lookup-row input:focus { outline: 2px solid var(--blue-light); border-color: var(--blue); }
+.lookup-row button {
+  border: none;
+  background: var(--blue-dark);
+  color: var(--white);
+  font-weight: 700;
+  padding: 0 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.lookup-row button:hover { background: var(--blue); }
+
+.lookup-msg {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  text-align: left;
+}
+.lookup-msg.ok { background: #e9f8ee; border: 1px solid #bfe8cd; color: #1c6b3a; }
+.lookup-msg.warn { background: #fff8e6; border: 1px solid #f3dfa0; color: #8a6414; }
+
+.link-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  text-decoration: underline;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 0 0 8px;
+  font-size: 0.85rem;
+}
+
+.dress-down-banner {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, var(--blue-lighter), #fff2ea);
+  border: 1px solid var(--blue-light);
+  color: var(--blue-dark);
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-align: left;
+}
+
+.manual-entry { margin-top: 18px; padding-top: 16px; border-top: 1px dashed #dcedfb; }
+.manual-entry__label { font-size: 0.82rem; color: var(--muted); margin-bottom: 10px; }
+.manual-entry .points-bar { justify-content: center; }
+.manual-entry__note { font-size: 0.76rem; color: var(--muted); margin-top: 8px; font-style: italic; }
 
 /* ---------- How it works ---------- */
 .how {

@@ -3,6 +3,7 @@
 
   const state = {
     cart: [], // array of item ids
+    verified: false, // true once a code has resolved against data/points.json
   };
 
   const els = {
@@ -15,6 +16,12 @@
     footWebsite: document.getElementById("footWebsite"),
     commendationInput: document.getElementById("commendationInput"),
     conductInput: document.getElementById("conductInput"),
+    lookupCode: document.getElementById("lookupCode"),
+    lookupBtn: document.getElementById("lookupBtn"),
+    lookupResult: document.getElementById("lookupResult"),
+    manualEntry: document.getElementById("manualEntry"),
+    miniBalance: document.getElementById("miniBalance"),
+    miniBalanceValue: document.getElementById("miniBalanceValue"),
     catalog: document.getElementById("catalog"),
     openCartBtn: document.getElementById("openCartBtn"),
     closeCartBtn: document.getElementById("closeCartBtn"),
@@ -62,6 +69,71 @@
 
   function itemById(id) {
     return ITEMS.find((i) => i.id === id);
+  }
+
+  function setVerifiedInputs(commendations, conduct) {
+    els.commendationInput.value = commendations;
+    els.conductInput.value = conduct;
+    els.commendationInput.readOnly = true;
+    els.conductInput.readOnly = true;
+    state.verified = true;
+  }
+
+  function clearVerification() {
+    els.commendationInput.readOnly = false;
+    els.conductInput.readOnly = false;
+    state.verified = false;
+  }
+
+  async function performLookup() {
+    const code = els.lookupCode.value.trim();
+    if (!code) {
+      els.lookupResult.innerHTML = `<div class="lookup-msg warn">Type your code first.</div>`;
+      return;
+    }
+    els.lookupResult.innerHTML = `<div class="lookup-msg">Checking…</div>`;
+    const record = await PointsLookup.find(code);
+
+    if (record) {
+      clearVerification();
+      setVerifiedInputs(record.commendations, record.conduct);
+      const dressDown =
+        record.conduct <= CONFIG.dressDownMaxConduct
+          ? `<div class="dress-down-banner">🎉 ${CONFIG.dressDownNote}</div>`
+          : "";
+      els.lookupResult.innerHTML = `
+        <div class="lookup-msg ok">
+          ✓ Verified! You have <strong>${record.commendations} commendation pts</strong> and
+          <strong>${record.conduct} conduct pts</strong> as of this month's upload.
+          <button class="link-btn" id="clearLookupBtn">Not you? Clear</button>
+        </div>
+        ${dressDown}
+      `;
+      document.getElementById("clearLookupBtn").addEventListener("click", resetLookup);
+    } else {
+      clearVerification();
+      els.lookupResult.innerHTML = `<div class="lookup-msg warn">We don't have this code in this month's upload yet. Enter your points manually below — staff will verify by hand.</div>`;
+      els.commendationInput.focus();
+    }
+    renderAll();
+  }
+
+  function resetLookup() {
+    els.lookupCode.value = "";
+    els.lookupResult.innerHTML = "";
+    els.commendationInput.value = "";
+    els.conductInput.value = "";
+    clearVerification();
+    renderAll();
+  }
+
+  function updateMiniBalance() {
+    const hasValue = els.commendationInput.value !== "";
+    els.miniBalance.hidden = !hasValue;
+    if (hasValue) {
+      els.miniBalanceValue.textContent = getCommendations();
+      els.miniBalance.classList.toggle("verified", state.verified);
+    }
   }
 
   function isLocked(item) {
@@ -184,6 +256,7 @@
   function renderAll() {
     renderCatalog();
     renderCart();
+    updateMiniBalance();
   }
 
   function openCart() {
@@ -206,21 +279,26 @@
       return `  • ${item.name} — ${item.cost} pts`;
     });
 
+    const verificationLine = state.verified
+      ? `Verification: VERIFIED via store lookup against this month's points upload`
+      : `Verification: SELF-REPORTED — not found in this month's upload, please verify manually`;
+
     return [
       `STINGRAY STORE REDEMPTION REQUEST`,
       `School: ${CONFIG.schoolName}`,
       `Submitted: ${new Date().toLocaleString()}`,
       ``,
       `Redemption Code: ${code}`,
-      `Student-entered commendation points: ${balance}`,
-      `Student-entered conduct points: ${conduct}`,
+      verificationLine,
+      `Commendation points on request: ${balance}`,
+      `Conduct points on request: ${conduct}`,
       ``,
       `Requested rewards (total ${total} pts):`,
       ...lines,
       ``,
       note ? `Note from student: ${note}` : ``,
       ``,
-      `-- Staff: please verify this code and the student's actual point balance in the roster before fulfilling. --`,
+      `-- Staff: please confirm this code and balance in the roster before fulfilling. --`,
     ]
       .filter((l) => l !== undefined)
       .join("\n");
@@ -228,10 +306,13 @@
 
   function openModal() {
     const total = cartTotal();
+    if (els.lookupCode.value.trim() && !els.studentCode.value.trim()) {
+      els.studentCode.value = els.lookupCode.value.trim();
+    }
     els.modalSummary.innerHTML = `
       <div class="line"><span>Items requested</span><span>${state.cart.length}</span></div>
       <div class="line"><span>Total cost</span><span>${total} pts</span></div>
-      <div class="line"><span>Your entered balance</span><span>${getCommendations()} pts</span></div>
+      <div class="line"><span>Your balance</span><span>${getCommendations()} pts ${state.verified ? "✓ verified" : "(self-reported)"}</span></div>
     `;
     els.copyStatus.textContent = "";
     els.modalWrap.classList.add("open");
@@ -271,8 +352,15 @@
   }
 
   // Wiring
-  els.commendationInput.addEventListener("input", renderCart);
+  els.commendationInput.addEventListener("input", renderAll);
   els.conductInput.addEventListener("input", renderAll);
+  els.lookupBtn.addEventListener("click", performLookup);
+  els.lookupCode.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      performLookup();
+    }
+  });
   els.openCartBtn.addEventListener("click", openCart);
   els.closeCartBtn.addEventListener("click", closeCart);
   els.overlay.addEventListener("click", closeCart);

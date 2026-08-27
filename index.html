@@ -16,15 +16,8 @@
     <div class="store" id="storeNameLabel">Stingray Store</div>
   </div>
   <div class="topbar__spacer"></div>
-  <div class="points-bar">
-    <div class="points-field">
-      <label for="commendationInput">🌟 Commendations</label>
-      <input type="number" id="commendationInput" min="0" placeholder="0" inputmode="numeric" />
-    </div>
-    <div class="points-field">
-      <label for="conductInput">⚠️ Conduct</label>
-      <input type="number" id="conductInput" min="0" placeholder="0" inputmode="numeric" />
-    </div>
+  <div class="mini-balance" id="miniBalance" hidden>
+    🌟 <span id="miniBalanceValue">0</span> pts
   </div>
   <button class="cart-btn" id="openCartBtn" aria-haspopup="dialog">
     🛒 <span class="label">My Requests</span> <span class="cart-count" id="cartCount">0</span>
@@ -39,11 +32,38 @@
   <div class="accent-line"></div>
 </section>
 
+<section class="lookup-section">
+  <div class="lookup-card">
+    <h2>🔑 Check My Points</h2>
+    <p>Enter the private code your school gave you. It's not your name — it's how the store looks up your real points without keeping any student records here.</p>
+    <div class="lookup-row">
+      <input type="text" id="lookupCode" placeholder="e.g. SR-4821-BLUE" autocomplete="off" />
+      <button id="lookupBtn">Check My Points</button>
+    </div>
+    <div id="lookupResult"></div>
+
+    <div id="manualEntry" class="manual-entry">
+      <div class="manual-entry__label">Don't have a code, or it's not in this month's upload yet? Enter your points yourself for now:</div>
+      <div class="points-bar">
+        <div class="points-field">
+          <label for="commendationInput">🌟 Commendations</label>
+          <input type="number" id="commendationInput" min="0" placeholder="0" inputmode="numeric" />
+        </div>
+        <div class="points-field">
+          <label for="conductInput">⚠️ Conduct</label>
+          <input type="number" id="conductInput" min="0" placeholder="0" inputmode="numeric" />
+        </div>
+      </div>
+      <div class="manual-entry__note">Self-reported points aren't verified automatically — staff will double-check your real balance by hand before fulfilling.</div>
+    </div>
+  </div>
+</section>
+
 <section class="how">
   <div class="how__step">
     <div class="num">1</div>
-    <h3>Enter your points</h3>
-    <p>Type in your current commendation and conduct points above. Nothing is saved — it's just for you.</p>
+    <h3>Check your points</h3>
+    <p>Enter your code above to see your real, verified points — no login needed.</p>
   </div>
   <div class="how__step">
     <div class="num">2</div>
@@ -52,13 +72,13 @@
   </div>
   <div class="how__step">
     <div class="num">3</div>
-    <h3>Enter your code</h3>
-    <p>Use the private redemption code your school gave you — it's how staff know it's really you.</p>
+    <h3>Add a note &amp; send</h3>
+    <p>Your request emails the Stingray Store team with your code and cart.</p>
   </div>
   <div class="how__step">
     <div class="num">4</div>
-    <h3>Send &amp; get verified</h3>
-    <p>Your request emails the Stingray Store team, who verify your code and points before fulfilling it.</p>
+    <h3>Get it fulfilled</h3>
+    <p>Staff confirm the details and let you know when your reward is ready.</p>
   </div>
 </section>
 
@@ -119,11 +139,12 @@
     <span id="footSchoolName">Your School Name</span> ·
     <a id="footWebsite" href="#" target="_blank" rel="noopener">School Website</a>
   </p>
-  <p style="opacity:0.8;">No student data is stored by this site. Point balances are self-reported and verified by staff using your redemption code before any reward is given.</p>
+  <p style="opacity:0.8;">No student data is stored by this site. Point balances come from an anonymous code lookup (or a self-report, if your code isn't in the system yet) and are confirmed by staff before any reward is given.</p>
 </footer>
 
 <script src="js/config.js"></script>
 <script src="js/items.js"></script>
+<script src="js/points.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

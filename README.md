@@ -5,41 +5,64 @@ points on real-world perks. Built as a static site (plain HTML/CSS/JS) so it
 can be hosted for free on GitHub Pages, with **zero student data stored
 anywhere in the app**.
 
-## How it works (the model this app implements)
+## How it works (matches Ms. Malca's monthly workflow)
 
-1. **Self-reported points.** Students type in their own commendation and
-   conduct point totals. Nothing is saved — it only drives what the page
-   shows them (affordability, locked items).
-2. **Browse & build a request.** Students add rewards to a cart. Items can
+1. **Monthly upload, codes only.** At the end of each month, once
+   Mr. McGaha runs the behavior report, whoever manages the store replaces
+   `data/points.json` with each student's real commendation/conduct totals
+   — keyed by their private redemption code (e.g. `SR-4821-BLUE`), **never
+   by name**. The code → real identity mapping lives only in the school's
+   own private roster, completely outside this app. Because a code alone
+   isn't personally identifying, `data/points.json` can safely ship as part
+   of the static site with no student-privacy exposure.
+2. **Check My Points.** A student types their code into the lookup card at
+   the top of the page. If it's in this month's file, the site shows their
+   *real, verified* commendation and conduct totals (read-only) — this is
+   the "as secure as the dismissal portal" property Ms. Malca asked for:
+   the number displayed is exactly what staff uploaded, not something the
+   student can edit. If a code isn't found yet (new student, upload not
+   done yet), the student can fall back to typing their points in by hand —
+   clearly labeled as self-reported, so staff know to double check it.
+3. **Free Dress-Down Day, automatically.** Per Ms. Malca's rule, a verified
+   student with conduct points at or below `CONFIG.dressDownMaxConduct`
+   (default 3) sees a banner congratulating them on qualifying for the
+   month's schoolwide free dress-down day. This is informational only — it
+   is not a cart item and costs no points.
+4. **Browse & build a request.** Students add rewards to a cart. Items can
    optionally be locked behind a conduct-point ceiling (`maxConduct` in
-   `js/items.js`).
-3. **A private redemption code, not a login.** Each student is given a short
-   code by the school (e.g. `SR-4821-BLUE`) that is *not* their name. The
-   mapping of code → student identity → real point balance lives only in a
-   spreadsheet or system your staff already control — **never in this
-   app or its repo**. This is what keeps the store PII-free while still
-   giving staff a way to verify a request is legitimate.
-4. **Request, don't auto-redeem.** "Send Request" builds a `mailto:` link
+   `js/items.js`), separate from the schoolwide freebie above (e.g. the
+   in-store "Full Dress-Down Day" pass anyone can buy with points, any day).
+5. **Request, don't auto-redeem.** "Send Request" builds a `mailto:` link
    (pre-filled subject/body) to your admin inbox with the code, the cart,
-   and the student's claimed balance. A "Copy Request Details" button is a
-   fallback for devices where `mailto:` doesn't open a mail app. Staff cross
-   check the code + claimed balance against the private roster before
-   fulfilling — that's the actual "verification" step, done by a human, by
-   design, since there's no backend here to do it automatically without
-   storing data.
+   the claimed balance, and whether it was verified via lookup or
+   self-reported. A "Copy Request Details" button is a fallback for devices
+   where `mailto:` doesn't open a mail app. Staff still do a final human
+   check before fulfilling — the lookup makes that check fast and accurate
+   instead of removing it, since there's still no live inventory/redemption
+   ledger tracking what's already been spent.
 
-This trade-off (manual verification instead of an automated database) is
-what lets the site ship with **no accounts, no server, and no student
-records** — the biggest risk (a database of student names/points) simply
-doesn't exist.
+### Generating `data/points.json` each month
+Format:
+```json
+{
+  "codes": {
+    "SR-4821-BLUE": { "commendations": 14, "conduct": 1 }
+  }
+}
+```
+Build it from the behavior report export (a quick spreadsheet formula or
+script mapping each student's existing code to their totals works fine).
+**Never add a name, student ID, email, or any other identifying column** —
+the whole point is that this file is safe to publish. Replace the file and
+redeploy (or host it elsewhere and point `pointsDataUrl` in `js/config.js`
+at it) once a month.
 
 ### If you outgrow this later
-If the honor-system model ever becomes a problem (e.g. students inflating
-their point claims), the natural next step is a small backend that looks up
-a code against a real point balance server-side — at that point you are
-intentionally choosing to store a code→points ledger (still not names) and
-should treat it as a data system with its own privacy review. That is
-out of scope for this static version on purpose.
+If you want the store to also track *redemptions* (so a spent point can't
+be spent twice), that requires a small backend with a real code→points
+ledger it can write to — a deliberate step up in scope and a good time for
+a privacy review, even though it still wouldn't need student names. Out of
+scope for this static version on purpose.
 
 ## Customize it
 
@@ -54,10 +77,14 @@ Everything you're likely to change lives in two files:
 Colors and layout live in `css/style.css`, controlled by CSS variables at
 the top (`--blue-dark`, `--blue`, `--blue-light`, `--red`).
 
-### Adding your real logo
-Drop your logo file into `assets/` (e.g. `assets/logo.png`) and update
-`logoPath` in `js/config.js`. Until then, a placeholder stingray icon
-(`assets/logo.svg`) is used.
+### Adding your real logo and Sammy the Stingray art
+The two seminolescience.org logo files and the "Sammy the Stingray" mascot
+images from the CHAMPS board couldn't be downloaded automatically in this
+session (blocked by network policy), so the site still uses a placeholder
+stingray icon. Drop your real files into `assets/` (e.g.
+`assets/logo-round.png`, `assets/logo-long.png`, `assets/sammy.png`) and
+update `logoPath` in `js/config.js` — or send them to whoever's iterating on
+this next and they can wire them in directly.
 
 ### Setting up email
 The default "Send Request by Email" button uses a `mailto:` link — this
@@ -86,16 +113,20 @@ python3 -m http.server 8000
 
 ## Suggested reward catalog (included, edit freely)
 
+Costs are ballparked off Ms. Malca's examples (6 pts for lunch bunch, 3 pts
+for an untucked-shirt pass) — treat every number here as a starting point to
+tune once you see real monthly point totals.
+
 | Category | Item | Cost |
 |---|---|---|
-| Dress Code | Untucked Shirt Pass | 15 |
-| Dress Code | Fancy Shoes Pass | 15 |
-| Dress Code | Wear a Hat Pass | 15 |
-| Dress Code | Full Dress-Down Day (locked above 2 conduct pts) | 40 |
-| Food & Social | Lunch Bunch Pass | 25 |
-| Food & Social | Lunch With a Teacher | 20 |
-| Academic | Homework Pass (locked above 1 conduct pt) | 30 |
-| Academic | Extra Credit Points (locked above 1 conduct pt) | 35 |
-| Recognition | Positive Call Home | 20 |
-| Recognition | Positive Email Home | 15 |
-| Recognition | V-Friends Card (locked above 2 conduct pts) | 50 |
+| Dress Code | Untucked Shirt Pass | 3 |
+| Dress Code | Fancy Shoes Pass | 3 |
+| Dress Code | Wear a Hat Pass | 3 |
+| Dress Code | Full Dress-Down Day (locked above 2 conduct pts) | 10 |
+| Food & Social | Lunch Bunch Pass | 6 |
+| Food & Social | Lunch With a Teacher | 8 |
+| Academic | Homework Pass (locked above 1 conduct pt) | 10 |
+| Academic | Extra Credit Points (locked above 1 conduct pt) | 10 |
+| Recognition | Positive Call Home | 6 |
+| Recognition | Positive Email Home | 4 |
+| Recognition | V-Friends Card (locked above 2 conduct pts) | 12 |
