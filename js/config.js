@@ -20,7 +20,8 @@ const CONFIG = {
   // a timestamped row in the form's linked response sheet automatically,
   // no backend needed. Leave blank to keep the default mailto: flow.
   // See README.md for the two-minute steps to create this form.
-  requestsFormUrl: "",
+  requestsFormUrl:
+    "https://docs.google.com/forms/d/e/1FAIpQLScYm1e2RswURXJGdlW6FCQgtas27P5Cfn7kMsXbfDxDzqeTsQ/viewform",
 
   // CSV export URL of that form's response sheet. Not read by this site;
   // just open the sheet directly to review submissions and approve or
