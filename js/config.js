@@ -22,9 +22,9 @@ const CONFIG = {
   // See README.md for the two-minute steps to create this form.
   requestsFormUrl: "",
 
-  // CSV export URL of that form's response sheet, so the admin page can
-  // list submitted requests and offer a CSV download. Leave blank if
-  // requestsFormUrl above is blank too.
+  // CSV export URL of that form's response sheet. Not read by this site;
+  // just open the sheet directly to review submissions and approve or
+  // deny them. Leave blank if requestsFormUrl above is blank too.
   requestsSheetCsvUrl: "",
 
   // School seal, shown in the top bar.
@@ -66,14 +66,14 @@ const CONFIG = {
   pointsSheetCsvUrl:
     "https://docs.google.com/spreadsheets/d/1BNjrOeiSft-aEOkaUjDK4xEXP91PhEv2euRISy0LcuU/export?format=csv&gid=0",
 
-  // Normal Google Sheets link, for staff to open and edit rows directly.
-  // Shown on the admin page.
+  // Normal Google Sheets link. Not read by the site, just kept here so
+  // whoever maintains this file has it on hand to open and edit rows.
   pointsSheetEditUrl:
     "https://docs.google.com/spreadsheets/d/1BNjrOeiSft-aEOkaUjDK4xEXP91PhEv2euRISy0LcuU/edit",
 
   // Your own private sheet mapping codes to real student names. This
-  // site never reads it. It's just a convenience link on the admin page
-  // once you've created it. Leave blank until then.
+  // site never reads it, and nothing here does either. Just a place to
+  // note the link for yourself once you've created it.
   rosterSheetUrl: "",
 
   // ---- Wall of Fame (moderated public quote board) ----
@@ -86,8 +86,8 @@ const CONFIG = {
   wallOfFameSheetCsvUrl:
     "https://docs.google.com/spreadsheets/d/1lUorAsYcrtM-ehNfTJRcKaPaHbP-yq9A8Sv3jLoKRCs/export?format=csv&gid=0",
 
-  // Normal Google Sheets link, for staff to review and approve/deny
-  // submissions. Shown on the admin page.
+  // Normal Google Sheets link, for staff to review submissions and type
+  // "Approved" into a row's Status column. Not read by the site.
   wallOfFameSheetEditUrl:
     "https://docs.google.com/spreadsheets/d/1lUorAsYcrtM-ehNfTJRcKaPaHbP-yq9A8Sv3jLoKRCs/edit",
 
@@ -113,23 +113,4 @@ const CONFIG = {
   // balance. Actually applying the deduction happens in your real
   // system, this site only displays the policy.
   falseClaimPenalty: 5,
-
-  // ---- Admin access ----
-  // This phrase gates the admin page (admin.html), where staff turn a
-  // spreadsheet of codes and points into the data/points.json file.
-  // IMPORTANT: this repository is public, and this site is a static page
-  // with no backend. A phrase stored here is visible to anyone who views
-  // this file's source, on the live site or on GitHub, no matter how long
-  // it is. Treat it as a speed bump that keeps casual visitors out of the
-  // admin tool, not as real security. The actual security boundary is
-  // GitHub's own login, which is required to commit the generated file.
-  // Change this phrase before publishing, and never gate anything more
-  // sensitive than "help me format a JSON file" behind it.
-  adminAccessPhrase: "TitoTime!",
-
-  // Direct link to edit the points file in GitHub's own web editor,
-  // shown at the end of the admin tool. Update the branch name if you
-  // rename or merge it.
-  pointsFileEditUrl:
-    "https://github.com/T1MLivingston/stingraystore/edit/claude/stingray-commendation-store-tmnbhp/data/points.json",
 };

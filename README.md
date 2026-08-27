@@ -38,22 +38,25 @@ anywhere in the app**.
    `mailto:` link (pre-filled subject/body) to your admin inbox. Set
    `CONFIG.requestsFormUrl` to switch to the queue model instead: it copies
    the request to the clipboard and opens a Google Form, so submissions
-   collect as rows in a sheet the admin page can list (see "Request queue"
+   collect as rows in a sheet you review directly (see "Request queue"
    below). Either way, a "Copy Request Details" button is a fallback, and
    staff still do a final human check before fulfilling — there's no live
    inventory/redemption ledger tracking what's already been spent.
 
-### The admin gate, and why it's only a speed bump
-`admin.html` is linked from the small "Admin" button at the bottom of the
-store's footer, gated by `CONFIG.adminAccessPhrase`.
+### No admin panel, on purpose
+There is no in-site staff tool. Updating this store is three things done
+directly at the source, monthly:
+- Edit the points sheet (or `data/points.json` via GitHub) with the
+  numbers from Mr. McGaha's report.
+- Approve or deny requests by typing into the Requests sheet's Status
+  column.
+- Approve or deny Wall of Fame quotes the same way, in their own sheet.
 
-Read this before you rely on that gate: **this repository is public**, so
-that phrase is visible to anyone who looks at `js/config.js`, on the live
-site or on GitHub, no matter how long you make it. It is a speed bump that
-keeps casual visitors out of the tool, not real security. Nothing behind it
-should be more sensitive than "help me format some data" — the real
-security boundaries are Google's login on your sheets and GitHub's login on
-this repo, both described below.
+Everything below documents exactly how each of those three sheets works.
+This repository is public, so anything that isn't already protected by
+Google's own login (on the sheets) or GitHub's own login (on this repo)
+would only ever be a speed bump, not real security — better to just use
+those logins directly instead of building a page that pretends otherwise.
 
 ### Two ways to publish points: live sheet or static file
 
@@ -66,8 +69,7 @@ set two things in `js/config.js`:
 - `pointsSheetCsvUrl`: `https://docs.google.com/spreadsheets/d/<SHEET_ID>/export?format=csv&gid=0`
   (swap in your sheet's ID; `gid=0` is its first tab).
 
-Edits take effect immediately, no redeploy. The admin page's "Points Sheet"
-section links straight to it.
+Edits take effect immediately, no redeploy needed.
 
 A test sheet already exists at the URLs currently in `js/config.js`
 (**Stingray Store Points (Test)**, created for this conversation) with three
@@ -82,8 +84,8 @@ you share it as "Anyone with the link," every column in it is exactly as
 public as `data/points.json` in this public repo — the site choosing to
 ignore a Name column doesn't stop anyone else from reading it directly. Keep
 the code → real name mapping in a **second, separate sheet you never share
-that way** — that's `rosterSheetUrl` in config, a convenience link on the
-admin page, never fetched by the site itself.
+that way** — that's `rosterSheetUrl` in config, a place to note the link
+for yourself, never fetched by the site itself.
 
 **Option B: static `data/points.json`.** Used automatically whenever
 `pointsSheetCsvUrl` is blank. Format:
@@ -94,11 +96,10 @@ admin page, never fetched by the site itself.
   }
 }
 ```
-The admin page's "Static File Generator" section builds this for you: paste
-`code, commendations, conduct` rows, Generate, then copy/download the
-result and commit it via the link the tool gives you to GitHub's own web
-editor — that GitHub login is the actual security boundary for this option.
-Redeploy (a push to the Pages branch does this automatically) to publish.
+Edit this file directly in GitHub's own web editor (open it in the repo,
+click the pencil icon, edit, commit) — that GitHub login is the actual
+security boundary for this option. Redeploy (a push to the Pages branch
+does this automatically) to publish.
 
 ### Request queue: Google Form to Sheet, no backend
 
@@ -109,25 +110,26 @@ somewhere staff can review them together instead:
    e.g. "Request details") and turn on **Responses → link a Sheet** —
    Google auto-creates it and timestamps every submission.
 2. Add a `Status` column to that response sheet yourself. Approve or deny a
-   request by typing into that column directly — there's no write-back
-   from the admin page, on purpose (see below).
+   request by typing into that column directly, in the sheet.
 3. Share the response sheet the same "Anyone with the link → Viewer" way as
    the points sheet, and set `requestsSheetCsvUrl` in `js/config.js` to its
-   CSV export URL.
+   CSV export URL (kept for your own reference; the site itself doesn't
+   read it — there is no in-site requests table).
 4. Set `requestsFormUrl` to the form's own public URL (its "Send" link).
 
 Once both are set, "Send Request" copies the formatted request to the
 clipboard and opens your form in a new tab for the student to paste and
 submit — Google is what actually writes the row, so no credential capable
 of writing to your Sheet or repo ever has to live in this public site's
-code. The admin page's "Requests" section then lists every submission with
-a Download CSV button, so staff can add real names to a copy and match them
-against the private roster.
+code. Review submissions and match codes against your private roster
+directly in the sheet.
 
-This was a deliberate choice over building real Approve/Deny buttons into
-the admin page: that would need a small script (Google Apps Script) deployed
-by hand as a "Web App," a real option if you want it later, just more setup
-than this version needed to be useful today.
+Approving or denying by typing into a Status column, rather than building
+real buttons for it, was a deliberate choice: buttons that actually write
+back would need a small script (Google Apps Script) deployed by hand as a
+"Web App" — a real option later, just more setup than this needed to be
+useful today, and one more moving part than "open the sheet you already
+have open anyway."
 
 I could not create the Form itself here — Google Drive's file-creation tool
 only makes native Docs, Sheets, and Slides, not Forms — so step 1 above is
@@ -205,16 +207,13 @@ real monthly point totals.
 | Collectibles | Collectible Card (locked above 2 conduct pts) | 50 |
 | Collectibles | VeeFriends Comic (locked above 2 conduct pts) | 100 |
 | Collectibles | Pizza Party | 100 |
-| Donation Bin | Head Shave Fund | 10 |
-| Donation Bin | Dress-Up Day Fund | 10 |
+| Donation Bin | Dress Down Day Fund | 10 |
 | Donation Bin | Talent Show Fund | 10 |
-| Donation Bin | Trivia Showdown Fund | 10 |
 
-**Donation Bin** items are running group goals (e.g. 5,000 points → a public
-head-shave), not per-student rewards. This static site has no shared
-counter to track those totals live — staff need to tally donations from
-submitted requests (the Requests table in `admin.html` is the source for
-that) and announce progress separately.
+**Donation Bin** items are running group goals (e.g. 1,000 points → a
+schoolwide dress-down day), not per-student rewards. This static site has
+no shared counter to track those totals live — staff need to tally
+donations from submitted requests and announce progress separately.
 
 ## Wall of Fame: a moderated public quote board
 

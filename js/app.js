@@ -45,7 +45,6 @@
     falseClaimField: document.getElementById("falseClaimField"),
     falseClaimCheck: document.getElementById("falseClaimCheck"),
     falseClaimPenaltyText: document.getElementById("falseClaimPenaltyText"),
-    adminBtn: document.getElementById("adminBtn"),
     pointsModalWrap: document.getElementById("pointsModalWrap"),
     pointsModalBody: document.getElementById("pointsModalBody"),
     pointsModalCloseBtn: document.getElementById("pointsModalCloseBtn"),
@@ -563,15 +562,6 @@
   els.pointsModalCloseBtn.addEventListener("click", closePointsModal);
   els.detailModalCloseBtn.addEventListener("click", closeDetailModal);
   els.quoteSubmitBtn.addEventListener("click", submitQuote);
-  els.adminBtn.addEventListener("click", () => {
-    const entered = prompt("Enter the admin access phrase:");
-    if (entered === null) return;
-    if (entered.trim() === CONFIG.adminAccessPhrase) {
-      window.location.href = "admin.html";
-    } else {
-      alert("That is not the right phrase.");
-    }
-  });
 
   applyConfig();
   renderAll();

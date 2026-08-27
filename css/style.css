@@ -720,18 +720,6 @@ footer .foot-motto {
   display: block;
 }
 
-.admin-btn {
-  margin-top: 18px;
-  background: none;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #9fbdf4;
-  font-size: 0.72rem;
-  padding: 5px 14px;
-  border-radius: 999px;
-  cursor: pointer;
-}
-.admin-btn:hover { border-color: #9fbdf4; color: var(--white); }
-
 @media (max-width: 640px) {
   .topbar { flex-wrap: wrap; }
   .cart-btn span.label { display: none; }

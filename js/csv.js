@@ -2,7 +2,7 @@
 // STINGRAY STORE — CSV UTILITY
 // A minimal CSV parser: handles quoted fields (Google Sheets quotes any
 // field containing a comma) and blank lines. Shared by points.js and
-// admin.js. Not a general CSV library, just enough for a simple sheet.
+// app.js. Not a general CSV library, just enough for a simple sheet.
 // ============================================================
 
 const CsvUtil = (function () {
