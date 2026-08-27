@@ -103,6 +103,7 @@ a { color: var(--blue); }
   font-size: 0.9rem;
 }
 .mini-balance.verified { border-color: #bfe8cd; background: #e9f8ee; color: #1c6b3a; }
+.mini-balance[hidden] { display: none; }
 
 .cart-btn {
   position: relative;
@@ -293,7 +294,18 @@ a { color: var(--blue); }
   border-left: 5px solid var(--red);
   padding-left: 10px;
   margin: 34px 0 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
+
+.category-link {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--blue);
+  text-decoration: none;
+}
+.category-link:hover { text-decoration: underline; }
 
 .grid {
   display: grid;

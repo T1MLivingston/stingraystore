@@ -14,6 +14,8 @@
     footMotto: document.getElementById("footMotto"),
     footSchoolName: document.getElementById("footSchoolName"),
     footWebsite: document.getElementById("footWebsite"),
+    footCodeOfConduct: document.getElementById("footCodeOfConduct"),
+    footUniformPolicy: document.getElementById("footUniformPolicy"),
     commendationInput: document.getElementById("commendationInput"),
     conductInput: document.getElementById("conductInput"),
     lookupCode: document.getElementById("lookupCode"),
@@ -51,6 +53,8 @@
     els.footMotto.textContent = `"${CONFIG.motto}"`;
     els.footSchoolName.textContent = CONFIG.schoolName;
     els.footWebsite.href = CONFIG.websiteUrl;
+    els.footCodeOfConduct.href = CONFIG.codeOfConductUrl;
+    els.footUniformPolicy.href = CONFIG.uniformPolicyUrl;
     if (CONFIG.logoPath) {
       els.logoImg.src = CONFIG.logoPath;
       els.logoImg.onerror = () => { els.logoImg.src = "assets/logo.svg"; };
@@ -153,6 +157,15 @@
       const title = document.createElement("h2");
       title.className = "category-title";
       title.textContent = cat;
+      if (cat === "Dress Code Passes") {
+        const link = document.createElement("a");
+        link.href = CONFIG.uniformPolicyUrl;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.className = "category-link";
+        link.textContent = "Uniform Policy ↗";
+        title.appendChild(link);
+      }
       section.appendChild(title);
 
       const grid = document.createElement("div");

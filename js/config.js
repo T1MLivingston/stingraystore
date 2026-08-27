@@ -23,6 +23,12 @@ const CONFIG = {
   // Link to your school website (shown in the footer).
   websiteUrl: "https://www.seminolescience.org",
 
+  // Reference documents (shown in the footer).
+  codeOfConductUrl:
+    "https://seminolescience.org/images/media/sscs/2627/2026-2027_SSCS_Student_Handbook_and_Code_of_Conduct.pdf",
+  uniformPolicyUrl:
+    "https://seminolescience.org/images/media/sscs/2024-25/StudentHandbook/SSCS_Uniform_Policy.pdf",
+
   // Conduct points: set what your school's scale means so the note
   // on the page matches your actual conduct system.
   conductNote:
