@@ -108,7 +108,7 @@
   <div class="modal">
     <div class="modal__header">
       <h2>Confirm &amp; Redeem</h2>
-      <p>This opens the request form for you to submit. It does not save any data here.</p>
+      <p>This sends your request to staff for review. It does not save any data here.</p>
     </div>
     <div class="modal__body">
       <div class="modal__summary" id="modalSummary"></div>
@@ -138,6 +138,13 @@
     </div>
   </div>
 </div>
+
+<!-- Submits the request directly to the Google Form's response endpoint
+     in the background, so the student never sees the Form itself. -->
+<iframe name="hiddenFormFrame" id="hiddenFormFrame" style="display: none" aria-hidden="true" tabindex="-1"></iframe>
+<form id="requestSubmitForm" method="POST" target="hiddenFormFrame" style="display: none">
+  <input type="hidden" id="requestSubmitField" name="entry.0" />
+</form>
 
 <div class="modal-wrap points-modal-wrap" id="pointsModalWrap" role="dialog" aria-label="Your points">
   <div class="modal points-modal" id="pointsModalBox">

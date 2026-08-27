@@ -40,6 +40,9 @@
     studentNote: document.getElementById("studentNote"),
     sendRequestBtn: document.getElementById("sendRequestBtn"),
     copyStatus: document.getElementById("copyStatus"),
+    hiddenFormFrame: document.getElementById("hiddenFormFrame"),
+    requestSubmitForm: document.getElementById("requestSubmitForm"),
+    requestSubmitField: document.getElementById("requestSubmitField"),
     closeModalBtn: document.getElementById("closeModalBtn"),
     falseClaimField: document.getElementById("falseClaimField"),
     falseClaimCheck: document.getElementById("falseClaimCheck"),
@@ -73,6 +76,8 @@
     els.footCodeOfConduct.href = CONFIG.codeOfConductUrl;
     els.footUniformPolicy.href = CONFIG.uniformPolicyUrl;
     els.falseClaimPenaltyText.textContent = CONFIG.falseClaimPenalty;
+    els.requestSubmitForm.action = CONFIG.requestsFormUrl.replace(/\/viewform.*$/, "/formResponse");
+    els.requestSubmitField.name = CONFIG.requestsFormFieldId;
     if (CONFIG.logoPath) {
       els.logoImg.src = CONFIG.logoPath;
     }
@@ -414,6 +419,22 @@
     els.modalWrap.classList.remove("open");
   }
 
+  // Set while a hidden-iframe form submission is in flight, so the
+  // iframe's "load" event (which also fires once harmlessly on page
+  // load) only triggers the success message during an actual submit.
+  let awaitingSubmitConfirmation = false;
+
+  function confirmSubmitted() {
+    if (!awaitingSubmitConfirmation) return;
+    awaitingSubmitConfirmation = false;
+    els.copyStatus.style.color = "#1c6b3a";
+    els.copyStatus.textContent = "Request submitted! Staff will review it soon.";
+    els.sendRequestBtn.disabled = false;
+    state.cart = [];
+    renderAll();
+    setTimeout(closeModal, 1800);
+  }
+
   function sendRequest() {
     if (!els.studentCode.value.trim()) {
       els.studentCode.focus();
@@ -427,18 +448,15 @@
       return;
     }
 
-    const text = buildRequestText();
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        els.copyStatus.style.color = "#1c6b3a";
-        els.copyStatus.textContent = "Copied. Paste it into the form that just opened, then submit there.";
-      })
-      .catch(() => {
-        els.copyStatus.style.color = "#c42836";
-        els.copyStatus.textContent = "Could not copy automatically. Select and copy the text yourself, then paste it into the form that just opened.";
-      });
-    window.open(CONFIG.requestsFormUrl, "_blank", "noopener");
+    els.requestSubmitField.value = buildRequestText();
+    els.sendRequestBtn.disabled = true;
+    els.copyStatus.style.color = "#1c6b3a";
+    els.copyStatus.textContent = "Submitting...";
+    awaitingSubmitConfirmation = true;
+    els.requestSubmitForm.submit();
+    // Cross-origin iframe content can't be read to confirm success, so
+    // fall back to an optimistic confirmation if "load" never fires.
+    setTimeout(confirmSubmitted, 4000);
   }
 
   function escapeHtml(s) {
@@ -524,6 +542,7 @@
   });
   els.closeModalBtn.addEventListener("click", closeModal);
   els.sendRequestBtn.addEventListener("click", sendRequest);
+  els.hiddenFormFrame.addEventListener("load", confirmSubmitted);
   els.pointsModalCloseBtn.addEventListener("click", closePointsModal);
   els.detailModalCloseBtn.addEventListener("click", closeDetailModal);
   els.quoteSubmitBtn.addEventListener("click", submitQuote);

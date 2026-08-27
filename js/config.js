@@ -10,14 +10,19 @@ const CONFIG = {
   motto: "We support each other, contribute to our community, and strive for excellence in all we do.",
 
   // ---- Request submission ----
-  // "Submit Request" copies the request details to the clipboard and
-  // opens this Google Form in a new tab, where the student pastes them
-  // into a single text field and submits. Each submission becomes a
-  // timestamped row in the form's linked response sheet automatically,
-  // no backend and no email needed. See README.md for the two-minute
-  // steps to create this form.
+  // "Submit Request" posts the request text straight to this Google
+  // Form's response endpoint from a hidden iframe, so it lands as a row
+  // in the form's linked sheet without the student ever seeing the Form
+  // itself. No backend, no email, and nothing to paste. See README.md
+  // for how to find requestsFormFieldId below for your own form.
   requestsFormUrl:
     "https://docs.google.com/forms/d/e/1FAIpQLScYm1e2RswURXJGdlW6FCQgtas27P5Cfn7kMsXbfDxDzqeTsQ/viewform",
+
+  // The Form's internal field name for its one text question, e.g.
+  // "entry.123456789". Find it via the Form editor's three-dot menu ->
+  // "Get pre-filled link" -> type any answer -> Get Link -> the entry.
+  // number in the generated URL.
+  requestsFormFieldId: "entry.1989281097",
 
   // CSV export URL of that form's response sheet. Not read by this site;
   // just open the sheet directly to review submissions and approve or

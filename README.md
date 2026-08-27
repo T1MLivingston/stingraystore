@@ -103,11 +103,12 @@ does this automatically) to publish.
 
 ### Request queue: Google Form to Sheet, no backend
 
-Requests never go by email. "Submit Request" copies the formatted request
-to the clipboard and opens a Google Form in a new tab for the student to
-paste and submit — Google is what actually writes the row, so no
-credential capable of writing to your Sheet or repo ever has to live in
-this public site's code. To set it up:
+Requests never go by email, and students never see a Google Form. "Submit
+Request" posts the formatted request straight to the Form's response
+endpoint from a hidden iframe on the page — Google is what actually writes
+the row, so no credential capable of writing to your Sheet or repo ever
+has to live in this public site's code, and there's nothing for the
+student to paste or submit themselves. To set it up:
 
 1. Create a Google Form with one field (a paragraph/long-answer question,
    e.g. "Request details") and turn on **Responses → link a Sheet** —
@@ -121,9 +122,20 @@ this public site's code. To set it up:
 4. Set `requestsFormUrl` to the form's own public responder link (click
    **Publish**, top right of the form editor, then copy the link from
    there).
+5. Find the field's internal name for `requestsFormFieldId`: in the form
+   editor, three-dot menu → **Get pre-filled link** → type any answer →
+   **Get Link** → copy the generated URL. It contains `entry.` followed
+   by a number (e.g. `entry.1989281097`) — that's the value to set.
 
 Review submissions and match codes against your private roster directly in
 the sheet.
+
+Because the response comes back inside a hidden iframe, the site can't
+actually read whether Google accepted it (cross-origin content can't be
+inspected by client-side JS) — it shows "Request submitted" either once
+the iframe finishes loading or after a few seconds either way. This is the
+same fire-and-forget tradeoff as the rest of this static site: staff still
+do a final human check in the sheet before fulfilling anything.
 
 Approving or denying by typing into a Status column, rather than building
 real buttons for it, was a deliberate choice: buttons that actually write
