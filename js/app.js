@@ -57,7 +57,6 @@
     els.footUniformPolicy.href = CONFIG.uniformPolicyUrl;
     if (CONFIG.logoPath) {
       els.logoImg.src = CONFIG.logoPath;
-      els.logoImg.onerror = () => { els.logoImg.src = "assets/logo.svg"; };
     }
   }
 
@@ -95,7 +94,7 @@
       els.lookupResult.innerHTML = `<div class="lookup-msg warn">Type your code first.</div>`;
       return;
     }
-    els.lookupResult.innerHTML = `<div class="lookup-msg">Checking…</div>`;
+    els.lookupResult.innerHTML = `<div class="lookup-msg">Checking.</div>`;
     const record = await PointsLookup.find(code);
 
     if (record) {
@@ -103,12 +102,12 @@
       setVerifiedInputs(record.commendations, record.conduct);
       const dressDown =
         record.conduct <= CONFIG.dressDownMaxConduct
-          ? `<div class="dress-down-banner">🎉 ${CONFIG.dressDownNote}</div>`
+          ? `<div class="dress-down-banner">${CONFIG.dressDownNote}</div>`
           : "";
       els.lookupResult.innerHTML = `
         <div class="lookup-msg ok">
-          ✓ Verified! You have <strong>${record.commendations} commendation pts</strong> and
-          <strong>${record.conduct} conduct pts</strong> as of this month's upload.
+          Verified. You have <strong>${record.commendations} commendation pts</strong> and
+          <strong>${record.conduct} conduct pts</strong> this month.
           <button class="link-btn" id="clearLookupBtn">Not you? Clear</button>
         </div>
         ${dressDown}
@@ -116,7 +115,7 @@
       document.getElementById("clearLookupBtn").addEventListener("click", resetLookup);
     } else {
       clearVerification();
-      els.lookupResult.innerHTML = `<div class="lookup-msg warn">We don't have this code in this month's upload yet. Enter your points manually below — staff will verify by hand.</div>`;
+      els.lookupResult.innerHTML = `<div class="lookup-msg warn">This code is not in this month's upload yet. Enter your points below. Staff will verify by hand.</div>`;
       els.commendationInput.focus();
     }
     renderAll();
@@ -157,14 +156,12 @@
       const title = document.createElement("h2");
       title.className = "category-title";
       title.textContent = cat;
-      if (cat === "Dress Code Passes") {
-        const link = document.createElement("a");
-        link.href = CONFIG.uniformPolicyUrl;
-        link.target = "_blank";
-        link.rel = "noopener";
-        link.className = "category-link";
-        link.textContent = "Uniform Policy ↗";
-        title.appendChild(link);
+      if (cat === "Recognition") {
+        const icon = document.createElement("img");
+        icon.src = "assets/sammy-medal.png";
+        icon.alt = "";
+        icon.className = "category-icon";
+        title.appendChild(icon);
       }
       section.appendChild(title);
 
@@ -188,12 +185,11 @@
 
     card.innerHTML = `
       ${inCart ? '<div class="in-cart-badge">In cart</div>' : ""}
-      <div class="icon">${item.icon}</div>
       <h3>${item.name}</h3>
       <p class="desc">${item.desc}</p>
-      <div class="cost"><span class="icon-mini">🌟</span> ${item.cost} pts</div>
-      ${locked ? `<div class="restriction">Unavailable — requires ${item.maxConduct} or fewer conduct points.</div>` : ""}
-      <button class="add" ${locked || inCart ? "disabled" : ""}>${inCart ? "Added ✓" : locked ? "Locked" : "Add to Requests"}</button>
+      <div class="cost">${item.cost} pts</div>
+      ${locked ? `<div class="restriction">Unavailable. Requires ${item.maxConduct} or fewer conduct points.</div>` : ""}
+      <button class="add" ${locked || inCart ? "disabled" : ""}>${inCart ? "Added" : locked ? "Locked" : "Add to Requests"}</button>
     `;
 
     const btn = card.querySelector("button.add");
@@ -237,7 +233,6 @@
         const row = document.createElement("div");
         row.className = "cart-item";
         row.innerHTML = `
-          <div class="icon">${item.icon}</div>
           <div class="info">
             <div class="name">${item.name}</div>
             <div class="cost">${item.cost} pts</div>
@@ -258,10 +253,10 @@
       els.balanceMsg.innerHTML = "";
       els.checkoutBtn.disabled = true;
     } else if (total > balance) {
-      els.balanceMsg.innerHTML = `<div class="balance-warning">You've entered ${balance} commendation pts — that's ${total - balance} short of this request. You can still send it, but staff will need to confirm your real balance.</div>`;
+      els.balanceMsg.innerHTML = `<div class="balance-warning">Your balance is ${balance} pts. That is ${total - balance} short of this request. You can still send it, but staff will need to confirm your real balance.</div>`;
       els.checkoutBtn.disabled = false;
     } else {
-      els.balanceMsg.innerHTML = `<div class="balance-ok">You have enough commendation points for this request. ✓</div>`;
+      els.balanceMsg.innerHTML = `<div class="balance-ok">You have enough points for this request.</div>`;
       els.checkoutBtn.disabled = false;
     }
   }
@@ -289,12 +284,12 @@
     const note = els.studentNote.value.trim();
     const lines = state.cart.map((id) => {
       const item = itemById(id);
-      return `  • ${item.name} — ${item.cost} pts`;
+      return `  - ${item.name}, ${item.cost} pts`;
     });
 
     const verificationLine = state.verified
       ? `Verification: VERIFIED via store lookup against this month's points upload`
-      : `Verification: SELF-REPORTED — not found in this month's upload, please verify manually`;
+      : `Verification: SELF-REPORTED, not found in this month's upload, please verify manually`;
 
     return [
       `STINGRAY STORE REDEMPTION REQUEST`,
@@ -325,7 +320,7 @@
     els.modalSummary.innerHTML = `
       <div class="line"><span>Items requested</span><span>${state.cart.length}</span></div>
       <div class="line"><span>Total cost</span><span>${total} pts</span></div>
-      <div class="line"><span>Your balance</span><span>${getCommendations()} pts ${state.verified ? "✓ verified" : "(self-reported)"}</span></div>
+      <div class="line"><span>Your balance</span><span>${getCommendations()} pts ${state.verified ? "(verified)" : "(self-reported)"}</span></div>
     `;
     els.copyStatus.textContent = "";
     els.modalWrap.classList.add("open");
@@ -341,7 +336,7 @@
       els.copyStatus.style.color = "#c42836";
       return;
     }
-    const subject = encodeURIComponent(`Stingray Store Request — Code ${els.studentCode.value.trim()}`);
+    const subject = encodeURIComponent(`Stingray Store Request, Code ${els.studentCode.value.trim()}`);
     const body = encodeURIComponent(buildRequestText());
     window.location.href = `mailto:${CONFIG.adminEmail}?subject=${subject}&body=${body}`;
   }
@@ -360,7 +355,7 @@
       els.copyStatus.textContent = "Copied! Paste it into an email to " + CONFIG.adminEmail;
     } catch (e) {
       els.copyStatus.style.color = "#c42836";
-      els.copyStatus.textContent = "Couldn't copy automatically — please select and copy the text manually.";
+      els.copyStatus.textContent = "Could not copy automatically. Please select and copy the text manually.";
     }
   }
 

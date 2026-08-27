@@ -6,7 +6,6 @@
 //   desc        one-line description
 //   cost        commendation points required
 //   category    groups items on the page
-//   icon        one emoji used as the card's icon
 //   maxConduct  (optional) item is locked if the student's entered
 //               conduct points are greater than this number
 // ============================================================
@@ -18,7 +17,6 @@ const ITEMS = [
     desc: "Wear your uniform shirt untucked for the day.",
     cost: 3,
     category: "Dress Code Passes",
-    icon: "👕",
   },
   {
     id: "fancy-shoes",
@@ -26,7 +24,6 @@ const ITEMS = [
     desc: "Swap uniform shoes for the shoes of your choice.",
     cost: 3,
     category: "Dress Code Passes",
-    icon: "👟",
   },
   {
     id: "hat-pass",
@@ -34,15 +31,13 @@ const ITEMS = [
     desc: "Wear a hat in class for the day.",
     cost: 3,
     category: "Dress Code Passes",
-    icon: "🧢",
   },
   {
     id: "dress-down",
     name: "Full Dress-Down Day",
-    desc: "Skip the uniform entirely — dress down all day, any day.",
+    desc: "Skip the uniform entirely. Dress down all day, any day.",
     cost: 10,
     category: "Dress Code Passes",
-    icon: "🎽",
     maxConduct: 2,
   },
   {
@@ -51,7 +46,6 @@ const ITEMS = [
     desc: "Eat lunch with friends outside your usual spot.",
     cost: 6,
     category: "Food & Social",
-    icon: "🍔",
   },
   {
     id: "lunch-teacher",
@@ -59,7 +53,6 @@ const ITEMS = [
     desc: "Enjoy a lunch invite with a teacher of your choice.",
     cost: 8,
     category: "Food & Social",
-    icon: "🍕",
   },
   {
     id: "homework-pass",
@@ -67,7 +60,6 @@ const ITEMS = [
     desc: "Skip one homework assignment, no questions asked.",
     cost: 10,
     category: "Academic Perks",
-    icon: "📝",
     maxConduct: 1,
   },
   {
@@ -76,7 +68,6 @@ const ITEMS = [
     desc: "Redeem for a small extra-credit boost in one class.",
     cost: 10,
     category: "Academic Perks",
-    icon: "⭐",
     maxConduct: 1,
   },
   {
@@ -85,7 +76,6 @@ const ITEMS = [
     desc: "A teacher or admin calls home with great news about you.",
     cost: 6,
     category: "Recognition",
-    icon: "📞",
   },
   {
     id: "email-home",
@@ -93,7 +83,6 @@ const ITEMS = [
     desc: "A teacher or admin sends a shout-out email to your family.",
     cost: 4,
     category: "Recognition",
-    icon: "📧",
   },
   {
     id: "vfriends",
@@ -101,7 +90,6 @@ const ITEMS = [
     desc: "Earn an exclusive V-Friends recognition card.",
     cost: 12,
     category: "Recognition",
-    icon: "🎴",
     maxConduct: 2,
   },
 ];

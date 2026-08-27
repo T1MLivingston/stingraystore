@@ -4,27 +4,28 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Stingray Store</title>
-<link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+<link rel="icon" href="assets/school-seal.png" type="image/png" />
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
 <header class="topbar">
-  <img class="topbar__logo" id="logoImg" src="assets/logo.svg" alt="School logo" />
+  <img class="topbar__logo" id="logoImg" src="assets/school-seal.png" alt="School logo" />
   <div class="topbar__titles">
     <div class="school" id="schoolNameLabel">Your School Name</div>
     <div class="store" id="storeNameLabel">Stingray Store</div>
   </div>
   <div class="topbar__spacer"></div>
   <div class="mini-balance" id="miniBalance" hidden>
-    🌟 <span id="miniBalanceValue">0</span> pts
+    <span id="miniBalanceValue">0</span> pts
   </div>
   <button class="cart-btn" id="openCartBtn" aria-haspopup="dialog">
-    🛒 <span class="label">My Requests</span> <span class="cart-count" id="cartCount">0</span>
+    <span class="label">My Requests</span> <span class="cart-count" id="cartCount">0</span>
   </button>
 </header>
 
 <section class="hero">
+  <img class="hero__sammy" src="assets/sammy-monitor.png" alt="Sammy the Stingray" />
   <h1>Welcome to the <span>Stingray Store</span></h1>
   <p class="motto" id="mottoText">
     We support each other, contribute to our community, and strive for excellence in all we do.
@@ -33,52 +34,65 @@
 </section>
 
 <section class="lookup-section">
-  <div class="lookup-card">
-    <h2>🔑 Check My Points</h2>
-    <p>Enter the private code your school gave you. It's not your name — it's how the store looks up your real points without keeping any student records here.</p>
-    <div class="lookup-row">
-      <input type="text" id="lookupCode" placeholder="e.g. SR-4821-BLUE" autocomplete="off" />
-      <button id="lookupBtn">Check My Points</button>
-    </div>
-    <div id="lookupResult"></div>
-
-    <div id="manualEntry" class="manual-entry">
-      <div class="manual-entry__label">Don't have a code, or it's not in this month's upload yet? Enter your points yourself for now:</div>
-      <div class="points-bar">
-        <div class="points-field">
-          <label for="commendationInput">🌟 Commendations</label>
-          <input type="number" id="commendationInput" min="0" placeholder="0" inputmode="numeric" />
-        </div>
-        <div class="points-field">
-          <label for="conductInput">⚠️ Conduct</label>
-          <input type="number" id="conductInput" min="0" placeholder="0" inputmode="numeric" />
-        </div>
+  <div class="lookup-grid">
+    <div class="lookup-card">
+      <h2>Check My Points</h2>
+      <p>Enter the private code your school gave you. This is not your name. It is how the store looks up your points without keeping any student records here.</p>
+      <div class="lookup-row">
+        <input type="text" id="lookupCode" placeholder="e.g. SR-4821-BLUE" autocomplete="off" />
+        <button id="lookupBtn">Check</button>
       </div>
-      <div class="manual-entry__note">Self-reported points aren't verified automatically — staff will double-check your real balance by hand before fulfilling.</div>
-    </div>
-  </div>
-</section>
+      <div id="lookupResult"></div>
 
-<section class="how">
-  <div class="how__step">
-    <div class="num">1</div>
-    <h3>Check your points</h3>
-    <p>Enter your code above to see your real, verified points — no login needed.</p>
-  </div>
-  <div class="how__step">
-    <div class="num">2</div>
-    <h3>Pick your rewards</h3>
-    <p>Browse the store and add anything you can afford to your requests.</p>
-  </div>
-  <div class="how__step">
-    <div class="num">3</div>
-    <h3>Add a note &amp; send</h3>
-    <p>Your request emails the Stingray Store team with your code and cart.</p>
-  </div>
-  <div class="how__step">
-    <div class="num">4</div>
-    <h3>Get it fulfilled</h3>
-    <p>Staff confirm the details and let you know when your reward is ready.</p>
+      <div id="manualEntry" class="manual-entry">
+        <div class="manual-entry__label">No code yet, or not in this month's upload? Enter your points for now.</div>
+        <div class="points-bar">
+          <div class="points-field">
+            <label for="commendationInput">Commendations</label>
+            <input type="number" id="commendationInput" min="0" placeholder="0" inputmode="numeric" />
+          </div>
+          <div class="points-field">
+            <label for="conductInput">Conduct</label>
+            <input type="number" id="conductInput" min="0" placeholder="0" inputmode="numeric" />
+          </div>
+        </div>
+        <div class="manual-entry__note">Self-reported points are not verified automatically. Staff will confirm your balance by hand before fulfilling.</div>
+      </div>
+    </div>
+
+    <div class="steps-wrap">
+      <ol class="steps-list">
+        <li>
+          <span class="steps-list__num">1</span>
+          <div>
+            <h3>Check your points</h3>
+            <p>Enter your code, or your points.</p>
+          </div>
+        </li>
+        <li>
+          <span class="steps-list__num">2</span>
+          <div>
+            <h3>Pick your rewards</h3>
+            <p>Add anything you can afford.</p>
+          </div>
+        </li>
+        <li>
+          <span class="steps-list__num">3</span>
+          <div>
+            <h3>Send your request</h3>
+            <p>Include your code and a note.</p>
+          </div>
+        </li>
+        <li>
+          <span class="steps-list__num">4</span>
+          <div>
+            <h3>Get it fulfilled</h3>
+            <p>Staff confirm and let you know.</p>
+          </div>
+        </li>
+      </ol>
+      <img class="steps-list__sammy" src="assets/sammy-backpack.png" alt="" />
+    </div>
   </div>
 </section>
 
@@ -100,7 +114,7 @@
     <div class="summary-row"><span>Items</span><span id="summaryItems">0</span></div>
     <div class="summary-row total"><span>Total cost</span><span id="summaryTotal">0 pts</span></div>
     <div id="balanceMsg"></div>
-    <button class="checkout-btn" id="checkoutBtn" disabled>Continue to Redemption Code →</button>
+    <button class="checkout-btn" id="checkoutBtn" disabled>Continue to Redemption Code</button>
   </div>
 </aside>
 
@@ -108,7 +122,7 @@
   <div class="modal">
     <div class="modal__header">
       <h2>Confirm &amp; Redeem</h2>
-      <p>This sends a request email — it does not save any data.</p>
+      <p>This sends a request email. It does not save any data.</p>
     </div>
     <div class="modal__body">
       <div class="modal__summary" id="modalSummary"></div>
@@ -125,8 +139,8 @@
       </div>
     </div>
     <div class="modal__footer">
-      <button class="checkout-btn" id="sendRequestBtn">📧 Send Request by Email</button>
-      <button class="secondary" id="copyRequestBtn">📋 Copy Request Details</button>
+      <button class="checkout-btn" id="sendRequestBtn">Send Request by Email</button>
+      <button class="secondary" id="copyRequestBtn">Copy Request Details</button>
       <div class="copy-status" id="copyStatus"></div>
       <button class="secondary" id="closeModalBtn">Back to Store</button>
     </div>
@@ -134,6 +148,7 @@
 </div>
 
 <footer>
+  <img class="footer__sammy" src="assets/sammy-peek.png" alt="" />
   <div class="foot-motto" id="footMotto">"We support each other, contribute to our community, and strive for excellence in all we do."</div>
   <p>
     <span id="footSchoolName">Your School Name</span> ·

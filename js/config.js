@@ -5,20 +5,15 @@
 // ============================================================
 
 const CONFIG = {
-  // Guessed from seminolescience.org — please correct if wrong.
-  schoolName: "Seminole Science Charter School",
+  schoolName: "Seminole Science STEM Charter School",
   storeName: "Stingray Store",
   motto: "We support each other, contribute to our community, and strive for excellence in all we do.",
 
   // Where redemption requests get emailed. Change to your real inbox.
   adminEmail: "stingraystore@seminolescience.org",
 
-  // Path to your logo. Real files weren't available to download into this
-  // session (network policy), so this still points at the placeholder
-  // stingray icon. Drop your real files at assets/logo-round.png and
-  // assets/logo-long.png (from seminolescience.org) and/or a real Sammy
-  // the Stingray mascot image, then update the paths below.
-  logoPath: "assets/logo.svg",
+  // School seal, shown in the top bar.
+  logoPath: "assets/school-seal.png",
 
   // Link to your school website (shown in the footer).
   websiteUrl: "https://www.seminolescience.org",
@@ -46,5 +41,5 @@ const CONFIG = {
   // item — it's shown as a shoutout banner, not something to "buy".
   dressDownMaxConduct: 3,
   dressDownNote:
-    "You qualify for a free Dress-Down Day on this month's announced day! (This is separate from the Full Dress-Down Day pass below, which anyone can redeem with points any day.)",
+    "You qualify for a free Dress-Down Day this month. This is separate from the Full Dress-Down Day pass below, which anyone can redeem with points any day.",
 };
