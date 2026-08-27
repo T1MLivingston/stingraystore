@@ -195,9 +195,9 @@ real monthly point totals.
 | Category | Item | Cost |
 |---|---|---|
 | Dress Code | Untucked Shirt Pass | 3 |
-| Dress Code | Fancy Shoes Pass | 3 |
-| Dress Code | Wear a Hat Pass | 3 |
-| Dress Code | Full Dress-Down Day (locked above 2 conduct pts) | 10 |
+| Dress Code | Fancy Shoes Pass | 5 |
+| Dress Code | Wear a Hat Pass | 5 |
+| Dress Code | Full Dress-Down Day (locked above 2 conduct pts) | 15 |
 | Privileges | Early Locker Pass | 4 |
 | Privileges | Tardy Pass | 5 |
 | Food & Social | Lunch With a Teacher | 8 |
@@ -208,12 +208,13 @@ real monthly point totals.
 | Collectibles | VeeFriends Comic (locked above 2 conduct pts) | 100 |
 | Collectibles | Pizza Party | 100 |
 | Donation Bin | Dress Down Day Fund | 10 |
-| Donation Bin | Talent Show Fund | 10 |
+| Donation Bin | Themed Day Fund | 10 |
 
 **Donation Bin** items are running group goals (e.g. 1,000 points → a
-schoolwide dress-down day), not per-student rewards. This static site has
-no shared counter to track those totals live — staff need to tally
-donations from submitted requests and announce progress separately.
+schoolwide dress-down day, 1,500 → a themed day with the theme voted on by
+students), not per-student rewards. This static site has no shared counter
+to track those totals live — staff need to tally donations from submitted
+requests and announce progress separately.
 
 ## Wall of Fame: a moderated public quote board
 
