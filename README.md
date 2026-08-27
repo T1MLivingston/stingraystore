@@ -197,15 +197,48 @@ real monthly point totals.
 | Dress Code | Wear a Hat Pass | 3 |
 | Dress Code | Full Dress-Down Day (locked above 2 conduct pts) | 10 |
 | Privileges | Early Locker Pass | 4 |
+| Privileges | Tardy Pass | 5 |
 | Food & Social | Lunch With a Teacher | 8 |
+| Food & Social | Group Lunch With a Teacher | 30 |
 | Recognition | Positive Call Home | 6 |
 | Recognition | Positive Email Home | 4 |
-| Recognition | Wall of Fame Donation | 10 |
-| Collectibles | VeeFriends Card (locked above 2 conduct pts) | 50 |
+| Collectibles | Collectible Card (locked above 2 conduct pts) | 50 |
+| Collectibles | VeeFriends Comic (locked above 2 conduct pts) | 100 |
 | Collectibles | Pizza Party | 100 |
+| Donation Bin | Head Shave Fund | 10 |
+| Donation Bin | Dress-Up Day Fund | 10 |
+| Donation Bin | Talent Show Fund | 10 |
+| Donation Bin | Trivia Showdown Fund | 10 |
 
-**Wall of Fame Donation** is a running group goal (5,000 points → a public
-head-shave), not a per-student reward. This static site has no shared
-counter to track that total live — staff need to tally donations from
+**Donation Bin** items are running group goals (e.g. 5,000 points → a public
+head-shave), not per-student rewards. This static site has no shared
+counter to track those totals live — staff need to tally donations from
 submitted requests (the Requests table in `admin.html` is the source for
 that) and announce progress separately.
+
+## Wall of Fame: a moderated public quote board
+
+This is a different feature from the Donation Bin above, despite the
+similar-sounding name in earlier drafts. The Wall of Fame is a public wall
+of student-submitted quotes — **nothing posts automatically.** A student
+submits a quote plus their code (for accountability, never shown publicly),
+it lands in a Google Sheet with a blank `Status` column, and it is only
+**rendered on the site once staff type `Approved` into that row's Status
+column**, directly in the sheet — the same "the sheet is the approval
+mechanism" pattern as the Requests queue.
+
+Set up:
+1. `wallOfFameSheetCsvUrl` / `wallOfFameSheetEditUrl` — a sheet with header
+   row `Timestamp, Code, Quote, Status`, shared "Anyone with the link →
+   Viewer" like the other sheets. A test sheet already exists at the URLs
+   currently in `js/config.js` (**Stingray Store Wall of Fame (Test)**) with
+   two sample approved quotes and one still pending, to demonstrate the
+   filter. Replace it before going live.
+2. `wallOfFameFormUrl` — a Google Form (same two-minute recipe as the
+   Request queue: one long-answer field, linked response sheet) that
+   students submit through. Leave blank to hide the submission box while
+   still showing the public wall.
+
+`CONFIG.wallOfFamePolicyNote` is shown right at the submission box: quotes
+are reviewed before posting, and an offensive one won't be approved and may
+carry consequences — adjust the wording to match your actual policy.

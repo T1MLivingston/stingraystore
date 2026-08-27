@@ -117,28 +117,28 @@ const ITEMS = [
     name: "Head Shave Fund",
     desc: "Donate to the goal. At 5,000 points, Mr. Livingston shaves his head.",
     cost: 10,
-    category: "Wall of Fame",
+    category: "Donation Bin",
   },
   {
     id: "wof-dress-up",
     name: "Dress-Up Day Fund",
     desc: "Donate to the goal. At 3,000 points, Mr. McGaha dresses up as a historical figure for the day.",
     cost: 10,
-    category: "Wall of Fame",
+    category: "Donation Bin",
   },
   {
     id: "wof-talent-show",
     name: "Talent Show Fund",
     desc: "Donate to the goal. At 2,000 points, Mr. Livingston and Mr. McGaha perform a talent show act for the school.",
     cost: 10,
-    category: "Wall of Fame",
+    category: "Donation Bin",
   },
   {
     id: "wof-trivia",
     name: "Trivia Showdown Fund",
     desc: "Donate to the goal. At 1,000 points, Mr. Livingston and Mr. McGaha face off in a trivia contest. Loser gets a pie in the face.",
     cost: 10,
-    category: "Wall of Fame",
+    category: "Donation Bin",
   },
 ];
 
@@ -149,5 +149,5 @@ const CATEGORY_COLORS = {
   "Food & Social": "#f59f00",
   Recognition: "#7048e8",
   Collectibles: "#0c8599",
-  "Wall of Fame": "#d6336c",
+  "Donation Bin": "#d6336c",
 };

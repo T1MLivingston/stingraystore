@@ -54,6 +54,14 @@
     detailModalTitle: document.getElementById("detailModalTitle"),
     detailModalText: document.getElementById("detailModalText"),
     detailModalCloseBtn: document.getElementById("detailModalCloseBtn"),
+    wallOfFameSection: document.getElementById("wallOfFameSection"),
+    wallOfFameGrid: document.getElementById("wallOfFameGrid"),
+    wallOfFameSubmit: document.getElementById("wallOfFameSubmit"),
+    wallOfFamePolicy: document.getElementById("wallOfFamePolicy"),
+    quoteCode: document.getElementById("quoteCode"),
+    quoteText: document.getElementById("quoteText"),
+    quoteSubmitBtn: document.getElementById("quoteSubmitBtn"),
+    quoteStatus: document.getElementById("quoteStatus"),
   };
 
   function applyConfig() {
@@ -253,18 +261,17 @@
     card.className = "card" + (locked ? " locked" : "") + (inCart ? " in-cart" : "");
 
     card.innerHTML = `
-      ${inCart ? '<div class="in-cart-badge">In cart</div>' : ""}
       <h3>${item.name}</h3>
       <p class="desc">${item.desc}</p>
       ${item.detail ? `<button class="detail-link">Learn more</button>` : ""}
       <div class="cost">${item.cost} pts</div>
       ${locked ? `<div class="restriction">Unavailable. Requires ${item.maxConduct} or fewer conduct points.</div>` : ""}
-      <button class="add" ${locked || inCart ? "disabled" : ""}>${inCart ? "Added" : locked ? "Locked" : "Add to Requests"}</button>
+      <button class="add${inCart ? " added" : ""}" ${locked ? "disabled" : ""}>${inCart ? "Added" : locked ? "Locked" : "Add to Requests"}</button>
     `;
 
     const btn = card.querySelector("button.add");
-    if (!locked && !inCart) {
-      btn.addEventListener("click", () => addToCart(item.id));
+    if (!locked) {
+      btn.addEventListener("click", () => (inCart ? removeFromCart(item.id) : addToCart(item.id)));
     }
 
     const detailBtn = card.querySelector(".detail-link");
@@ -469,6 +476,70 @@
     }
   }
 
+  function escapeHtml(s) {
+    const div = document.createElement("div");
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  function renderWallOfFame(rows) {
+    const approved = rows.filter((r) => (r.status || "").trim().toLowerCase() === "approved");
+    if (approved.length === 0) {
+      els.wallOfFameGrid.innerHTML = `<p class="wall-of-fame__intro">No quotes yet. Be the first to share one.</p>`;
+      return;
+    }
+    els.wallOfFameGrid.innerHTML = approved
+      .map((r) => `<div class="quote-card">"${escapeHtml(r.quote)}"</div>`)
+      .join("");
+  }
+
+  function loadWallOfFame() {
+    if (!CONFIG.wallOfFameSheetCsvUrl) return;
+    fetch(CONFIG.wallOfFameSheetCsvUrl)
+      .then((res) => {
+        if (!res.ok) throw new Error("not reachable");
+        return res.text();
+      })
+      .then((text) => {
+        renderWallOfFame(CsvUtil.toObjects(text));
+        els.wallOfFameSection.hidden = false;
+      })
+      .catch(() => {
+        // Sheet not reachable or not shared yet: quietly leave the
+        // section hidden rather than showing a broken wall.
+      });
+  }
+
+  function submitQuote() {
+    const code = els.quoteCode.value.trim();
+    const quote = els.quoteText.value.trim();
+    if (!code || !quote) {
+      els.quoteStatus.style.color = "#c42836";
+      els.quoteStatus.textContent = "Enter your code and a quote first.";
+      return;
+    }
+    const text = [
+      `STINGRAY STORE WALL OF FAME SUBMISSION`,
+      `Code: ${code}`,
+      `Quote: ${quote}`,
+      `Submitted: ${new Date().toLocaleString()}`,
+      ``,
+      `-- Staff: review before approving. Offensive content will not be approved. --`,
+    ].join("\n");
+
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        els.quoteStatus.style.color = "#1c6b3a";
+        els.quoteStatus.textContent = "Copied. Paste it into the form that just opened, then submit there.";
+      })
+      .catch(() => {
+        els.quoteStatus.style.color = "#c42836";
+        els.quoteStatus.textContent = "Could not copy automatically. Copy your quote and code, then paste them into the form that just opened.";
+      });
+    window.open(CONFIG.wallOfFameFormUrl, "_blank", "noopener");
+  }
+
   // Wiring
   els.commendationInput.addEventListener("input", renderAll);
   els.conductInput.addEventListener("input", renderAll);
@@ -491,6 +562,7 @@
   els.copyRequestBtn.addEventListener("click", copyRequest);
   els.pointsModalCloseBtn.addEventListener("click", closePointsModal);
   els.detailModalCloseBtn.addEventListener("click", closeDetailModal);
+  els.quoteSubmitBtn.addEventListener("click", submitQuote);
   els.adminBtn.addEventListener("click", () => {
     const entered = prompt("Enter the admin access phrase:");
     if (entered === null) return;
@@ -503,4 +575,7 @@
 
   applyConfig();
   renderAll();
+  els.wallOfFamePolicy.textContent = CONFIG.wallOfFamePolicyNote;
+  els.wallOfFameSubmit.hidden = !CONFIG.wallOfFameFormUrl;
+  loadWallOfFame();
 })();

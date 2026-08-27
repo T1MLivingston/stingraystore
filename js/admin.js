@@ -26,6 +26,8 @@
     requestsTableWrap: document.getElementById("requestsTableWrap"),
     refreshRequestsBtn: document.getElementById("refreshRequestsBtn"),
     downloadRequestsBtn: document.getElementById("downloadRequestsBtn"),
+    wallOfFameEditLink: document.getElementById("wallOfFameEditLink"),
+    noWallOfFameMsg: document.getElementById("noWallOfFameMsg"),
   };
 
   els.schoolNameLabel.textContent = CONFIG.schoolName;
@@ -40,6 +42,13 @@
   if (CONFIG.rosterSheetUrl) {
     els.rosterLink.href = CONFIG.rosterSheetUrl;
     els.rosterLinkWrap.hidden = false;
+  }
+
+  if (CONFIG.wallOfFameSheetEditUrl) {
+    els.wallOfFameEditLink.href = CONFIG.wallOfFameSheetEditUrl;
+  } else {
+    els.wallOfFameEditLink.hidden = true;
+    els.noWallOfFameMsg.hidden = false;
   }
 
   let lastRequestsCsv = "";

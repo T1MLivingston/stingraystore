@@ -162,6 +162,27 @@
   </div>
 </div>
 
+<section class="wall-of-fame" id="wallOfFameSection" hidden>
+  <h2>Wall of Fame</h2>
+  <p class="wall-of-fame__intro">Quotes shared and approved by students.</p>
+  <div class="wall-of-fame__grid" id="wallOfFameGrid"></div>
+
+  <div class="wall-of-fame__submit" id="wallOfFameSubmit" hidden>
+    <h3>Share a Quote</h3>
+    <div class="field">
+      <label for="quoteCode">Your Redemption Code</label>
+      <input type="text" id="quoteCode" placeholder="e.g. SR-4821-BLUE" autocomplete="off" />
+    </div>
+    <div class="field">
+      <label for="quoteText">Your Quote</label>
+      <textarea id="quoteText" rows="2" placeholder="Something worth sharing"></textarea>
+    </div>
+    <p class="wall-of-fame__policy" id="wallOfFamePolicy"></p>
+    <button class="checkout-btn" id="quoteSubmitBtn">Share My Quote</button>
+    <div class="copy-status" id="quoteStatus"></div>
+  </div>
+</section>
+
 <footer>
   <img class="footer__sammy" src="assets/sammy-medal.png" alt="" />
   <div class="foot-motto" id="footMotto">"We support each other, contribute to our community, and strive for excellence in all we do."</div>

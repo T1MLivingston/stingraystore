@@ -375,17 +375,8 @@ a { color: var(--blue); }
 
 .card.in-cart { border: 2px solid var(--red); }
 
-.card .in-cart-badge {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  background: var(--red);
-  color: var(--white);
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  padding: 3px 9px;
-}
+.card button.add.added { background: var(--red); }
+.card button.add.added:hover { background: var(--red-dark); }
 
 /* ---------- Cart drawer ---------- */
 .overlay {
@@ -638,6 +629,63 @@ button.secondary {
 button.secondary:hover { background: var(--blue-lighter); }
 
 .copy-status { font-size: 0.8rem; color: #1c6b3a; text-align: center; min-height: 1em; }
+
+/* ---------- Wall of Fame ---------- */
+.wall-of-fame {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px 20px;
+  text-align: center;
+}
+.wall-of-fame h2 {
+  color: var(--blue-dark);
+  font-size: 1.4rem;
+  margin: 0 0 4px;
+  border-left: 5px solid #d6336c;
+  padding-left: 10px;
+  display: inline-block;
+  text-align: left;
+}
+.wall-of-fame__intro { color: var(--muted); font-size: 0.9rem; margin: 0 0 20px; }
+
+.wall-of-fame__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.quote-card {
+  background: var(--white);
+  border: 1px solid #e1eefb;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+  font-style: italic;
+  color: var(--ink);
+  text-align: left;
+}
+
+.wall-of-fame__submit {
+  max-width: 420px;
+  margin: 0 auto;
+  background: var(--white);
+  border: 1px solid #e1eefb;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  text-align: left;
+}
+.wall-of-fame__submit h3 { margin: 0 0 14px; color: var(--blue-dark); text-align: center; }
+.wall-of-fame__policy {
+  font-size: 0.78rem;
+  color: var(--red-dark);
+  background: #fdeceb;
+  border: 1px solid #f6c6c9;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin: 4px 0 14px;
+}
 
 /* ---------- Footer ---------- */
 footer {

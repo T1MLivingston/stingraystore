@@ -76,6 +76,31 @@ const CONFIG = {
   // once you've created it. Leave blank until then.
   rosterSheetUrl: "",
 
+  // ---- Wall of Fame (moderated public quote board) ----
+  // A publicly posted wall where students share quotes. Every submission
+  // requires staff approval before it appears anywhere public: it lands
+  // as a row in wallOfFameSheetCsvUrl with a blank Status column, and
+  // only shows on the site once staff type "Approved" into that column
+  // directly in the sheet. The student's code rides along in the sheet
+  // for accountability, but the site never displays it publicly.
+  wallOfFameSheetCsvUrl:
+    "https://docs.google.com/spreadsheets/d/1lUorAsYcrtM-ehNfTJRcKaPaHbP-yq9A8Sv3jLoKRCs/export?format=csv&gid=0",
+
+  // Normal Google Sheets link, for staff to review and approve/deny
+  // submissions. Shown on the admin page.
+  wallOfFameSheetEditUrl:
+    "https://docs.google.com/spreadsheets/d/1lUorAsYcrtM-ehNfTJRcKaPaHbP-yq9A8Sv3jLoKRCs/edit",
+
+  // Google Form that appends a submission to the sheet above. Same
+  // "copy to clipboard, open the form, paste, submit" pattern as
+  // requestsFormUrl. Leave blank to hide the submission box (the public
+  // wall still shows if wallOfFameSheetCsvUrl is set).
+  wallOfFameFormUrl: "",
+
+  // Shown to students right where they submit a quote.
+  wallOfFamePolicyNote:
+    "Quotes are reviewed by staff before they are posted. An offensive quote, in any way, will not be approved and may result in consequences.",
+
   // Students at or below this many conduct points earn a schoolwide free
   // Dress-Down Day on the announced day each month. This is NOT a store
   // item — it's shown as a shoutout banner, not something to "buy".
