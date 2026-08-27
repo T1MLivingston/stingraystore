@@ -25,7 +25,8 @@ const CONFIG = {
   // CSV export URL of that form's response sheet. Not read by this site;
   // just open the sheet directly to review submissions and approve or
   // deny them. Leave blank if requestsFormUrl above is blank too.
-  requestsSheetCsvUrl: "",
+  requestsSheetCsvUrl:
+    "https://docs.google.com/spreadsheets/d/1MYX75By-rqXhXbGsTY3mlvCtABVesfQuB1Po0qXfw6A/export?format=csv&gid=0",
 
   // School seal, shown in the top bar.
   logoPath: "assets/school-seal.png",
