@@ -64,12 +64,12 @@ const CONFIG = {
   // don't rely on the site ignoring them for real privacy). Leave blank
   // to use data/points.json instead.
   pointsSheetCsvUrl:
-    "https://docs.google.com/spreadsheets/d/1BNjrOeiSft-aEOkaUjDK4xEXP91PhEv2euRISy0LcuU/export?format=csv&gid=0",
+    "https://docs.google.com/spreadsheets/d/1JtMTjT3ksYRvyjQM6CxNptt5LlBBf7Jf7t9iRGgJFSI/export?format=csv&gid=0",
 
   // Normal Google Sheets link. Not read by the site, just kept here so
   // whoever maintains this file has it on hand to open and edit rows.
   pointsSheetEditUrl:
-    "https://docs.google.com/spreadsheets/d/1BNjrOeiSft-aEOkaUjDK4xEXP91PhEv2euRISy0LcuU/edit",
+    "https://docs.google.com/spreadsheets/d/1JtMTjT3ksYRvyjQM6CxNptt5LlBBf7Jf7t9iRGgJFSI/edit",
 
   // Your own private sheet mapping codes to real student names. This
   // site never reads it, and nothing here does either. Just a place to
