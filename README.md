@@ -34,9 +34,10 @@ anywhere in the app**.
    in-store "Full Dress-Down Day" pass anyone can buy with points, any day).
    Requesting more than your known balance covers requires checking a box
    acknowledging `CONFIG.falseClaimPenalty` first.
-5. **Request, don't auto-redeem.** "Submit Request" copies the request to
-   the clipboard and opens a Google Form, so submissions collect as rows in
-   a sheet you review directly (see "Request queue" below). Staff still do
+5. **Request, don't auto-redeem.** "Submit Request" posts the request to a
+   Google Form in the background, so submissions collect as rows in a
+   sheet you review directly — code, points used, items, and balance each
+   in their own column (see "Request queue" below). Staff still do
    a final human check before fulfilling — there's no live inventory/
    redemption ledger tracking what's already been spent.
 
@@ -110,9 +111,24 @@ the row, so no credential capable of writing to your Sheet or repo ever
 has to live in this public site's code, and there's nothing for the
 student to paste or submit themselves. To set it up:
 
-1. Create a Google Form with one field (a paragraph/long-answer question,
-   e.g. "Request details") and turn on **Responses → link a Sheet** —
-   Google auto-creates it and timestamps every submission.
+1. Create a Google Form with one question per piece of a request, so each
+   lands in its own column of the response sheet. Add them in this order,
+   and mark every one **not** required (a student's note is often empty,
+   and one empty required question rejects the whole submission):
+
+   | Question title | Type | Maps to |
+   | --- | --- | --- |
+   | Redemption Code | Short answer | `code` |
+   | Points Used | Short answer | `pointsUsed` |
+   | Items Requested | Paragraph | `items` (one reward per line) |
+   | Student Balance | Short answer | `balance` |
+   | Conduct Points | Short answer | `conduct` (optional) |
+   | Verified? | Short answer | `verified` (optional) |
+   | Note From Student | Paragraph | `note` (optional) |
+   | Full Request | Paragraph | `details` (optional) |
+
+   Then turn on **Responses → link a Sheet** — Google auto-creates it and
+   timestamps every submission.
 2. Add a `Status` column to that response sheet yourself. Approve or deny a
    request by typing into that column directly, in the sheet.
 3. Share the response sheet the same "Anyone with the link → Viewer" way as
@@ -122,10 +138,24 @@ student to paste or submit themselves. To set it up:
 4. Set `requestsFormUrl` to the form's own public responder link (click
    **Publish**, top right of the form editor, then copy the link from
    there).
-5. Find the field's internal name for `requestsFormFieldId`: in the form
-   editor, three-dot menu → **Get pre-filled link** → type any answer →
-   **Get Link** → copy the generated URL. It contains `entry.` followed
-   by a number (e.g. `entry.1989281097`) — that's the value to set.
+5. Find each question's internal name for `requestsFormFields`: in the
+   form editor, three-dot menu → **Get pre-filled link** → type a
+   throwaway answer into **every** question → **Get Link** → copy the
+   generated URL. It lists one `entry.<number>=` per question, in the
+   same top-to-bottom order as the form, e.g.
+
+   ```
+   ...viewform?usp=pp_url&entry.1111111=A&entry.2222222=B&entry.3333333=C
+   ```
+
+   Paste each number into the matching key of `requestsFormFields` in
+   `js/config.js`. Leave a key blank to skip that question entirely.
+
+   `requestsFormFieldId` below it is the old single-question setup, where
+   the whole request arrived as one blob of text in one column. It is
+   only used while every key in `requestsFormFields` is still blank, so
+   an existing form keeps working until you finish wiring up the new
+   one — filling in even one named field is what flips the site over.
 
 Review submissions and match codes against your private roster directly in
 the sheet.

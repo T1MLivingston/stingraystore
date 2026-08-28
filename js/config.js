@@ -18,10 +18,36 @@ const CONFIG = {
   requestsFormUrl:
     "https://docs.google.com/forms/d/e/1FAIpQLScYm1e2RswURXJGdlW6FCQgtas27P5Cfn7kMsXbfDxDzqeTsQ/viewform",
 
-  // The Form's internal field name for its one text question, e.g.
-  // "entry.123456789". Find it via the Form editor's three-dot menu ->
-  // "Get pre-filled link" -> type any answer -> Get Link -> the entry.
-  // number in the generated URL.
+  // The Form's internal field names, one "entry.123456789" per question.
+  // Each key below is a separate question on the Form, so each lands in
+  // its own column of the response sheet instead of all being crammed
+  // into a single blob of text.
+  //
+  // Find every entry number at once: in the Form editor, three-dot menu
+  // -> "Get pre-filled link" -> type a throwaway answer into EVERY
+  // question -> Get Link -> the generated URL lists each question's
+  // "entry.<number>=" in the same top-to-bottom order as the Form.
+  //
+  // Leave any key blank ("") to skip it -- the site simply won't send
+  // that field. Any question you do map must NOT be marked "Required"
+  // unless it is always filled in (a student's note, for instance, is
+  // often empty), or Google will reject the whole submission.
+  requestsFormFields: {
+    code: "", // Redemption Code (short answer) -- which student this is
+    pointsUsed: "", // Points Used (short answer) -- total cost of the request
+    items: "", // Items Requested (paragraph) -- one reward per line
+    balance: "", // Student Balance (short answer) -- commendation points on hand
+    conduct: "", // Conduct Points (short answer, optional)
+    verified: "", // Verified? (short answer, optional) -- did the code check out
+    note: "", // Note From Student (paragraph, optional)
+    details: "", // Full Request (paragraph, optional) -- the whole thing as text
+  },
+
+  // Legacy single-question setup: the entry id of one paragraph question
+  // that receives the entire request as one block of text. Only used if
+  // every key in requestsFormFields above is left blank, so filling in
+  // requestsFormFields is what switches the site over to separate
+  // columns. Keep this set until the new Form is ready.
   requestsFormFieldId: "entry.1989281097",
 
   // CSV export URL of that form's response sheet. Not read by this site;

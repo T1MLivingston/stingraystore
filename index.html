@@ -143,7 +143,8 @@
      in the background, so the student never sees the Form itself. -->
 <iframe name="hiddenFormFrame" id="hiddenFormFrame" style="display: none" aria-hidden="true" tabindex="-1"></iframe>
 <form id="requestSubmitForm" method="POST" target="hiddenFormFrame" style="display: none">
-  <input type="hidden" id="requestSubmitField" name="entry.0" />
+  <!-- Inputs are built at submit time, one per configured field in
+       CONFIG.requestsFormFields, by sendRequest() in js/app.js. -->
 </form>
 
 <div class="modal-wrap points-modal-wrap" id="pointsModalWrap" role="dialog" aria-label="Your points">

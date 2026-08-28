@@ -42,7 +42,6 @@
     copyStatus: document.getElementById("copyStatus"),
     hiddenFormFrame: document.getElementById("hiddenFormFrame"),
     requestSubmitForm: document.getElementById("requestSubmitForm"),
-    requestSubmitField: document.getElementById("requestSubmitField"),
     closeModalBtn: document.getElementById("closeModalBtn"),
     falseClaimField: document.getElementById("falseClaimField"),
     falseClaimCheck: document.getElementById("falseClaimCheck"),
@@ -77,7 +76,6 @@
     els.footUniformPolicy.href = CONFIG.uniformPolicyUrl;
     els.falseClaimPenaltyText.textContent = CONFIG.falseClaimPenalty;
     els.requestSubmitForm.action = CONFIG.requestsFormUrl.replace(/\/viewform.*$/, "/formResponse");
-    els.requestSubmitField.name = CONFIG.requestsFormFieldId;
     if (CONFIG.logoPath) {
       els.logoImg.src = CONFIG.logoPath;
     }
@@ -360,17 +358,34 @@
     els.overlay.classList.remove("open");
   }
 
-  function buildRequestText() {
+  // Every piece of a request, as its own string. Each key here lines up
+  // with a key in CONFIG.requestsFormFields, so a request can be posted
+  // as separate Form questions (one column per piece in the response
+  // sheet) instead of one wall of text.
+  function buildRequestValues() {
     const total = cartTotal();
     const balance = getCommendations();
     const conduct = getConduct();
     const code = els.studentCode.value.trim() || "(no code entered)";
     const note = els.studentNote.value.trim();
-    const lines = state.cart.map((id) => {
+    const items = state.cart.map((id) => {
       const item = itemById(id);
-      return `  - ${item.name}, ${item.cost} pts`;
+      return `${item.name} (${item.cost} pts)`;
     });
 
+    return {
+      code: code,
+      pointsUsed: String(total),
+      items: items.join("\n"),
+      balance: String(balance),
+      conduct: String(conduct),
+      verified: state.verified ? "Verified" : "Not checked",
+      note: note,
+      details: "", // filled in below, once the rest is known
+    };
+  }
+
+  function buildRequestText(v) {
     const verificationLine = state.verified
       ? `Verification: VERIFIED via store lookup against this month's points upload`
       : `Verification: NOT CHECKED, please confirm this code and balance before fulfilling`;
@@ -380,20 +395,35 @@
       `School: ${CONFIG.schoolName}`,
       `Submitted: ${new Date().toLocaleString()}`,
       ``,
-      `Redemption Code: ${code}`,
+      `Redemption Code: ${v.code}`,
       verificationLine,
-      `Commendation points on request: ${balance}`,
-      `Conduct points on request: ${conduct}`,
+      `Commendation points on request: ${v.balance}`,
+      `Conduct points on request: ${v.conduct}`,
       ``,
-      `Requested rewards (total ${total} pts):`,
-      ...lines,
+      `Requested rewards (total ${v.pointsUsed} pts):`,
+      ...v.items.split("\n").filter(Boolean).map((line) => `  - ${line}`),
       ``,
-      note ? `Note from student: ${note}` : ``,
+      v.note ? `Note from student: ${v.note}` : ``,
       ``,
       `-- Staff: please confirm this code and balance in the roster before fulfilling. --`,
-    ]
-      .filter((l) => l !== undefined)
-      .join("\n");
+    ].join("\n");
+  }
+
+  // Which Form question each piece of the request goes to. Falls back to
+  // the old single-question setup (whole request as one blob of text)
+  // when requestsFormFields has nothing filled in yet, so an existing
+  // Form keeps working until the new one is wired up.
+  function requestFieldMap() {
+    const named = CONFIG.requestsFormFields || {};
+    const configured = {};
+    Object.keys(named).forEach((key) => {
+      const entryId = String(named[key] || "").trim();
+      if (entryId) configured[key] = entryId;
+    });
+    if (Object.keys(configured).length > 0) return configured;
+
+    const legacy = String(CONFIG.requestsFormFieldId || "").trim();
+    return legacy ? { details: legacy } : {};
   }
 
   function openModal() {
@@ -448,7 +478,28 @@
       return;
     }
 
-    els.requestSubmitField.value = buildRequestText();
+    const fields = requestFieldMap();
+    if (Object.keys(fields).length === 0) {
+      els.copyStatus.textContent =
+        "This store isn't set up to receive requests yet. Please tell a staff member.";
+      els.copyStatus.style.color = "#c42836";
+      return;
+    }
+
+    const values = buildRequestValues();
+    values.details = buildRequestText(values);
+
+    // One hidden input per configured question, rebuilt each submit so a
+    // second request never carries over the first one's values.
+    els.requestSubmitForm.innerHTML = "";
+    Object.keys(fields).forEach((key) => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = fields[key];
+      input.value = values[key] || "";
+      els.requestSubmitForm.appendChild(input);
+    });
+
     els.sendRequestBtn.disabled = true;
     els.copyStatus.style.color = "#1c6b3a";
     els.copyStatus.textContent = "Submitting...";
