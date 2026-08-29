@@ -1,8 +1,8 @@
 // ============================================================
 // STINGRAY STORE — EASTER EGGS
-// Secrets kids find by messing around. Triple-tap a section
-// heading and its cards flip; quadruple-tap and the section does
-// something of its own. Nothing here touches points, requests, or
+// Secrets kids find by messing around. Tap a section heading twice
+// for an emoji, three times to spin its cards, four times for that
+// section's own trick. Nothing here touches points, requests, or
 // any student data — it is all animation, and every count lives
 // only in that one browser.
 // ============================================================
@@ -13,22 +13,29 @@
   // Per section: how its cards flip on a triple-tap, and the one-off
   // trick it does on a quadruple-tap. Add a category here to give it
   // its own pair; anything not listed falls back to DEFAULT_EGG.
+  // Per section: the emoji two taps pops, the spin three taps runs, and
+  // the trick four taps sets off. Add a category here to give it its own
+  // set; anything not listed falls back to DEFAULT_EGG.
   const EGGS = {
-    "Dress Code Passes": { triple: "egg-flip-y", quad: "egg-costume" },
-    Privileges: { triple: "egg-flip-x", quad: "egg-hallpass" },
-    "Food & Social": { triple: "egg-flip-spin", quad: "egg-wiggle" },
-    Recognition: { triple: "egg-flip-cascade", quad: "egg-spotlight" },
-    "Big Ticket Events": { triple: "egg-flip-tumble", quad: "egg-disco" },
-    Collectibles: { triple: "egg-flip-y", quad: "egg-foil" },
-    "Donation Bin": { triple: "egg-flip-x", quad: "egg-coins" },
-    Sammy: { triple: "egg-flip-spin", quad: "egg-school" },
+    "Dress Code Passes": { emote: "👕", triple: "egg-spin-y", quad: "egg-falloff" },
+    Privileges: { emote: "🎟️", triple: "egg-spin-x", quad: "egg-trace" },
+    "Food & Social": { emote: "🍕", triple: "egg-spin-flat", quad: "egg-wiggle" },
+    Recognition: { emote: "🌟", triple: "egg-spin-cascade", quad: "egg-spotlight" },
+    "Big Ticket Events": { emote: "🎉", triple: "egg-tumble", quad: "egg-streamers" },
+    Collectibles: { emote: "💎", triple: "egg-spin-y", quad: "egg-trace" },
+    "Donation Bin": { emote: "🫶", triple: "egg-spin-x", quad: "egg-drop" },
+    Sammy: { emote: "🐟", triple: "egg-spin-flat", quad: "egg-school" },
   };
 
-  const DEFAULT_EGG = { triple: "egg-flip-y", quad: "egg-wiggle" };
+  const DEFAULT_EGG = { emote: "✨", triple: "egg-spin-y", quad: "egg-wiggle" };
 
-  // How long taps keep counting as one burst. Long enough for a kid
-  // tapping with one finger, short enough that two separate taps a
-  // second apart don't add up to a triple.
+  // The two quad effects that paint over the whole page rather than
+  // animating the section's own cards.
+  const OVERLAY_EFFECTS = {
+    "egg-streamers": streamConfetti,
+    "egg-school": releaseTheSchool,
+  };
+
   const TAP_WINDOW_MS = 550;
   const EFFECT_MS = 2200;
   const STORAGE_KEY = "stingray.eggs.found";
@@ -72,7 +79,7 @@
     if (!counterEl) return;
     // Only count secrets that actually exist on this page, so removing
     // a category never leaves the total unreachable.
-    const total = registered.size * 2;
+    const total = registered.size * 3;
     const mine = [...found].filter((id) => registered.has(id.split(":")[0])).length;
     if (mine === 0) {
       counterEl.hidden = true;
@@ -104,12 +111,33 @@
     setTimeout(() => targetEl.classList.remove(className), EFFECT_MS);
   }
 
-  // The quad effect for Sammy is the only one that needs more than a
-  // class: a few little stingrays swimming across the page.
+  function overlay(lifetimeMs) {
+    const layer = document.createElement("div");
+    layer.className = "egg-overlay";
+    document.body.appendChild(layer);
+    setTimeout(() => layer.remove(), lifetimeMs);
+    return layer;
+  }
+
+  // Confetti running the width of the screen. Flat colors, no gradients.
+  function streamConfetti() {
+    if (reducedMotion) return;
+    const colors = ["#e63946", "#2d6cdf", "#f59f00", "#2f9e44", "#7048e8", "#0c8599"];
+    const layer = overlay(3200);
+    for (let i = 0; i < 45; i++) {
+      const bit = document.createElement("div");
+      bit.className = "egg-streamer";
+      bit.style.top = `${Math.random() * 100}%`;
+      bit.style.background = colors[Math.floor(Math.random() * colors.length)];
+      bit.style.animationDelay = `${Math.random() * 1.1}s`;
+      layer.appendChild(bit);
+    }
+  }
+
+  // A few little stingrays swimming across the page.
   function releaseTheSchool() {
     if (reducedMotion) return;
-    const layer = document.createElement("div");
-    layer.className = "egg-school-layer";
+    const layer = overlay(5000);
     for (let i = 0; i < 7; i++) {
       const ray = document.createElement("img");
       ray.src = "assets/sammy-monitor.png";
@@ -120,21 +148,43 @@
       ray.style.width = `${50 + Math.random() * 70}px`;
       layer.appendChild(ray);
     }
-    document.body.appendChild(layer);
-    setTimeout(() => layer.remove(), 5000);
   }
 
-  function trigger(key, kind, targetEl) {
+  // Two taps: a couple of emoji drift up out of the heading.
+  function popEmote(triggerEl, emoji) {
+    if (reducedMotion) return;
+    const box = triggerEl.getBoundingClientRect();
+    for (let i = 0; i < 3; i++) {
+      const bit = document.createElement("span");
+      bit.className = "egg-emote";
+      bit.textContent = emoji;
+      bit.style.left = `${box.left + box.width * (0.25 + Math.random() * 0.5)}px`;
+      bit.style.top = `${box.top + window.scrollY}px`;
+      bit.style.position = "absolute";
+      bit.style.setProperty("--drift", `${(Math.random() - 0.5) * 70}px`);
+      bit.style.animationDelay = `${i * 0.09}s`;
+      document.body.appendChild(bit);
+      setTimeout(() => bit.remove(), 1700);
+    }
+  }
+
+  function trigger(key, kind, targetEl, triggerEl) {
     const egg = EGGS[key] || DEFAULT_EGG;
-    playEffect(targetEl, egg[kind]);
-    if (egg[kind] === "egg-school") releaseTheSchool();
+    if (kind === "emote") {
+      popEmote(triggerEl, egg.emote || DEFAULT_EGG.emote);
+    } else {
+      const effect = egg[kind];
+      const overlayFn = OVERLAY_EFFECTS[effect];
+      if (overlayFn) overlayFn();
+      else playEffect(targetEl, effect);
+    }
     recordFind(key, kind);
   }
 
-  // Counts taps in a burst, then decides once the burst ends: exactly
-  // three fires the triple, four or more fires the quad. Deciding at
-  // the end is what keeps a quadruple-tap from firing the triple on
-  // its way past three.
+  // Counts taps in a burst, then decides once the burst ends: two fires
+  // the emoji, three the spin, four or more the section's trick.
+  // Deciding at the end is what keeps a longer burst from setting off
+  // every smaller tier on its way past.
   function attach(triggerEl, key, targetEl) {
     let taps = 0;
     let timer = null;
@@ -143,8 +193,9 @@
       taps += 1;
       clearTimeout(timer);
       timer = setTimeout(() => {
-        if (taps === 3) trigger(key, "triple", targetEl);
-        else if (taps >= 4) trigger(key, "quad", targetEl);
+        if (taps === 2) trigger(key, "emote", targetEl, triggerEl);
+        else if (taps === 3) trigger(key, "triple", targetEl, triggerEl);
+        else if (taps >= 4) trigger(key, "quad", targetEl, triggerEl);
         taps = 0;
       }, TAP_WINDOW_MS);
     });

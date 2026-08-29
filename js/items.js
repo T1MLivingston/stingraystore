@@ -77,7 +77,7 @@ const ITEMS = [
     id: "elevator-pass",
     name: "Elevator Pass",
     desc: "You and one friend ride the elevator for the day.",
-    cost: 12,
+    cost: 30,
     category: "Privileges",
     approval: "Front office approval",
     notePrompt: "Name the friend riding with you.",
