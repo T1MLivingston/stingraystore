@@ -24,8 +24,6 @@
   color-scheme: light;
   --bg: #ffffff;
   --bg-soft: #e6f1ff;
-  --bg-soft-warm: #fff2ea;
-  --page-gradient: linear-gradient(180deg, #e6f1ff 0%, #ffffff 320px);
   --surface: #ffffff;
   --surface-2: #eef4fb;
   --border: #cfe1f5;
@@ -57,42 +55,43 @@
   --footer-text: #cfd9e6;
 }
 
-/* ---------- Dark ---------- */
+/* ---------- Dark ----------
+   Near-black rather than navy, so the brand red and blue read as the
+   only real color on the page. Flat fills, visible borders, no
+   gradients anywhere. */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0b1c33;
-  --bg-soft: #11274a;
-  --bg-soft-warm: #2b2135;
-  --page-gradient: linear-gradient(180deg, #0f2749 0%, #0b1c33 420px);
-  --surface: #12294b;
-  --surface-2: #0e2141;
-  --border: #27497a;
-  --border-strong: #3d76d6;
-  --text: #e9f1fc;
-  --text-muted: #9fb6d6;
+  --bg: #0a0a0c;
+  --bg-soft: #17181d;
+  --surface: #131418;
+  --surface-2: #1c1e24;
+  --border: #2e3038;
+  --border-strong: #e63946;
+  --text: #f2f3f5;
+  --text-muted: #a6abb5;
   --heading: #ffffff;
-  --accent: #ff7b85;
-  --blue-light: #4b86ee;
+  --accent: #ff4d5a;
+  --blue-light: #5b8cf0;
   --btn-bg: #2d6cdf;
-  --btn-bg-hover: #5590f0;
-  --disabled: #3a5578;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  --shadow-hover: 0 16px 34px rgba(0, 0, 0, 0.6);
-  --shadow-lift: 0 24px 50px rgba(0, 0, 0, 0.68);
-  --ok-bg: #0f3a22;
-  --ok-border: #1f7040;
-  --ok-text: #82e7a8;
-  --warn-bg: #3a2f10;
-  --warn-border: #7d6521;
-  --warn-text: #ffd97a;
-  --alert-bg: #3d161a;
-  --alert-border: #7f2a33;
-  --alert-text: #ff9aa2;
-  --approval-bg: #3b2410;
-  --approval-border: #7d4f1d;
-  --approval-text: #ffc078;
-  --footer-bg: #071527;
-  --footer-text: #a8bfdd;
+  --btn-bg-hover: #4a84f0;
+  --disabled: #3a3d45;
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+  --shadow-hover: 0 10px 26px rgba(0, 0, 0, 0.65);
+  --shadow-lift: 0 14px 34px rgba(0, 0, 0, 0.72);
+  --ok-bg: #0c2b18;
+  --ok-border: #1f7a45;
+  --ok-text: #4ade80;
+  --warn-bg: #2e2408;
+  --warn-border: #7a6011;
+  --warn-text: #fbbf24;
+  --alert-bg: #2e0f13;
+  --alert-border: #8b1f2a;
+  --alert-text: #ff6b76;
+  --approval-bg: #2e1c08;
+  --approval-border: #7d4a12;
+  --approval-text: #fb923c;
+  --footer-bg: #000000;
+  --footer-text: #b8bcc4;
 }
 
 * { box-sizing: border-box; }
@@ -101,10 +100,7 @@ body {
   margin: 0;
   font-family: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
   color: var(--text);
-  /* explicit base color under the gradient, so the page still reads
-     correctly if the gradient never paints */
   background-color: var(--bg);
-  background-image: var(--page-gradient);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -239,7 +235,7 @@ a { color: var(--blue); }
 .accent-line {
   width: 100%;
   height: 6px;
-  background: linear-gradient(90deg, var(--blue), var(--red));
+  background: var(--red);
 }
 
 /* ---------- Points lookup ---------- */
@@ -272,15 +268,6 @@ a { color: var(--blue); }
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-/* a thin brand bar across the top, instead of the old heavy border */
-.lookup-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 5px;
-  background: linear-gradient(90deg, var(--blue), var(--red));
-}
-
 .lookup-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-hover), 0 0 0 1px var(--blue-light);
@@ -298,8 +285,7 @@ a { color: var(--blue); }
   letter-spacing: -0.02em;
 }
 
-.lookup-card__sammy { width: 58px; }
-.lookup-card__sammy { width: 46px; height: auto; }
+.lookup-card__sammy { width: 58px; height: auto; }
 
 .lookup-lead { margin: 0 0 4px; color: var(--text); font-size: 0.95rem; font-weight: 600; }
 .lookup-sub { margin: 0 0 16px; color: var(--text-muted); font-size: 0.8rem; }
@@ -361,7 +347,7 @@ a { color: var(--blue); }
   margin-top: 10px;
   padding: 12px 14px;
   border-radius: 12px;
-  background: linear-gradient(90deg, var(--bg-soft), var(--bg-soft-warm));
+  background: var(--bg-soft);
   border: 1px solid var(--blue-light);
   color: var(--heading);
   font-weight: 700;
@@ -455,23 +441,6 @@ a { color: var(--blue); }
   box-shadow: var(--shadow-lift);
   border-color: var(--blue-light);
 }
-
-/* the accent bar wipes in from the left on hover */
-.card::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--blue), var(--red));
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.28s ease;
-  border-radius: 0 0 var(--radius) var(--radius);
-}
-
-.card:hover::after { transform: scaleX(1); }
 
 .card button.add {
   transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
@@ -1396,3 +1365,76 @@ textarea::placeholder { color: var(--text-muted); opacity: 0.75; }
   pointer-events: none;
   transform: translateY(-6px);
 }
+
+/* ============================================================
+   DAD JOKE VAULT
+   Hidden until every grade-level challenge is solved.
+   ============================================================ */
+
+.jokes {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 10px 20px 60px;
+  text-align: center;
+}
+
+.jokes[hidden] { display: none; }
+
+.jokes__head h2 {
+  margin: 0 0 6px;
+  color: var(--heading);
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.jokes__head p {
+  margin: 0 auto 22px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.joke-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px 24px 24px;
+}
+
+.joke-box__setup {
+  margin: 0 0 14px;
+  color: var(--text);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.4;
+  min-height: 1.4em;
+}
+
+.joke-box__reveal {
+  display: inline-block;
+  margin: 0 0 14px;
+  padding: 8px 16px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 999px;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.joke-box__reveal:hover { background: var(--surface-2); }
+.joke-box__reveal[hidden] { display: none; }
+
+.joke-box__punch {
+  margin: 0 0 18px;
+  color: var(--accent);
+  font-size: 1.3rem;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.joke-box__punch[hidden] { display: none; }

@@ -4,7 +4,6 @@
   const state = {
     cart: [], // array of item ids
     verified: false, // true once a code has resolved against data/points.json
-    lookupOnScreen: true, // is the lookup card currently in view
   };
 
   const els = {
@@ -19,13 +18,14 @@
     footWebsite: document.getElementById("footWebsite"),
     footCodeOfConduct: document.getElementById("footCodeOfConduct"),
     footUniformPolicy: document.getElementById("footUniformPolicy"),
+    footDressCode: document.getElementById("footDressCode"),
+    footDressCodeItem: document.getElementById("footDressCodeItem"),
     commendationInput: document.getElementById("commendationInput"),
     conductInput: document.getElementById("conductInput"),
     lookupCode: document.getElementById("lookupCode"),
     lookupBtn: document.getElementById("lookupBtn"),
     lookupBtnLabel: document.getElementById("lookupBtnLabel"),
     lookupCartCount: document.getElementById("lookupCartCount"),
-    lookupSection: document.querySelector(".lookup-section"),
     lookupResult: document.getElementById("lookupResult"),
     miniBalance: document.getElementById("miniBalance"),
     miniBalanceValue: document.getElementById("miniBalanceValue"),
@@ -83,6 +83,11 @@
     els.footWebsite.href = CONFIG.websiteUrl;
     els.footCodeOfConduct.href = CONFIG.codeOfConductUrl;
     els.footUniformPolicy.href = CONFIG.uniformPolicyUrl;
+    if (CONFIG.dressCodeDocUrl) {
+      els.footDressCode.href = CONFIG.dressCodeDocUrl;
+    } else {
+      els.footDressCodeItem.hidden = true;
+    }
     els.falseClaimPenaltyText.textContent = CONFIG.falseClaimPenalty;
     els.requestSubmitForm.action = CONFIG.requestsFormUrl.replace(/\/viewform.*$/, "/formResponse");
     if (CONFIG.logoPath) {
@@ -183,10 +188,28 @@
     renderAll();
   }
 
-  function launchConfetti() {
+  // A bigger month earns a bigger burst. Past the conduct cutoff it
+  // shrinks rather than turning into anything discouraging — a small
+  // celebration is still a celebration.
+  function confettiPieceCount(record) {
+    const cfg = CONFIG.confetti || {};
+    const min = cfg.minPieces || 12;
+    const max = cfg.maxPieces || 60;
+    const per = cfg.piecesPerCommendation || 2;
+    const commendations = record ? record.commendations : 0;
+    let pieces = Math.min(max, Math.max(min, min + commendations * per));
+    const conduct = record ? record.conduct : 0;
+    if (typeof cfg.conductCutoff === "number" && conduct > cfg.conductCutoff) {
+      pieces = Math.max(min, Math.round(pieces * (cfg.reducedFraction || 0.35)));
+    }
+    return pieces;
+  }
+
+  function launchConfetti(record) {
     const colors = ["#e63946", "#2d6cdf", "#f59f00", "#2f9e44", "#7048e8", "#0c8599"];
+    const total = confettiPieceCount(record);
     els.confettiLayer.innerHTML = "";
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < total; i++) {
       const piece = document.createElement("div");
       piece.className = "confetti-piece";
       piece.style.left = `${Math.random() * 100}%`;
@@ -200,9 +223,12 @@
   }
 
   function openPointsModal(record) {
+    const dressCodeLink = CONFIG.dressCodeDocUrl
+      ? ` <a href="${CONFIG.dressCodeDocUrl}" target="_blank" rel="noopener">What can I wear?</a>`
+      : "";
     const dressDown =
       record.conduct <= CONFIG.dressDownMaxConduct
-        ? `<div class="dress-down-banner">${CONFIG.dressDownNote}</div>`
+        ? `<div class="dress-down-banner">${escapeHtml(CONFIG.dressDownNote)}${dressCodeLink}</div>`
         : "";
     els.pointsModalBody.innerHTML = `
       <h2>You're verified!</h2>
@@ -213,7 +239,7 @@
       ${dressDown}
     `;
     els.pointsModalWrap.classList.add("open");
-    launchConfetti();
+    launchConfetti(record);
   }
 
   function closePointsModal() {
@@ -257,28 +283,12 @@
     updateTopCartButton();
   }
 
-  // The top-bar button is the fallback: it hides only while the lookup
-  // card's own request button is on screen, so there is never a moment
-  // with no way to reach the cart.
+  // Once a code is in, the lookup card carries the request button and the
+  // top-bar copy goes away for good. Reaching the cart from down in the
+  // catalog means scrolling back to the card, which is the tradeoff for
+  // keeping the top bar clear.
   function updateTopCartButton() {
-    const duplicated = lookupButtonIsRequest() && state.lookupOnScreen;
-    els.openCartBtn.classList.toggle("is-hidden", duplicated);
-  }
-
-  function watchLookupVisibility() {
-    if (!els.lookupSection || !("IntersectionObserver" in window)) {
-      state.lookupOnScreen = false;
-      updateTopCartButton();
-      return;
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        state.lookupOnScreen = entries[0].isIntersecting;
-        updateTopCartButton();
-      },
-      { threshold: 0.35 }
-    );
-    observer.observe(els.lookupSection);
+    els.openCartBtn.classList.toggle("is-hidden", lookupButtonIsRequest());
   }
 
   function updateMiniBalance() {
@@ -591,6 +601,13 @@
       setStatusTone(els.copyStatus, "err");
       return;
     }
+    const waiting = cooldownRemaining(els.studentCode.value);
+    if (waiting > 0) {
+      els.copyStatus.textContent =
+        `This code already sent a request today. Try again in ${describeWait(waiting)}.`;
+      setStatusTone(els.copyStatus, "err");
+      return;
+    }
     if (cartItemsNeedingNote().length > 0 && !els.studentNote.value.trim()) {
       els.studentNote.focus();
       els.copyStatus.textContent =
@@ -626,6 +643,7 @@
       els.requestSubmitForm.appendChild(input);
     });
 
+    markRequested(els.studentCode.value);
     els.sendRequestBtn.disabled = true;
     setStatusTone(els.copyStatus, "ok");
     els.copyStatus.textContent = "Submitting...";
@@ -634,6 +652,50 @@
     // Cross-origin iframe content can't be read to confirm success, so
     // fall back to an optimistic confirmation if "load" never fires.
     setTimeout(confirmSubmitted, 4000);
+  }
+
+  // ---- One request per code per day ----
+  // Recorded in the student's own browser, so it is a courtesy guard
+  // rather than a real limit — a different browser or a cleared cache
+  // gets past it. Duplicate codes in the response sheet are the real
+  // check, which is why the code and timestamp ride along on every row.
+  function cooldownKey(code) {
+    return `stingray.lastRequest.${code.trim().toUpperCase()}`;
+  }
+
+  function cooldownMs() {
+    const hours = Number(CONFIG.requestCooldownHours);
+    return Number.isFinite(hours) && hours > 0 ? hours * 60 * 60 * 1000 : 0;
+  }
+
+  // Milliseconds still to wait for this code, or 0 if it is free to go.
+  function cooldownRemaining(code) {
+    const holdMs = cooldownMs();
+    if (!holdMs || !code.trim()) return 0;
+    let last = 0;
+    try {
+      last = Number(localStorage.getItem(cooldownKey(code))) || 0;
+    } catch (err) {
+      return 0;
+    }
+    const elapsed = Date.now() - last;
+    return elapsed >= 0 && elapsed < holdMs ? holdMs - elapsed : 0;
+  }
+
+  function markRequested(code) {
+    if (!cooldownMs()) return;
+    try {
+      localStorage.setItem(cooldownKey(code), String(Date.now()));
+    } catch (err) {
+      /* the hold just won't survive a reload */
+    }
+  }
+
+  function describeWait(ms) {
+    const hours = Math.floor(ms / (60 * 60 * 1000));
+    const minutes = Math.ceil((ms % (60 * 60 * 1000)) / (60 * 1000));
+    if (hours >= 1) return `${hours} hour${hours === 1 ? "" : "s"}`;
+    return `${minutes} minute${minutes === 1 ? "" : "s"}`;
   }
 
   // Status lines read as green or red, but the exact shade has to come
@@ -741,10 +803,15 @@
 
   applyConfig();
   applyTheme(currentTheme());
-  if (window.Challenges) window.Challenges.init(renderAll);
+  if (window.Challenges) {
+    window.Challenges.init(() => {
+      renderAll();
+      if (window.Jokes) window.Jokes.refresh();
+    });
+  }
+  if (window.Jokes) window.Jokes.init();
   renderAll();
   if (window.Eggs) window.Eggs.init();
-  watchLookupVisibility();
   els.wallOfFamePolicy.textContent = CONFIG.wallOfFamePolicyNote;
   els.wallOfFameSubmit.hidden = !CONFIG.wallOfFameFormUrl;
   loadWallOfFame();

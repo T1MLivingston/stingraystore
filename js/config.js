@@ -81,6 +81,12 @@ const CONFIG = {
   uniformPolicyUrl:
     "https://seminolescience.org/images/media/sscs/2024-25/StudentHandbook/SSCS_Uniform_Policy.pdf",
 
+  // Explains what a dress-down day actually allows. Linked in the footer
+  // and from the dress-down banner, since that is where a student is most
+  // likely to wonder. Leave blank to drop both links.
+  dressCodeDocUrl:
+    "https://docs.google.com/document/d/1kykbCfuidQ_fTAVexV8Ca_BzSig7ZiBiylCPbpeAWE8/edit",
+
   // Conduct points: set what your school's scale means so the note
   // on the page matches your actual conduct system.
   conductNote:
@@ -147,8 +153,30 @@ const CONFIG = {
   // Dress-Down Day on the announced day each month. This is NOT a store
   // item — it's shown as a shoutout banner, not something to "buy".
   dressDownMaxConduct: 3,
-  dressDownNote:
-    "You qualify for a free Dress-Down Day this month. This is separate from the Full Dress-Down Day pass below, which anyone can redeem with points any day.",
+  dressDownNote: "You qualify for Dress-Down Day this month.",
+
+  // ---- One request per code per day ----
+  // After a request is sent, that code is held for this many hours before
+  // the site will send another. It is a courtesy guard, not a real limit:
+  // it lives in the student's own browser, so a different browser or a
+  // cleared cache gets around it. Duplicate codes and timestamps in the
+  // response sheet are the actual check. Set to 0 to turn it off.
+  requestCooldownHours: 24,
+
+  // ---- Confetti on a verified lookup ----
+  // How big the celebration is scales with the student's month. More
+  // commendations, more confetti; a conduct total above the cutoff pulls
+  // it back to a small burst rather than replacing it with anything
+  // discouraging.
+  confetti: {
+    minPieces: 12,
+    maxPieces: 60,
+    piecesPerCommendation: 2,
+    // Above this many conduct points, the burst shrinks.
+    conductCutoff: 5,
+    // What is left of the burst once past the cutoff (0.35 = about a third).
+    reducedFraction: 0.35,
+  },
 
   // Penalty for requesting more than your real balance covers. Shown to
   // students before they can send a request that exceeds their known

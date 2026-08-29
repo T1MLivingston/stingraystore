@@ -60,6 +60,22 @@ const CHALLENGES = [
       { q: "In a right triangle, the hypotenuse is 25 and one leg is 7. How long is the other leg?", a: ["24"] },
     ],
   },
+  {
+    grade: "11th Grade",
+    pool: [
+      { q: "Solve for x:  log base 2 of x = 5", a: ["32", "x=32", "x = 32"] },
+      { q: "What is the sum of the first 20 positive integers?", a: ["210"] },
+      { q: "If f(x) = 2x + 1 and g(x) = x^2, what is f(g(3))?", a: ["19"] },
+    ],
+  },
+  {
+    grade: "12th Grade",
+    pool: [
+      { q: "What is the derivative of f(x) = 3x^2 + 5x? (Write it like '6x+5')", a: ["6x+5", "6x + 5"] },
+      { q: "Evaluate:  sin(90 degrees) + cos(0 degrees)", a: ["2"] },
+      { q: "What is the sum of the infinite series 8 + 4 + 2 + 1 + ... ?", a: ["16"] },
+    ],
+  },
 ];
 
 (function () {
@@ -68,7 +84,7 @@ const CHALLENGES = [
   const STORAGE_KEY = "stingray.challenge.solved";
 
   const state = {
-    solved: load(),
+    solved: load(), // Set of grade names this browser has beaten
     picked: [], // the problem chosen for each grade this page load
   };
 
@@ -77,22 +93,40 @@ const CHALLENGES = [
 
   function load() {
     try {
-      return window.localStorage.getItem(STORAGE_KEY) || "";
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (!raw) return new Set();
+      // Earlier versions stored a single grade name. Keep that unlock.
+      if (raw.charAt(0) !== "[") return new Set([raw]);
+      return new Set(JSON.parse(raw));
     } catch (err) {
-      return "";
+      return new Set();
     }
   }
 
-  function save(grade) {
+  function save() {
     try {
-      window.localStorage.setItem(STORAGE_KEY, grade);
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify([...state.solved]));
     } catch (err) {
       /* the unlock just won't survive a reload */
     }
   }
 
+  // One solved challenge opens the gated store category.
   function isUnlocked() {
-    return Boolean(state.solved);
+    return state.solved.size > 0;
+  }
+
+  // Every challenge solved is what opens the dad joke generator.
+  function allSolved() {
+    return state.solved.size >= CHALLENGES.length;
+  }
+
+  function solvedCount() {
+    return state.solved.size;
+  }
+
+  function totalCount() {
+    return CHALLENGES.length;
   }
 
   // "36 PI" and " 36pi " should both beat "36pi".
@@ -113,14 +147,17 @@ const CHALLENGES = [
 
   function renderStatus() {
     if (!els.status) return;
-    const category = CONFIG.challengeUnlocksCategory;
-    if (isUnlocked()) {
-      els.status.hidden = false;
-      els.status.className = "challenges__status unlocked";
-      els.status.textContent = `Unlocked by the ${state.solved} challenge. The ${category} is open, scroll up to see it.`;
-    } else {
+    if (!isUnlocked()) {
       els.status.hidden = true;
+      return;
     }
+    const category = CONFIG.challengeUnlocksCategory;
+    els.status.hidden = false;
+    els.status.className = "challenges__status unlocked";
+    els.status.textContent = allSolved()
+      ? `All ${totalCount()} solved. The ${category} is open, and so is the joke generator below.`
+      : `The ${category} is open, scroll up to see it. ` +
+        `Solved ${solvedCount()} of ${totalCount()} — beat them all to unlock one more thing.`;
   }
 
   function renderCard(challenge, index) {
@@ -141,16 +178,25 @@ const CHALLENGES = [
     const input = card.querySelector("input");
     const msg = card.querySelector(".challenge-card__msg");
 
+    if (state.solved.has(challenge.grade)) {
+      card.classList.add("solved");
+      msg.className = "challenge-card__msg ok";
+      msg.textContent = "Already solved.";
+    }
+
     card.addEventListener("submit", (event) => {
       event.preventDefault();
       if (!input.value.trim()) return;
       if (accepts(problem, input.value)) {
+        const isNew = !state.solved.has(challenge.grade);
         card.classList.add("solved");
+        card.classList.remove("wrong");
         msg.className = "challenge-card__msg ok";
-        msg.textContent = "Correct. Unlocked.";
-        if (!isUnlocked()) {
-          state.solved = challenge.grade;
-          save(challenge.grade);
+        msg.textContent = allSolved() && !isNew ? "Already solved." : "Correct.";
+        if (isNew) {
+          state.solved.add(challenge.grade);
+          save();
+          msg.textContent = allSolved() ? "Correct. That's all of them." : "Correct. Unlocked.";
           renderStatus();
           if (onUnlock) onUnlock();
         }
@@ -194,5 +240,11 @@ const CHALLENGES = [
     render();
   }
 
-  window.Challenges = { init: init, isUnlocked: isUnlocked };
+  window.Challenges = {
+    init: init,
+    isUnlocked: isUnlocked,
+    allSolved: allSolved,
+    solvedCount: solvedCount,
+    totalCount: totalCount,
+  };
 })();

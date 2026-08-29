@@ -241,6 +241,7 @@ Everything you're likely to change lives in two files:
 - **`js/eggs.js`** — the hidden tap animations. See "Easter eggs" below.
 - **`js/challenges.js`** — the grade-level math problems. See "Math
   challenges" below.
+- **`js/jokes.js`** — the dad joke bank. See "The Vault" below.
 
 Colors and layout live in `css/style.css`. The top of that file holds the
 theme tokens: a short block of fixed brand colors (`--blue`, `--red`), then
@@ -382,10 +383,12 @@ they started.
 
 ## Math challenges
 
-Seminole Science is a STEM school, so the bottom of the page carries six
-math problems — one each for 5th through 10th grade. **Solving any single
-one unlocks the Donation Bin**, which is hidden from the store until then.
-A student only has to beat their own grade, not all six.
+Seminole Science is a STEM school, so the bottom of the page carries eight
+math problems — one each for 5th through 12th grade. There are two prizes:
+
+- **Solve any single one** and the Donation Bin unlocks in the store. A
+  student only has to beat their own grade.
+- **Solve all eight** and the dad joke vault opens (see below).
 
 - Which category is gated is `CONFIG.challengeUnlocksCategory` in
   `js/config.js`. Set it to `""` to switch the whole thing off and show
@@ -399,10 +402,36 @@ A student only has to beat their own grade, not all six.
   `36pi`, `36 PI`, and ` 36pi ` all pass the same problem. When a problem
   has more than one reasonable form, list them all: `a: ["10", "x=10",
   "x = 10"]`.
-- The unlock is stored in that browser's `localStorage`. It is a
-  motivator, not a security boundary — anyone who opens dev tools can
+- Which grades a student has beaten is stored in that browser's
+  `localStorage`. It is a motivator, not a security boundary — anyone who opens dev tools can
   clear or set it, and that is fine. Nothing behind it is sensitive; the
   reward is seeing two more cards.
+
+## The Vault (dad jokes)
+
+Solving all eight challenges reveals a joke generator holding 55 clean dad
+jokes. The setup shows first and the punchline waits for a tap, because
+that is how a dad joke works. The same joke never comes up twice in a row.
+
+Edit the `DAD_JOKES` array in `js/jokes.js` to add or cut. Keep them
+school appropriate — this sits on a public page with the school's name at
+the top of it.
+
+## One request per code per day
+
+After a request goes through, that code is held for
+`CONFIG.requestCooldownHours` (24 by default) before the site will send
+another. Set it to `0` to turn it off.
+
+**This is a courtesy guard, not a real limit.** It lives in the student's
+own browser, so a different browser, a different device, or cleared site
+data gets past it. Treat it as a way to stop honest double-clicks and
+same-day second helpings, not as enforcement.
+
+The real check is the sheet: every row carries the code and a timestamp,
+so two requests from one code on one day sit right next to each other
+where staff will see them. Any actual limit has to be applied there, by a
+person, the same as every other decision in this system.
 
 ## Easter eggs
 
