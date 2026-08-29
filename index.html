@@ -42,6 +42,15 @@
   <div class="mini-balance" id="miniBalance" hidden>
     <span id="miniBalanceValue">0</span> pts
   </div>
+  <button class="cart-btn" id="openCartBtn" aria-haspopup="dialog" aria-label="Open your cart">
+    <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false">
+      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            d="M2 3h3l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.55L21 7H6" />
+      <circle cx="10" cy="20" r="1.4" fill="currentColor" />
+      <circle cx="18" cy="20" r="1.4" fill="currentColor" />
+    </svg>
+    <span class="cart-count" id="cartCount">0</span>
+  </button>
 </header>
 
 <section class="hero">
@@ -55,45 +64,46 @@
 <section class="lookup-section">
   <div class="lookup-grid">
     <div class="lookup-card">
-      <h2>Check My Points <img class="lookup-card__sammy" src="assets/sammy-backpack.png" alt="Backpack Sammy" /></h2>
-      <div class="lookup-row">
+      <h2>Check My Points <img class="lookup-card__sammy" src="assets/sammy-medal.png" alt="Sammy with a medal" /></h2>
+      <div class="lookup-row" id="lookupRow">
         <input type="text" id="lookupCode" placeholder="Enter your store code" autocomplete="off" />
         <button id="lookupBtn"><span class="label" id="lookupBtnLabel">Check</span><span class="cart-count" id="lookupCartCount" hidden>0</span></button>
       </div>
       <div id="lookupResult"></div>
       <button class="code-reset" id="changeCodeBtn" type="button" hidden>Enter a different code</button>
+      <p class="lookup-fineprint" id="lookupFinePrint" hidden></p>
       <input type="hidden" id="commendationInput" value="" />
       <input type="hidden" id="conductInput" value="" />
     </div>
 
     <div class="steps-wrap">
-      <ol class="steps-list">
-        <li>
+      <ol class="steps-list" id="stepsList">
+        <li data-step="1">
           <span class="steps-list__num">1</span>
           <div>
             <h3>Check your points</h3>
-            <p>Enter your code, or your points.</p>
+            <p>Enter your store code.</p>
           </div>
         </li>
-        <li>
+        <li data-step="2">
           <span class="steps-list__num">2</span>
           <div>
             <h3>Pick your rewards</h3>
             <p>Add anything you can afford.</p>
           </div>
         </li>
-        <li>
+        <li data-step="3">
           <span class="steps-list__num">3</span>
           <div>
             <h3>Send your request</h3>
             <p>Include your code and a note.</p>
           </div>
         </li>
-        <li>
+        <li data-step="4">
           <span class="steps-list__num">4</span>
           <div>
-            <h3>Get it fulfilled</h3>
-            <p>Staff confirm and let you know.</p>
+            <h3>Wait for staff to confirm</h3>
+            <p>Once confirmed, your points are deducted.</p>
           </div>
         </li>
       </ol>
@@ -143,6 +153,8 @@
         <ul class="note-prompts" id="notePrompts" hidden></ul>
         <textarea id="studentNote" rows="2" placeholder="e.g. Which class period, or which teacher for a lunch pass"></textarea>
       </div>
+
+      <div class="fineprint" id="modalFinePrint"></div>
 
       <div class="field" id="falseClaimField" hidden>
         <label class="checkbox-label">
@@ -233,7 +245,7 @@
 </section>
 
 <footer>
-  <img class="footer__sammy" src="assets/sammy-medal.png" alt="" />
+  <img class="footer__sammy" src="assets/sammy-backpack.png" alt="" />
   <div class="foot-motto" id="footMotto">"We support each other, contribute to our community, and strive for excellence in all we do."</div>
   <p>
     <span id="footSchoolName">Your School Name</span> ·

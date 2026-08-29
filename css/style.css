@@ -1480,3 +1480,105 @@ textarea::placeholder { color: var(--text-muted); opacity: 0.75; }
 
 /* the lookup button is the only cart button now, so it takes the pulse */
 .lookup-row button.bump { animation: cartBump 0.35s ease; }
+
+/* ============================================================
+   PROGRESS, THE FULL-WIDTH REQUEST BUTTON, AND FINE PRINT
+   ============================================================ */
+
+/* Verified, the button leaves the input's row and takes the full width. */
+.lookup-row.stacked {
+  display: block;
+}
+
+.lookup-row.stacked input { width: 100%; margin-bottom: 12px; }
+
+.lookup-row.stacked button {
+  width: 100%;
+  justify-content: center;
+  padding: 15px 18px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.lookup-fineprint {
+  margin: 14px 0 0;
+  text-align: left;
+}
+
+.lookup-fineprint[hidden] { display: none; }
+
+.lookup-fineprint ul,
+.fineprint ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.fineprint {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.fineprint__warn {
+  margin: 0 0 8px;
+  color: var(--warn-text);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+/* ---- the steps list doubles as a progress tracker ---- */
+
+.steps-list li {
+  transition: opacity 0.25s ease;
+  opacity: 0.55;
+}
+
+.steps-list li.is-active,
+.steps-list li.is-done { opacity: 1; }
+
+.steps-list li.is-active .steps-list__num {
+  background: var(--red);
+  box-shadow: 0 0 0 4px var(--alert-bg);
+}
+
+.steps-list li.is-done .steps-list__num {
+  background: var(--ok-text);
+}
+
+/* the number is replaced by a check once the step is behind you */
+.steps-list li.is-done .steps-list__num { font-size: 0; }
+
+.steps-list li.is-done .steps-list__num::after {
+  content: "✓";
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+/* ---- the top-bar cart ---- */
+
+.cart-btn svg { display: block; }
+
+/* ---- a question that can be swapped for a riddle ---- */
+
+.challenge-card__q.is-swappable {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.challenge-card.riddle { border-color: var(--border-strong); }
+
+.challenge-card.riddle .challenge-card__grade::after {
+  content: " · riddle";
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .steps-list li { transition: none; }
+}

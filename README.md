@@ -420,6 +420,10 @@ math problems — one each for 5th through 12th grade. There are two prizes:
   `36pi`, `36 PI`, and ` 36pi ` all pass the same problem. When a problem
   has more than one reasonable form, list them all: `a: ["10", "x=10",
   "x = 10"]`.
+- **Triple-clicking a question turns it into a riddle.** Three riddles
+  sit in the `RIDDLES` array in `js/challenges.js`; one is drawn at
+  random, and answering it counts exactly the same as the math would
+  have. A card already solved ignores the click.
 - **Triple-clicking an answer box fills in the answer.** A deliberate
   back door, on the theory that a student who pokes at an input box until
   it gives up its answer has earned the jokes as much as one who did the
@@ -440,34 +444,44 @@ Edit the `DAD_JOKES` array in `js/jokes.js` to add or cut. Keep them
 school appropriate — this sits on a public page with the school's name at
 the top of it.
 
-## Entering a code
+## Entering a code, and the four steps
 
-There is no request button in the top bar. The only way to open the cart
-is the lookup card's own button, which means a student has to put their
-code in before they can send anything — the code is what staff need on
-every row anyway.
+The top bar holds a shopping cart (with its count) that opens the drawer
+from anywhere on the page. It is not the request button — sending a
+request always goes through the lookup card, so a code is attached to
+every row staff receive.
 
-Before a code is checked the button says **Check**. Once one is accepted
-it becomes **Make a Request** (red, with the cart count), and the code
-input locks so it cannot be changed mid-request. Swapping codes takes the
-small **Enter a different code** button underneath, which clears the whole
-lookup and puts the card back to **Check**.
+Before a code is checked, the lookup card's button sits beside the input
+and says **Check**. Once a code is accepted the button drops below the
+input, runs the full width of the card in red, and reads **Make a
+Request** with the cart count. The code input locks at the same time;
+swapping codes takes the small **Enter a different code** button, which
+resets the whole card.
 
-## One request per code per day
+The numbered list beside the card is a live progress tracker, not
+decoration. `currentStep()` in `js/app.js` decides which of the four is
+active: no code yet is 1, a verified code with an empty cart is 2, items
+in the cart is 3, and a sent request is 4. Steps behind the student turn
+green with a check.
 
-After a request goes through, that code is held for
-`CONFIG.requestCooldownHours` (24 by default) before the site will send
-another. Set it to `0` to turn it off.
+## The request window
 
-**This is a courtesy guard, not a real limit.** It lives in the student's
-own browser, so a different browser, a different device, or cleared site
-data gets past it. Treat it as a way to stop honest double-clicks and
-same-day second helpings, not as enforcement.
+Requests are collected **one day a week**, set by `CONFIG.requestDay`
+(`5` = Friday; `null` turns the rule off). On any other day the checkout
+screen shows a warning above the fine print — but **it still sends**.
+Whether a late row counts is a staff decision made in the sheet, not
+something a student's browser should decide on its own, and a hard block
+would also mean a clock or timezone quirk could silently cost someone
+their week.
 
-The real check is the sheet: every row carries the code and a timestamp,
-so two requests from one code on one day sit right next to each other
-where staff will see them. Any actual limit has to be applied there, by a
-person, the same as every other decision in this system.
+`CONFIG.requestCooldownHours` (168, one week) then holds that code from
+sending again. Like every other gate here it lives in the student's own
+browser, so a different browser or cleared site data gets past it — the
+code and timestamp on every sheet row remain the real check.
+
+`CONFIG.requestFinePrint` is the list of rules, rendered in two places
+from that one array: under the request button in the lookup card, and
+again on the checkout screen right before the student sends.
 
 ## Easter eggs
 

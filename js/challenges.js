@@ -78,6 +78,23 @@ const CHALLENGES = [
   },
 ];
 
+// Triple-click a question and it turns into one of these instead. Answer
+// a riddle and it counts exactly the same as the math did.
+const RIDDLES = [
+  {
+    q: "I have keys but open no locks. I have space but no room. You can enter, but you cannot go outside. What am I?",
+    a: ["keyboard", "a keyboard"],
+  },
+  {
+    q: "What has hands but cannot clap?",
+    a: ["clock", "a clock", "watch", "a watch"],
+  },
+  {
+    q: "The more you take, the more you leave behind. What am I?",
+    a: ["footsteps", "footprints", "steps"],
+  },
+];
+
 (function () {
   "use strict";
 
@@ -161,7 +178,9 @@ const CHALLENGES = [
   }
 
   function renderCard(challenge, index) {
-    const problem = state.picked[index];
+    // Swappable: a triple-click on the question replaces it with a
+    // riddle, and everything below reads whichever one is live.
+    let problem = state.picked[index];
     const card = document.createElement("form");
     card.className = "challenge-card";
     card.innerHTML = `
@@ -173,7 +192,9 @@ const CHALLENGES = [
       </div>
       <div class="challenge-card__msg" aria-live="polite"></div>
     `;
-    card.querySelector(".challenge-card__q").textContent = problem.q;
+    const question = card.querySelector(".challenge-card__q");
+    question.textContent = problem.q;
+    question.classList.add("is-swappable");
 
     const input = card.querySelector("input");
     const msg = card.querySelector(".challenge-card__msg");
@@ -184,21 +205,35 @@ const CHALLENGES = [
       msg.textContent = "Already solved.";
     }
 
-    // A hidden shortcut: triple-click the answer box and it fills itself
-    // in. Solving all eight by hand is the intended route to the joke
-    // vault; this is the back door for anyone who pokes at things.
-    let clicks = 0;
-    let clickTimer = null;
-    input.addEventListener("click", () => {
-      clicks += 1;
-      clearTimeout(clickTimer);
-      clickTimer = setTimeout(() => {
-        if (clicks >= 3) {
-          input.value = problem.a[0];
-          input.focus();
-        }
-        clicks = 0;
-      }, 500);
+    // Two hidden shortcuts, both on a triple-click. On the answer box it
+    // fills the answer in. On the question it swaps the math for a
+    // riddle, which counts the same.
+    function onTripleClick(el, handler) {
+      let clicks = 0;
+      let timer = null;
+      el.addEventListener("click", () => {
+        clicks += 1;
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          if (clicks >= 3) handler();
+          clicks = 0;
+        }, 500);
+      });
+    }
+
+    onTripleClick(input, () => {
+      input.value = problem.a[0];
+      input.focus();
+    });
+
+    onTripleClick(question, () => {
+      if (card.classList.contains("solved")) return;
+      problem = RIDDLES[Math.floor(Math.random() * RIDDLES.length)];
+      question.textContent = problem.q;
+      card.classList.add("riddle");
+      input.value = "";
+      msg.className = "challenge-card__msg";
+      msg.textContent = "";
     });
 
     card.addEventListener("submit", (event) => {

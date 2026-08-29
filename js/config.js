@@ -155,13 +155,30 @@ const CONFIG = {
   dressDownMaxConduct: 3,
   dressDownNote: "You qualify for Dress-Down Day this month.",
 
-  // ---- One request per code per day ----
+  // ---- Request window ----
+  // Requests are collected on one day a week. 0 is Sunday, 5 is Friday.
+  // The site warns on any other day but still sends, because whether a
+  // late row counts is a staff decision made in the sheet, not something
+  // a student's browser should be deciding. Set to null to drop the rule.
+  requestDay: 5,
+
   // After a request is sent, that code is held for this many hours before
-  // the site will send another. It is a courtesy guard, not a real limit:
-  // it lives in the student's own browser, so a different browser or a
-  // cleared cache gets around it. Duplicate codes and timestamps in the
-  // response sheet are the actual check. Set to 0 to turn it off.
-  requestCooldownHours: 24,
+  // the site will send another (168 = one week, matching the window
+  // above). It is a courtesy guard, not a real limit: it lives in the
+  // student's own browser, so a different browser or a cleared cache gets
+  // around it. Duplicate codes and timestamps in the response sheet are
+  // the actual check. Set to 0 to turn it off.
+  requestCooldownHours: 168,
+
+  // Shown wherever a student is about to send. Each line renders as its
+  // own bullet.
+  requestFinePrint: [
+    "One request per person per week, on Fridays.",
+    "Anything sent on another day will not be counted.",
+    "If you send more than one, only your last one counts.",
+    "No guarantees. A request may be fulfilled before you send another.",
+    "Points are deducted only after staff confirm.",
+  ],
 
   // ---- Confetti on a verified lookup ----
   // How big the celebration is scales with the student's month. More

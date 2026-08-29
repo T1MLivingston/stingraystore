@@ -4,6 +4,7 @@
   const state = {
     cart: [], // array of item ids
     verified: false, // true once a code has resolved against data/points.json
+    submitted: false, // true once a request has actually been sent
   };
 
   const els = {
@@ -27,6 +28,12 @@
     lookupBtnLabel: document.getElementById("lookupBtnLabel"),
     lookupCartCount: document.getElementById("lookupCartCount"),
     changeCodeBtn: document.getElementById("changeCodeBtn"),
+    lookupRow: document.getElementById("lookupRow"),
+    lookupFinePrint: document.getElementById("lookupFinePrint"),
+    stepsList: document.getElementById("stepsList"),
+    modalFinePrint: document.getElementById("modalFinePrint"),
+    openCartBtn: document.getElementById("openCartBtn"),
+    cartCount: document.getElementById("cartCount"),
     lookupResult: document.getElementById("lookupResult"),
     miniBalance: document.getElementById("miniBalance"),
     miniBalanceValue: document.getElementById("miniBalanceValue"),
@@ -94,19 +101,14 @@
     }
   }
 
-  // "Stingray Commendation Store" renders with the first word accented
-  // and the rest in the heading color, so the store name stays a single
-  // config value instead of being split across the markup.
+  // The store name renders as one solid color. It stays a single config
+  // value rather than being split across the markup.
   function renderHeroTitle() {
     const words = CONFIG.storeName.trim().split(/\s+/);
     const first = words.shift() || "";
     const rest = words.join(" ");
     const sammy = els.heroTitle.querySelector(".hero__sammy");
-    els.heroTitle.textContent = "";
-    const accent = document.createElement("span");
-    accent.textContent = first;
-    els.heroTitle.appendChild(accent);
-    if (rest) els.heroTitle.appendChild(document.createTextNode(` ${rest}`));
+    els.heroTitle.textContent = rest ? `${first} ${rest}` : first;
     if (sammy) els.heroTitle.appendChild(sammy);
   }
 
@@ -296,6 +298,7 @@
   }
 
   function resetLookup() {
+    state.submitted = false;
     els.lookupCode.value = "";
     els.lookupResult.innerHTML = "";
     els.commendationInput.value = "";
@@ -320,7 +323,56 @@
     els.lookupCode.readOnly = asRequest;
     els.changeCodeBtn.hidden = !asRequest;
     els.lookupCartCount.hidden = !asRequest;
+    // Verified, the button drops below the input and runs the full width
+    // of the card, so the next thing to do is unmistakable.
+    els.lookupRow.classList.toggle("stacked", asRequest);
+    els.lookupFinePrint.hidden = !asRequest;
+    if (asRequest && !els.lookupFinePrint.innerHTML) {
+      els.lookupFinePrint.innerHTML = finePrintList();
+    }
     els.lookupCartCount.textContent = state.cart.length;
+    els.cartCount.textContent = state.cart.length;
+  }
+
+  // 1 enter a code, 2 add rewards, 3 send, 4 wait for staff. The list
+  // marks everything behind the student as done and the current one as
+  // active, so the card doubles as a progress bar.
+  function currentStep() {
+    if (state.submitted) return 4;
+    if (!state.verified) return 1;
+    return state.cart.length === 0 ? 2 : 3;
+  }
+
+  function renderSteps() {
+    if (!els.stepsList) return;
+    const now = currentStep();
+    els.stepsList.querySelectorAll("li").forEach((li) => {
+      const step = Number(li.dataset.step);
+      li.classList.toggle("is-active", step === now);
+      li.classList.toggle("is-done", step < now);
+    });
+  }
+
+  // The rules a student is agreeing to when they send. Same list in the
+  // lookup card and at checkout, from one place in the config.
+  function finePrintList() {
+    const lines = CONFIG.requestFinePrint || [];
+    if (lines.length === 0) return "";
+    return `<ul>${lines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>`;
+  }
+
+  const DAY_NAMES = [
+    "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
+  ];
+
+  function isRequestDay() {
+    const day = CONFIG.requestDay;
+    if (day === null || day === undefined) return true;
+    return new Date().getDay() === day;
+  }
+
+  function requestDayName() {
+    return DAY_NAMES[CONFIG.requestDay] || "the collection day";
   }
 
   function updateMiniBalance() {
@@ -440,13 +492,15 @@
     }
   }
 
-  // The lookup card's button is the only cart button now, so that is
-  // what pulses when something is added.
+  // Both the top-bar cart and the lookup card's button show the count,
+  // so both pulse when something is added.
   function bumpCartButton() {
-    els.lookupBtn.classList.remove("bump");
-    // force reflow so the animation can restart on rapid adds
-    void els.lookupBtn.offsetWidth;
-    els.lookupBtn.classList.add("bump");
+    [els.openCartBtn, els.lookupBtn].forEach((el) => {
+      el.classList.remove("bump");
+      // force reflow so the animation can restart on rapid adds
+      void el.offsetWidth;
+      el.classList.add("bump");
+    });
   }
 
   function removeFromCart(id) {
@@ -499,6 +553,7 @@
     renderCart();
     updateMiniBalance();
     updateLookupButton();
+    renderSteps();
   }
 
   function openCart() {
@@ -598,6 +653,11 @@
       ? "Note to staff (required for what you picked)"
       : "Note to staff (optional)";
 
+    const offDay = !isRequestDay()
+      ? `<p class="fineprint__warn">Today is not ${requestDayName()}. You can still send this, but it will not be counted.</p>`
+      : "";
+    els.modalFinePrint.innerHTML = offDay + finePrintList();
+
     els.falseClaimField.hidden = total <= getCommendations();
     els.falseClaimCheck.checked = false;
     els.copyStatus.textContent = "";
@@ -623,6 +683,7 @@
     els.copyStatus.textContent = "Request submitted! Staff will review it soon.";
     els.sendRequestBtn.disabled = false;
     state.cart = [];
+    state.submitted = true;
     renderAll();
     setTimeout(closeModal, 1800);
   }
@@ -637,7 +698,7 @@
     const waiting = cooldownRemaining(els.studentCode.value);
     if (waiting > 0) {
       els.copyStatus.textContent =
-        `This code already sent a request today. Try again in ${describeWait(waiting)}.`;
+        `This code already sent a request. Try again in ${describeWait(waiting)}.`;
       setStatusTone(els.copyStatus, "err");
       return;
     }
@@ -724,11 +785,17 @@
     }
   }
 
+  function plural(n, word) {
+    return `${n} ${word}${n === 1 ? "" : "s"}`;
+  }
+
+  // A week-long hold reads as "7 days", not "167 hours".
   function describeWait(ms) {
-    const hours = Math.floor(ms / (60 * 60 * 1000));
-    const minutes = Math.ceil((ms % (60 * 60 * 1000)) / (60 * 1000));
-    if (hours >= 1) return `${hours} hour${hours === 1 ? "" : "s"}`;
-    return `${minutes} minute${minutes === 1 ? "" : "s"}`;
+    const minutes = Math.ceil(ms / (60 * 1000));
+    if (minutes < 60) return plural(minutes, "minute");
+    const hours = Math.round(ms / (60 * 60 * 1000));
+    if (hours < 24) return plural(hours, "hour");
+    return plural(Math.round(ms / (24 * 60 * 60 * 1000)), "day");
   }
 
   // Status lines read as green or red, but the exact shade has to come
@@ -833,6 +900,7 @@
   els.quoteSubmitBtn.addEventListener("click", submitQuote);
   els.themeToggle.addEventListener("click", toggleTheme);
   els.changeCodeBtn.addEventListener("click", resetLookup);
+  els.openCartBtn.addEventListener("click", openCart);
 
   applyConfig();
   applyTheme(currentTheme());
