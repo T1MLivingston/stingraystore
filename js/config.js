@@ -16,7 +16,7 @@ const CONFIG = {
   // itself. No backend, no email, and nothing to paste. See README.md
   // for how to find requestsFormFieldId below for your own form.
   requestsFormUrl:
-    "https://docs.google.com/forms/d/e/1FAIpQLScYm1e2RswURXJGdlW6FCQgtas27P5Cfn7kMsXbfDxDzqeTsQ/viewform",
+    "https://docs.google.com/forms/d/e/1FAIpQLSf8EOiBpJOhWVSDixgdnbiw0MMX4USlHS4Jenu0MXAe4khsTQ/viewform",
 
   // The Form's internal field names, one "entry.123456789" per question.
   // Each key below is a separate question on the Form, so each lands in
@@ -33,13 +33,13 @@ const CONFIG = {
   // unless it is always filled in (a student's note, for instance, is
   // often empty), or Google will reject the whole submission.
   requestsFormFields: {
-    code: "", // Redemption Code (short answer) -- which student this is
-    pointsUsed: "", // Points Used (short answer) -- total cost of the request
-    items: "", // Items Requested (paragraph) -- one reward per line
-    balance: "", // Student Balance (short answer) -- commendation points on hand
-    conduct: "", // Conduct Points (short answer, optional)
+    code: "entry.1214264987", // Redemption Code (short answer) -- which student this is
+    pointsUsed: "entry.407241922", // Points Used (short answer) -- total cost of the request
+    items: "entry.216679292", // Items Requested (paragraph) -- one reward per line
+    balance: "entry.1167893473", // Student Balance (short answer) -- commendation points on hand
+    conduct: "entry.1425404857", // Conduct Points (short answer, optional)
     verified: "", // Verified? (short answer, optional) -- did the code check out
-    note: "", // Note From Student (paragraph, optional)
+    note: "entry.999526134", // Note From Student (paragraph, optional)
     details: "", // Full Request (paragraph, optional) -- the whole thing as text
   },
 
