@@ -62,7 +62,12 @@ const CONFIG = {
   // just open the sheet directly to review submissions and approve or
   // deny them.
   requestsSheetCsvUrl:
-    "https://docs.google.com/spreadsheets/d/1MYX75By-rqXhXbGsTY3mlvCtABVesfQuB1Po0qXfw6A/gviz/tq?tqx=out:csv",
+    "https://docs.google.com/spreadsheets/d/1ATTaHooIHiuO0pYvWVCy3Q4ZUDrZD1xWF-5fLpCn7DU/gviz/tq?tqx=out:csv",
+
+  // The same sheet as a normal Google Sheets link, which is the one staff
+  // actually open to work the queue. Not read by the site either.
+  requestsSheetEditUrl:
+    "https://docs.google.com/spreadsheets/d/1ATTaHooIHiuO0pYvWVCy3Q4ZUDrZD1xWF-5fLpCn7DU/edit",
 
   // School seal, shown in the top bar.
   logoPath: "assets/school-seal.png",

@@ -131,14 +131,18 @@ student to paste or submit themselves. To set it up:
    timestamps every submission.
 2. Add a `Status` column to that response sheet yourself. Approve or deny a
    request by typing into that column directly, in the sheet.
-3. Share the response sheet the same "Anyone with the link → Viewer" way as
-   the points sheet, and set `requestsSheetCsvUrl` in `js/config.js` to its
-   CSV export URL (kept for your own reference; the site itself doesn't
-   read it — there is no in-site requests table).
-4. Set `requestsFormUrl` to the form's own public responder link (click
+3. Add a **`Status`** column of your own to the right of the form's
+   columns (the form writes A through G, so `Status` goes in **H1**).
+   Google only ever appends rows and never touches a column it did not
+   create, so anything you type there is safe. This is where you approve
+   or deny — see "Working the request queue" below.
+4. Set `requestsSheetCsvUrl` and `requestsSheetEditUrl` in `js/config.js`
+   to that sheet. Both are kept for your own reference; the site itself
+   reads neither, and there is no in-site requests table.
+5. Set `requestsFormUrl` to the form's own public responder link (click
    **Publish**, top right of the form editor, then copy the link from
    there).
-5. Find each question's internal name for `requestsFormFields`: in the
+6. Find each question's internal name for `requestsFormFields`: in the
    form editor, three-dot menu → **Get pre-filled link** → type a
    throwaway answer into **every** question → **Get Link** → copy the
    generated URL. It lists one `entry.<number>=` per question, in the
@@ -157,8 +161,54 @@ student to paste or submit themselves. To set it up:
    an existing form keeps working until you finish wiring up the new
    one — filling in even one named field is what flips the site over.
 
-Review submissions and match codes against your private roster directly in
-the sheet.
+### Working the request queue
+
+Everything happens in that one sheet. There is no admin screen, no login,
+and no button anywhere that changes a student's points — a person reading
+rows is the entire approval system, on purpose.
+
+A submitted request lands as one row:
+
+| A | B | C | D | E | F | G | H |
+|---|---|---|---|---|---|---|---|
+| Timestamp | Redemption Code | Points Used | Items | Student Balance | Conduct Points | Note From Student | **Status** |
+
+Columns A–G are written by Google. Column H is yours. For each new row:
+
+1. **Identify the student.** Column B holds their code, not their name.
+   Look it up in your private roster sheet — the one this site never
+   touches. That split is the whole privacy model: the sheet the site can
+   reach has no names in it.
+2. **Check the balance is real.** Column E is whatever the student's
+   browser had at submit time, so treat it as a claim, not a fact. Compare
+   it against this month's points upload. A student who overstated it
+   already had to tick a box acknowledging `CONFIG.falseClaimPenalty`
+   before the site would send the request.
+3. **Check the conduct gate.** Column F is their conduct points. Some
+   items are capped (Full Dress-Down Day is unavailable above 3), and the
+   site enforces that with whatever the student entered — which is worth
+   re-checking here against the real number.
+4. **Handle anything marked pending.** An item in column D tagged
+   `[PENDING APPROVAL: ...]` names who has to say yes first. Get that yes
+   before you approve the row. For items that required it, column G holds
+   the detail you need — the teacher who agreed to the chair swap, the
+   act for the lunch performance, the quote to read on the PA.
+5. **Type your decision in column H.** `Approved`, `Denied`, or anything
+   else that means something to you — it is a free-text column and nothing
+   reads it but you.
+6. **Deduct the points in your real system.** The site never does this.
+   Column C is the amount.
+7. **Tell the student.** However you normally would.
+
+The site never learns any of this. It cannot read the sheet, so a student
+refreshing the page will not see a status — approving a row is a message
+to your staff, not to the student.
+
+Typing into a Status column, rather than building real approve/deny
+buttons, was deliberate. Buttons that actually wrote back would need a
+Google Apps Script deployed by hand as a Web App — a real option later,
+just more setup and one more moving part than "open the sheet you already
+have open anyway."
 
 Because the response comes back inside a hidden iframe, the site can't
 actually read whether Google accepted it (cross-origin content can't be
@@ -166,13 +216,6 @@ inspected by client-side JS) — it shows "Request submitted" either once
 the iframe finishes loading or after a few seconds either way. This is the
 same fire-and-forget tradeoff as the rest of this static site: staff still
 do a final human check in the sheet before fulfilling anything.
-
-Approving or denying by typing into a Status column, rather than building
-real buttons for it, was a deliberate choice: buttons that actually write
-back would need a small script (Google Apps Script) deployed by hand as a
-"Web App" — a real option later, just more setup than this needed to be
-useful today, and one more moving part than "open the sheet you already
-have open anyway."
 
 I could not create the Form itself here — Google Drive's file-creation tool
 only makes native Docs, Sheets, and Slides, not Forms — so step 1 above is
