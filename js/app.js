@@ -11,6 +11,10 @@
     schoolNameLabel: document.getElementById("schoolNameLabel"),
     storeNameLabel: document.getElementById("storeNameLabel"),
     mottoText: document.getElementById("mottoText"),
+    heroTitle: document.getElementById("heroTitle"),
+    themeToggle: document.getElementById("themeToggle"),
+    themeToggleIcon: document.getElementById("themeToggleIcon"),
+    themeToggleLabel: document.getElementById("themeToggleLabel"),
     footMotto: document.getElementById("footMotto"),
     footSchoolName: document.getElementById("footSchoolName"),
     footWebsite: document.getElementById("footWebsite"),
@@ -71,6 +75,7 @@
     els.schoolNameLabel.textContent = CONFIG.schoolName;
     els.storeNameLabel.textContent = CONFIG.storeName;
     els.mottoText.textContent = CONFIG.motto;
+    renderHeroTitle();
     els.footMotto.textContent = `"${CONFIG.motto}"`;
     els.footSchoolName.textContent = CONFIG.schoolName;
     els.footWebsite.href = CONFIG.websiteUrl;
@@ -81,6 +86,46 @@
     if (CONFIG.logoPath) {
       els.logoImg.src = CONFIG.logoPath;
     }
+  }
+
+  // "Stingray Commendation Store" renders with the first word accented
+  // and the rest in the heading color, so the store name stays a single
+  // config value instead of being split across the markup.
+  function renderHeroTitle() {
+    const words = CONFIG.storeName.trim().split(/\s+/);
+    const first = words.shift() || "";
+    const rest = words.join(" ");
+    const sammy = els.heroTitle.querySelector(".hero__sammy");
+    els.heroTitle.textContent = "";
+    const accent = document.createElement("span");
+    accent.textContent = first;
+    els.heroTitle.appendChild(accent);
+    if (rest) els.heroTitle.appendChild(document.createTextNode(` ${rest}`));
+    if (sammy) els.heroTitle.appendChild(sammy);
+  }
+
+  // ---- Theme ----
+  // The stored choice is applied by an inline script in index.html before
+  // first paint; this only keeps the button in sync and handles clicks.
+  function currentTheme() {
+    return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    try {
+      window.localStorage.setItem("stingray.theme", theme);
+    } catch (err) {
+      /* the choice just won't survive a reload */
+    }
+    const goingTo = theme === "dark" ? "Light" : "Dark";
+    els.themeToggleIcon.textContent = theme === "dark" ? "☀" : "☾";
+    els.themeToggleLabel.textContent = goingTo;
+    els.themeToggle.setAttribute("aria-label", `Switch to ${goingTo.toLowerCase()} mode`);
+  }
+
+  function toggleTheme() {
+    applyTheme(currentTheme() === "dark" ? "light" : "dark");
   }
 
   function getConduct() {
@@ -231,7 +276,7 @@
     const grid = document.createElement("div");
     grid.className = "grid";
 
-    ITEMS.filter((i) => i.category === cat).forEach((item) => {
+    visibleItems().filter((i) => i.category === cat).forEach((item) => {
       grid.appendChild(renderCard(item));
     });
 
@@ -240,8 +285,20 @@
     return section;
   }
 
+  // A category named by CONFIG.challengeUnlocksCategory stays out of the
+  // catalog until a student solves one of the grade-level problems.
+  function categoryIsLocked(cat) {
+    if (!CONFIG.challengeUnlocksCategory) return false;
+    if (cat !== CONFIG.challengeUnlocksCategory) return false;
+    return !(window.Challenges && window.Challenges.isUnlocked());
+  }
+
+  function visibleItems() {
+    return ITEMS.filter((item) => !categoryIsLocked(item.category));
+  }
+
   function renderCatalog() {
-    const categories = [...new Set(ITEMS.map((i) => i.category))];
+    const categories = [...new Set(visibleItems().map((i) => i.category))];
     els.catalog.innerHTML = "";
 
     // Categories with only one or two items are paired side by side to
@@ -249,7 +306,7 @@
     let i = 0;
     while (i < categories.length) {
       const cat = categories[i];
-      const isSmall = (c) => ITEMS.filter((item) => item.category === c).length <= 2;
+      const isSmall = (c) => visibleItems().filter((item) => item.category === c).length <= 2;
 
       if (isSmall(cat) && i + 1 < categories.length && isSmall(categories[i + 1])) {
         const row = document.createElement("div");
@@ -479,7 +536,7 @@
   function confirmSubmitted() {
     if (!awaitingSubmitConfirmation) return;
     awaitingSubmitConfirmation = false;
-    els.copyStatus.style.color = "#1c6b3a";
+    setStatusTone(els.copyStatus, "ok");
     els.copyStatus.textContent = "Request submitted! Staff will review it soon.";
     els.sendRequestBtn.disabled = false;
     state.cart = [];
@@ -491,19 +548,19 @@
     if (!els.studentCode.value.trim()) {
       els.studentCode.focus();
       els.copyStatus.textContent = "Please enter your redemption code first.";
-      els.copyStatus.style.color = "#c42836";
+      setStatusTone(els.copyStatus, "err");
       return;
     }
     if (cartItemsNeedingNote().length > 0 && !els.studentNote.value.trim()) {
       els.studentNote.focus();
       els.copyStatus.textContent =
         "One of your rewards needs details in the note. See the list above it.";
-      els.copyStatus.style.color = "#c42836";
+      setStatusTone(els.copyStatus, "err");
       return;
     }
     if (requiresFalseClaimAck()) {
       els.copyStatus.textContent = "Please confirm your points balance is accurate first.";
-      els.copyStatus.style.color = "#c42836";
+      setStatusTone(els.copyStatus, "err");
       return;
     }
 
@@ -511,7 +568,7 @@
     if (Object.keys(fields).length === 0) {
       els.copyStatus.textContent =
         "This store isn't set up to receive requests yet. Please tell a staff member.";
-      els.copyStatus.style.color = "#c42836";
+      setStatusTone(els.copyStatus, "err");
       return;
     }
 
@@ -530,13 +587,20 @@
     });
 
     els.sendRequestBtn.disabled = true;
-    els.copyStatus.style.color = "#1c6b3a";
+    setStatusTone(els.copyStatus, "ok");
     els.copyStatus.textContent = "Submitting...";
     awaitingSubmitConfirmation = true;
     els.requestSubmitForm.submit();
     // Cross-origin iframe content can't be read to confirm success, so
     // fall back to an optimistic confirmation if "load" never fires.
     setTimeout(confirmSubmitted, 4000);
+  }
+
+  // Status lines read as green or red, but the exact shade has to come
+  // from the active theme, so it is a class rather than an inline color.
+  function setStatusTone(el, tone) {
+    el.classList.remove("ok", "err");
+    el.classList.add(tone);
   }
 
   function escapeHtml(s) {
@@ -581,7 +645,7 @@
     const code = els.quoteCode.value.trim();
     const quote = els.quoteText.value.trim();
     if (!code || !quote) {
-      els.quoteStatus.style.color = "#c42836";
+      setStatusTone(els.quoteStatus, "err");
       els.quoteStatus.textContent = "Enter your code and a quote first.";
       return;
     }
@@ -597,11 +661,11 @@
     navigator.clipboard
       .writeText(text)
       .then(() => {
-        els.quoteStatus.style.color = "#1c6b3a";
+        setStatusTone(els.quoteStatus, "ok");
         els.quoteStatus.textContent = "Copied. Paste it into the form that just opened, then submit there.";
       })
       .catch(() => {
-        els.quoteStatus.style.color = "#c42836";
+        setStatusTone(els.quoteStatus, "err");
         els.quoteStatus.textContent = "Could not copy automatically. Copy your quote and code, then paste them into the form that just opened.";
       });
     window.open(CONFIG.wallOfFameFormUrl, "_blank", "noopener");
@@ -630,8 +694,11 @@
   els.pointsModalCloseBtn.addEventListener("click", closePointsModal);
   els.detailModalCloseBtn.addEventListener("click", closeDetailModal);
   els.quoteSubmitBtn.addEventListener("click", submitQuote);
+  els.themeToggle.addEventListener("click", toggleTheme);
 
   applyConfig();
+  applyTheme(currentTheme());
+  if (window.Challenges) window.Challenges.init(renderAll);
   renderAll();
   if (window.Eggs) window.Eggs.init();
   els.wallOfFamePolicy.textContent = CONFIG.wallOfFamePolicyNote;

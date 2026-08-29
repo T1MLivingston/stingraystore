@@ -6,6 +6,18 @@
 <title>Stingray Store</title>
 <link rel="icon" href="assets/school-seal.png" type="image/png" />
 <link rel="stylesheet" href="css/style.css" />
+<script>
+  // Runs before the stylesheet paints, so a returning student never sees
+  // a flash of the other theme.
+  (function () {
+    try {
+      var saved = localStorage.getItem("stingray.theme");
+      document.documentElement.setAttribute("data-theme", saved === "light" ? "light" : "dark");
+    } catch (e) {
+      document.documentElement.setAttribute("data-theme", "dark");
+    }
+  })();
+</script>
 </head>
 <body>
 
@@ -16,6 +28,10 @@
     <div class="store" id="storeNameLabel">Stingray Store</div>
   </div>
   <div class="topbar__spacer"></div>
+  <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch between dark and light">
+    <span class="theme-toggle__icon" id="themeToggleIcon">☾</span>
+    <span class="theme-toggle__label" id="themeToggleLabel">Dark</span>
+  </button>
   <div class="mini-balance" id="miniBalance" hidden>
     <span id="miniBalanceValue">0</span> pts
   </div>
@@ -25,7 +41,7 @@
 </header>
 
 <section class="hero">
-  <h1>Welcome to the <span>Stingray Store</span> <img class="hero__sammy" src="assets/sammy-monitor.png" alt="Sammy the Stingray" /></h1>
+  <h1 id="heroTitle"><img class="hero__sammy" src="assets/sammy-monitor.png" alt="Sammy the Stingray" /></h1>
   <p class="motto" id="mottoText">
     We support each other, contribute to our community, and strive for excellence in all we do.
   </p>
@@ -36,10 +52,8 @@
   <div class="lookup-grid">
     <div class="lookup-card">
       <h2>Check My Points <img class="lookup-card__sammy" src="assets/sammy-backpack.png" alt="Backpack Sammy" /></h2>
-      <p class="lookup-lead">This is the private code Mr. McGaha gave you.</p>
-      <p class="lookup-sub">It stores your points without keeping any student data.</p>
       <div class="lookup-row">
-        <input type="text" id="lookupCode" placeholder="e.g. SR-4821-BLUE" autocomplete="off" />
+        <input type="text" id="lookupCode" placeholder="Enter your store code" autocomplete="off" />
         <button id="lookupBtn">Check</button>
       </div>
       <div id="lookupResult"></div>
@@ -115,7 +129,7 @@
 
       <div class="field">
         <label for="studentCode">Your Redemption Code</label>
-        <input type="text" id="studentCode" placeholder="e.g. SR-4821-BLUE" autocomplete="off" />
+        <input type="text" id="studentCode" placeholder="Enter your store code" autocomplete="off" />
         <div class="hint">Don't have a code? Ask your teacher or the front office. We never ask for your name here.</div>
       </div>
 
@@ -170,6 +184,15 @@
   </div>
 </div>
 
+<section class="challenges" id="challengeSection">
+  <div class="challenges__head">
+    <h2>Stingray Math Challenge</h2>
+    <p id="challengeLead"></p>
+  </div>
+  <div class="challenges__grid" id="challengeGrid"></div>
+  <div class="challenges__status" id="challengeStatus" hidden></div>
+</section>
+
 <section class="wall-of-fame" id="wallOfFameSection" hidden>
   <h2>Wall of Fame</h2>
   <p class="wall-of-fame__intro">Quotes shared and approved by students.</p>
@@ -209,6 +232,7 @@
 <script src="js/csv.js"></script>
 <script src="js/points.js"></script>
 <script src="js/eggs.js"></script>
+<script src="js/challenges.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

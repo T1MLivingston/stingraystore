@@ -6,8 +6,16 @@
 
 const CONFIG = {
   schoolName: "Seminole Science STEM Charter School",
-  storeName: "Stingray Store",
+  storeName: "Stingray Commendation Store",
   motto: "We support each other, contribute to our community, and strive for excellence in all we do.",
+
+  // ---- Math challenge gate ----
+  // The category hidden in the store until a student solves any one of
+  // the grade-level problems at the bottom of the page. Every grade's
+  // challenge unlocks this same category, so a student only has to beat
+  // their own grade. Set to "" to turn the whole thing off and show
+  // every category from the start. Edit the problems in js/challenges.js.
+  challengeUnlocksCategory: "Donation Bin",
 
   // ---- Request submission ----
   // "Submit Request" posts the request text straight to this Google

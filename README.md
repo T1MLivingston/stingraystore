@@ -196,9 +196,30 @@ Everything you're likely to change lives in two files:
   conduct-point total), `approval` (who has to say yes), or `notePrompt`
   (what the student must write in the note).
 - **`js/eggs.js`** — the hidden tap animations. See "Easter eggs" below.
+- **`js/challenges.js`** — the grade-level math problems. See "Math
+  challenges" below.
 
-Colors and layout live in `css/style.css`, controlled by CSS variables at
-the top (`--blue-dark`, `--blue`, `--blue-light`, `--red`).
+Colors and layout live in `css/style.css`. The top of that file holds the
+theme tokens: a short block of fixed brand colors (`--blue`, `--red`), then
+one block per theme defining the semantic tokens everything else uses —
+`--surface`, `--text`, `--border`, `--heading`, and so on.
+
+**Adding a rule?** Reach for a semantic token, not a hex value. A literal
+color will look wrong in one of the two themes, which is the one mistake
+this structure exists to prevent.
+
+### Dark and light mode
+
+The store opens in dark mode. The toggle sits in the top bar, and the
+choice is remembered per browser in `localStorage`. A small inline script
+in `index.html` applies the saved theme before the stylesheet paints, so a
+returning student never sees a flash of the wrong theme — if you move that
+script, keep it in `<head>` and ahead of the stylesheet.
+
+Both themes were checked against WCAG AA contrast on every text style on
+the page. If you retint something, re-check it rather than eyeballing it:
+dark text on a dark surface is easy to ship by accident and hard to
+notice on the one bright monitor you happen to be testing on.
 
 ### Branding assets
 `assets/` holds the real school seal (`school-seal.png`, used as the logo
@@ -301,6 +322,30 @@ students), not per-student rewards. This static site has no shared counter
 to track those totals live — staff need to tally donations from submitted
 requests and announce progress separately.
 
+## Math challenges
+
+Seminole Science is a STEM school, so the bottom of the page carries six
+math problems — one each for 5th through 10th grade. **Solving any single
+one unlocks the Donation Bin**, which is hidden from the store until then.
+A student only has to beat their own grade, not all six.
+
+- Which category is gated is `CONFIG.challengeUnlocksCategory` in
+  `js/config.js`. Set it to `""` to switch the whole thing off and show
+  every category from the start.
+- The problems live in the `CHALLENGES` array at the top of
+  `js/challenges.js`. Each grade has a **pool**, and one problem is drawn
+  from it at random per page load, so an answer going around the lunch
+  table stops working tomorrow. Add more to a pool and it gets harder to
+  pass around.
+- Answers are compared as trimmed, lowercased, space-stripped text, so
+  `36pi`, `36 PI`, and ` 36pi ` all pass the same problem. When a problem
+  has more than one reasonable form, list them all: `a: ["10", "x=10",
+  "x = 10"]`.
+- The unlock is stored in that browser's `localStorage`. It is a
+  motivator, not a security boundary — anyone who opens dev tools can
+  clear or set it, and that is fine. Nothing behind it is sensitive; the
+  reward is seeing two more cards.
+
 ## Easter eggs
 
 Kids poke at things. `js/eggs.js` gives them something to find: **triple-tap
@@ -320,7 +365,9 @@ doesn't spoil the rest.
 | Sammy (hero image) | Sammy spins | a school of stingrays swims across |
 
 A counter in the footer keeps score ("Secrets found: 3 of 16") once a
-student finds their first one. It is stored in that browser's
+student finds their first one. The Donation Bin's two secrets only count
+toward the total once the math challenge has unlocked that section, so the
+number goes up when it appears rather than showing an unreachable goal. It is stored in that browser's
 `localStorage` — nothing is sent anywhere, nothing is tied to a student,
 and clearing site data resets it. The total counts only the sections
 actually on the page, so deleting a category can't strand it at an
