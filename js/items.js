@@ -120,11 +120,29 @@ const ITEMS = [
     category: "Food & Social",
   },
   {
+    id: "lunch-teacher-friend",
+    name: "Lunch With a Teacher and a Friend",
+    desc: "Lunch with a teacher of your choice, plus one friend.",
+    cost: 20,
+    category: "Food & Social",
+    notePrompt: "Name the teacher and the friend coming with you.",
+  },
+  {
     id: "group-lunch-teacher",
     name: "Group Lunch With a Teacher",
     desc: "Lunch with a teacher, plus two friends.",
     cost: 30,
     category: "Food & Social",
+  },
+  {
+    id: "pizza-party",
+    name: "Pizza Party",
+    desc: "A pizza delivered to share at lunch.",
+    cost: 100,
+    category: "Food & Social",
+    approval: "Staff schedule it, and the office checks allergies first",
+    detail:
+      "A pizza shows up at lunch for you and the table. Staff pick the day and check for allergies and dietary restrictions before it is ordered, so this one gets scheduled rather than handed out on the spot.",
   },
   {
     id: "call-home",
@@ -219,29 +237,62 @@ const ITEMS = [
       "The biggest one on the board. Ask the teacher first and put their name in the note. Administration picks the day and place, usually at an assembly or a spirit event.",
   },
   {
+    id: "robot-sticker",
+    name: "Robot Super Sticker",
+    desc: "A die-cut sticker for your binder, laptop, or water bottle.",
+    cost: 5,
+    category: "Collectibles",
+    detail:
+      "The entry tier. Cheap on purpose, so anyone having a decent month can walk away with something in hand.",
+  },
+  {
+    id: "topps-chrome",
+    name: "Topps Chrome Card",
+    desc: "A real chrome-finish trading card, straight from the pack.",
+    cost: 10,
+    category: "Collectibles",
+    detail:
+      "Pulled from a sealed pack, so which card you get is luck. Chrome finish, real card stock, the same thing you would find in a hobby box.",
+  },
+  {
     id: "collectible-card",
-    name: "Collectible Card",
-    desc: "A fun character card from Mr. Livingston.",
+    name: "Stingray Character Card",
+    desc: "A custom character card from Mr. Livingston.",
+    cost: 20,
+    category: "Collectibles",
+    detail:
+      "A VeeFriends for students exclusive, designed for this school. Collect them all.",
+  },
+  {
+    id: "insert-card",
+    name: "Insert Card",
+    desc: "A short-print insert. Harder to pull than a base card.",
     cost: 50,
     category: "Collectibles",
-    maxConduct: 2,
+    maxConduct: 3,
     detail:
-      "This design is a VeeFriends for students exclusive. Collect them all.",
+      "Inserts are the cards that show up a few times a box instead of a few times a pack. Numbered or specially designed, and a real step up from a base card.",
   },
   {
     id: "veefriends-comic",
-    name: "VeeFriends Comic",
-    desc: "An exclusive VeeFriends comic book.",
+    name: "VeeFriends Comic: Empathy",
+    desc: "An exclusive VeeFriends comic about empathy.",
     cost: 100,
     category: "Collectibles",
-    maxConduct: 2,
+    maxConduct: 3,
+    detail:
+      "A full comic built around empathy, and one of the few things on this board you cannot buy anywhere else.",
   },
   {
-    id: "pizza-party",
-    name: "Pizza Party",
-    desc: "A pizza delivered to share at lunch.",
-    cost: 100,
+    id: "tier-one-card",
+    name: "Tier One Card",
+    desc: "The rarest card on the board. One of a very few.",
+    cost: 150,
     category: "Collectibles",
+    maxConduct: 2,
+    approval: "Mr. Livingston hands these out personally",
+    detail:
+      "The top of the ladder. These are the rare pulls, held back and given out one at a time, so there is a real chance the one you want is already gone. Worth saving for.",
   },
   {
     id: "wof-dress-down",

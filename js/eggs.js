@@ -1,10 +1,10 @@
 // ============================================================
 // STINGRAY STORE — EASTER EGGS
-// Secrets kids find by messing around. Tap a section heading twice
-// for an emoji, three times to spin its cards, four times for that
-// section's own trick. Nothing here touches points, requests, or
-// any student data — it is all animation, and every count lives
-// only in that one browser.
+// Secrets kids find by messing around. Tap a section heading three
+// times to spin its cards, four times for that section's own trick.
+// Finding every one unlocks dark mode. Nothing here touches points,
+// requests, or any student data, and every count lives only in that
+// one browser.
 // ============================================================
 
 (function () {
@@ -13,21 +13,21 @@
   // Per section: how its cards flip on a triple-tap, and the one-off
   // trick it does on a quadruple-tap. Add a category here to give it
   // its own pair; anything not listed falls back to DEFAULT_EGG.
-  // Per section: the emoji two taps pops, the spin three taps runs, and
-  // the trick four taps sets off. Add a category here to give it its own
-  // set; anything not listed falls back to DEFAULT_EGG.
+  // Per section: the spin three taps runs, and the trick four taps sets
+  // off. Add a category here to give it its own pair; anything not listed
+  // falls back to DEFAULT_EGG.
   const EGGS = {
-    "Dress Code Passes": { emote: "👕", triple: "egg-spin-y", quad: "egg-falloff" },
-    Privileges: { emote: "🎟️", triple: "egg-spin-x", quad: "egg-trace" },
-    "Food & Social": { emote: "🍕", triple: "egg-spin-flat", quad: "egg-wiggle" },
-    Recognition: { emote: "🌟", triple: "egg-spin-cascade", quad: "egg-spotlight" },
-    "Big Ticket Events": { emote: "🎉", triple: "egg-tumble", quad: "egg-streamers" },
-    Collectibles: { emote: "💎", triple: "egg-spin-y", quad: "egg-trace" },
-    "Donation Bin": { emote: "🫶", triple: "egg-spin-x", quad: "egg-drop" },
-    Sammy: { emote: "🐟", triple: "egg-spin-flat", quad: "egg-school" },
+    "Dress Code Passes": { triple: "egg-spin-y", quad: "egg-falloff" },
+    Privileges: { triple: "egg-spin-x", quad: "egg-trace" },
+    "Food & Social": { triple: "egg-spin-flat", quad: "egg-wiggle" },
+    Recognition: { triple: "egg-spin-cascade", quad: "egg-spotlight" },
+    "Big Ticket Events": { triple: "egg-tumble", quad: "egg-streamers" },
+    Collectibles: { triple: "egg-spin-y", quad: "egg-trace" },
+    "Donation Bin": { triple: "egg-spin-x", quad: "egg-drop" },
+    Sammy: { triple: "egg-spin-flat", quad: "egg-school" },
   };
 
-  const DEFAULT_EGG = { emote: "✨", triple: "egg-spin-y", quad: "egg-wiggle" };
+  const DEFAULT_EGG = { triple: "egg-spin-y", quad: "egg-wiggle" };
 
   // The two quad effects that paint over the whole page rather than
   // animating the section's own cards.
@@ -43,6 +43,7 @@
   const registered = new Set(); // egg keys that exist on this page
   let found = loadFound();
   let counterEl = null;
+  let onAllFound = null; // app.js hands this over to reveal the theme switch
 
   const reducedMotion =
     window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -72,15 +73,29 @@
     found.add(id);
     saveFound();
     renderCounter(isNew);
+    if (isNew && allFound() && onAllFound) onAllFound();
     return isNew;
+  }
+
+  function foundCount() {
+    return [...found].filter((id) => registered.has(id.split(":")[0])).length;
+  }
+
+  function totalCount() {
+    return registered.size * 2;
+  }
+
+  // Every secret on this page. What dark mode is gated behind.
+  function allFound() {
+    return registered.size > 0 && foundCount() >= totalCount();
   }
 
   function renderCounter(celebrate) {
     if (!counterEl) return;
     // Only count secrets that actually exist on this page, so removing
     // a category never leaves the total unreachable.
-    const total = registered.size * 3;
-    const mine = [...found].filter((id) => registered.has(id.split(":")[0])).length;
+    const total = totalCount();
+    const mine = foundCount();
     if (mine === 0) {
       counterEl.hidden = true;
       return;
@@ -88,7 +103,7 @@
     counterEl.hidden = false;
     counterEl.textContent =
       mine >= total
-        ? `You found every secret on this page. All ${total} of them.`
+        ? `All ${total} secrets found. Dark mode unlocked.`
         : `Secrets found: ${mine} of ${total}`;
     if (celebrate) {
       counterEl.classList.remove("pop");
@@ -150,41 +165,19 @@
     }
   }
 
-  // Two taps: a couple of emoji drift up out of the heading.
-  function popEmote(triggerEl, emoji) {
-    if (reducedMotion) return;
-    const box = triggerEl.getBoundingClientRect();
-    for (let i = 0; i < 3; i++) {
-      const bit = document.createElement("span");
-      bit.className = "egg-emote";
-      bit.textContent = emoji;
-      bit.style.left = `${box.left + box.width * (0.25 + Math.random() * 0.5)}px`;
-      bit.style.top = `${box.top + window.scrollY}px`;
-      bit.style.position = "absolute";
-      bit.style.setProperty("--drift", `${(Math.random() - 0.5) * 70}px`);
-      bit.style.animationDelay = `${i * 0.09}s`;
-      document.body.appendChild(bit);
-      setTimeout(() => bit.remove(), 1700);
-    }
-  }
-
-  function trigger(key, kind, targetEl, triggerEl) {
+  function trigger(key, kind, targetEl) {
     const egg = EGGS[key] || DEFAULT_EGG;
-    if (kind === "emote") {
-      popEmote(triggerEl, egg.emote || DEFAULT_EGG.emote);
-    } else {
-      const effect = egg[kind];
-      const overlayFn = OVERLAY_EFFECTS[effect];
-      if (overlayFn) overlayFn();
-      else playEffect(targetEl, effect);
-    }
+    const effect = egg[kind];
+    const overlayFn = OVERLAY_EFFECTS[effect];
+    if (overlayFn) overlayFn();
+    else playEffect(targetEl, effect);
     recordFind(key, kind);
   }
 
-  // Counts taps in a burst, then decides once the burst ends: two fires
-  // the emoji, three the spin, four or more the section's trick.
-  // Deciding at the end is what keeps a longer burst from setting off
-  // every smaller tier on its way past.
+  // Counts taps in a burst, then decides once the burst ends: three
+  // fires the spin, four or more the section's trick. Deciding at the
+  // end is what keeps four taps from setting off the triple on the way
+  // past three.
   function attach(triggerEl, key, targetEl) {
     let taps = 0;
     let timer = null;
@@ -193,9 +186,8 @@
       taps += 1;
       clearTimeout(timer);
       timer = setTimeout(() => {
-        if (taps === 2) trigger(key, "emote", targetEl, triggerEl);
-        else if (taps === 3) trigger(key, "triple", targetEl, triggerEl);
-        else if (taps >= 4) trigger(key, "quad", targetEl, triggerEl);
+        if (taps === 3) trigger(key, "triple", targetEl);
+        else if (taps >= 4) trigger(key, "quad", targetEl);
         taps = 0;
       }, TAP_WINDOW_MS);
     });
@@ -210,12 +202,13 @@
     renderCounter(false);
   }
 
-  function init() {
+  function init(allFoundCallback) {
+    onAllFound = allFoundCallback || null;
     counterEl = document.getElementById("eggCounter");
     const sammy = document.querySelector(".hero__sammy");
     if (sammy) bind(sammy, "Sammy", sammy);
     renderCounter(false);
   }
 
-  window.Eggs = { bind: bind, init: init };
+  window.Eggs = { bind: bind, init: init, allFound: allFound };
 })();

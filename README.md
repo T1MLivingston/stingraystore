@@ -254,12 +254,18 @@ this structure exists to prevent.
 
 ### Dark and light mode
 
-The store opens in dark mode. A small unlabelled switch sits in the top
-bar (knob right means dark), and the choice is remembered per browser in
-`localStorage`. A small inline script
-in `index.html` applies the saved theme before the stylesheet paints, so a
-returning student never sees a flash of the wrong theme — if you move that
-script, keep it in `<head>` and ahead of the stylesheet.
+**The store opens in light mode, and dark mode has to be earned.** The
+switch is not in the top bar at all until a student has found every easter
+egg on the page (see "Easter eggs" below); after that it appears, and the
+choice is remembered per browser in `localStorage`. Someone who has not
+unlocked it never sees dark mode, and a browser that loses its saved
+unlock falls back to light rather than stranding a student in a theme they
+cannot switch out of.
+
+A small inline script in `index.html` applies the saved theme before the
+stylesheet paints, so a returning student never sees a flash of the wrong
+theme — if you move that script, keep it in `<head>` and ahead of the
+stylesheet.
 
 Both themes were checked against WCAG AA contrast on every text style on
 the page. If you retint something, re-check it rather than eyeballing it:
@@ -315,14 +321,16 @@ makes the note box required at checkout.
 | Privileges | Early Locker Pass | 4 |
 | Privileges | Tardy Pass | 5 |
 | Privileges | Stuffed Animal Buddy | 10 |
-| Privileges | Elevator Pass, you and a friend ⏳📝 | 30 |
 | Privileges | Chair Swap With a Teacher ⏳📝 | 20 |
 | Privileges | You Pick the P.E. Game ⏳📝 | 20 |
+| Privileges | Elevator Pass, you and a friend ⏳📝 | 30 |
 | Privileges | Erase One Conduct Point ⏳ | 40 |
 | Food & Social | Lunch With a Teacher | 8 |
+| Food & Social | Lunch With a Teacher and a Friend 📝 | 20 |
 | Food & Social | Group Lunch With a Teacher | 30 |
-| Recognition | Positive Call Home | 6 |
+| Food & Social | Pizza Party ⏳ | 100 |
 | Recognition | Positive Email Home | 4 |
+| Recognition | Positive Call Home | 6 |
 | Recognition | Shout-Out on the PA 📝 | 15 |
 | Recognition | Inspirational Quote on the PA 📝 | 15 |
 | Recognition | Celebration Board Square 📝 | 25 |
@@ -331,11 +339,21 @@ makes the note box required at checkout.
 | Big Ticket Events | Electronics Day ⏳ | 50 |
 | Big Ticket Events | Dance Party Upstairs ⏳ | 75 |
 | Big Ticket Events | Pie a Teacher ⏳📝 | 100 |
-| Collectibles | Collectible Card (locked above 2 conduct pts) | 50 |
-| Collectibles | VeeFriends Comic (locked above 2 conduct pts) | 100 |
-| Collectibles | Pizza Party | 100 |
+| Collectibles | Robot Super Sticker | 5 |
+| Collectibles | Topps Chrome Card | 10 |
+| Collectibles | Stingray Character Card | 20 |
+| Collectibles | Insert Card (locked above 3 conduct pts) | 50 |
+| Collectibles | VeeFriends Comic: Empathy (locked above 3 conduct pts) | 100 |
+| Collectibles | Tier One Card (locked above 2 conduct pts) ⏳ | 150 |
 | Donation Bin | Dress Down Day Fund | 10 |
 | Donation Bin | Themed Day Fund | 10 |
+
+**Collectibles are a ladder on purpose.** A sticker at 5 points means a
+student having an ordinary month can still walk away holding something;
+the Tier One Card at 150 is meant to be saved for, and rare enough that
+the one you want may already be gone. The tiers in between (Chrome card,
+character card, insert) give the ladder rungs so the jump from 5 to 150
+isn't a cliff.
 
 **Dress-down and conduct points.** A student above 3 conduct points cannot
 dress down, either way it is offered: `maxConduct: 3` locks the Full
@@ -402,6 +420,11 @@ math problems — one each for 5th through 12th grade. There are two prizes:
   `36pi`, `36 PI`, and ` 36pi ` all pass the same problem. When a problem
   has more than one reasonable form, list them all: `a: ["10", "x=10",
   "x = 10"]`.
+- **Triple-clicking an answer box fills in the answer.** A deliberate
+  back door, on the theory that a student who pokes at an input box until
+  it gives up its answer has earned the jokes as much as one who did the
+  algebra. Remove the `input.addEventListener("click", ...)` block in
+  `js/challenges.js` to close it.
 - Which grades a student has beaten is stored in that browser's
   `localStorage`. It is a motivator, not a security boundary — anyone who opens dev tools can
   clear or set it, and that is fine. Nothing behind it is sensitive; the
@@ -416,6 +439,19 @@ that is how a dad joke works. The same joke never comes up twice in a row.
 Edit the `DAD_JOKES` array in `js/jokes.js` to add or cut. Keep them
 school appropriate — this sits on a public page with the school's name at
 the top of it.
+
+## Entering a code
+
+There is no request button in the top bar. The only way to open the cart
+is the lookup card's own button, which means a student has to put their
+code in before they can send anything — the code is what staff need on
+every row anyway.
+
+Before a code is checked the button says **Check**. Once one is accepted
+it becomes **Make a Request** (red, with the cart count), and the code
+input locks so it cannot be changed mid-request. Swapping codes takes the
+small **Enter a different code** button underneath, which clears the whole
+lookup and puts the card back to **Check**.
 
 ## One request per code per day
 
@@ -435,34 +471,35 @@ person, the same as every other decision in this system.
 
 ## Easter eggs
 
-Kids poke at things. `js/eggs.js` gives them something to find, in three
-tiers on every section heading: **two taps pops an emoji, three taps spins
-the cards, four taps sets off that section's own trick.** Each section has
-its own set, so finding one doesn't spoil the rest.
+Kids poke at things. `js/eggs.js` gives them something to find, in two
+tiers on every section heading: **three taps spins the cards, four taps
+sets off that section's own trick.** Each section has its own pair, so
+finding one doesn't spoil the rest.
 
-| Section | Two taps | Three taps | Four taps |
-|---|---|---|---|
-| Dress Code Passes | 👕 | spin on the Y axis | cards fall off and climb back |
-| Privileges | 🎟️ | spin on the X axis | an outline traces around each card |
-| Food & Social | 🍕 | flat spin | a case of the wiggles |
-| Recognition | 🌟 | spins in order across the row | each card takes the spotlight |
-| Big Ticket Events | 🎉 | tumble | confetti streams across the screen |
-| Collectibles | 💎 | spin on the Y axis | an outline traces around each card |
-| Donation Bin | 🫶 | spin on the X axis | points drop into the bin |
-| Sammy (hero image) | 🐟 | Sammy spins | a school of stingrays swims across |
+| Section | Three taps | Four taps |
+|---|---|---|
+| Dress Code Passes | spin on the Y axis | cards fall off and climb back |
+| Privileges | spin on the X axis | an outline traces around each card |
+| Food & Social | flat spin | a case of the wiggles |
+| Recognition | spins in order across the row | each card takes the spotlight |
+| Big Ticket Events | tumble | confetti streams across the screen |
+| Collectibles | spin on the Y axis | an outline traces around each card |
+| Donation Bin | spin on the X axis | points drop into the bin |
+| Sammy (hero image) | Sammy spins | a school of stingrays swims across |
 
-A counter in the footer keeps score ("Secrets found: 7 of 24") once a
-student finds their first one. The Donation Bin's three secrets only count
+**Finding every one unlocks dark mode.** See below.
+
+A counter in the footer keeps score ("Secrets found: 7 of 16") once a
+student finds their first one. The Donation Bin's two secrets only count
 toward the total once the math challenge has unlocked that section, so the
 number goes up when it appears rather than showing an unreachable goal. It
 is stored in that browser's `localStorage` — nothing is sent anywhere,
 nothing is tied to a student, and clearing site data resets it.
 
 Taps are counted in one burst and judged when the burst ends, which is why
-four taps doesn't set off the two- and three-tap effects on its way past.
-A single tap does nothing at all. Anyone whose device asks for reduced
-motion gets a quiet fade instead of the animation, and still gets the
-count.
+four taps doesn't set off the three-tap spin on its way past. One or two
+taps do nothing at all. Anyone whose device asks for reduced motion gets a
+quiet fade instead of the animation, and still gets the count.
 
 Every effect uses flat color — there are no gradients anywhere in this
 file, by design. To add, change, or remove one, edit the `EGGS` map at the

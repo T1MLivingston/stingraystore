@@ -10,12 +10,16 @@
   // Runs before the stylesheet paints, so a returning student never sees
   // a flash of the other theme.
   (function () {
+    var theme = "light";
     try {
-      var saved = localStorage.getItem("stingray.theme");
-      document.documentElement.setAttribute("data-theme", saved === "light" ? "light" : "dark");
+      // Dark mode is a reward for finding every easter egg, so it only
+      // applies when it has been unlocked AND chosen.
+      var unlocked = localStorage.getItem("stingray.darkUnlocked") === "1";
+      if (unlocked && localStorage.getItem("stingray.theme") === "dark") theme = "dark";
     } catch (e) {
-      document.documentElement.setAttribute("data-theme", "dark");
+      /* fall through to light */
     }
+    document.documentElement.setAttribute("data-theme", theme);
   })();
 </script>
 </head>
@@ -28,7 +32,7 @@
     <div class="store" id="storeNameLabel">Stingray Store</div>
   </div>
   <div class="topbar__spacer"></div>
-  <button class="theme-switch" id="themeToggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode">
+  <button class="theme-switch" id="themeToggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode" hidden>
     <span class="theme-switch__track" aria-hidden="true">
       <span class="theme-switch__glyph theme-switch__glyph--sun">☀</span>
       <span class="theme-switch__glyph theme-switch__glyph--moon">☾</span>
@@ -38,9 +42,6 @@
   <div class="mini-balance" id="miniBalance" hidden>
     <span id="miniBalanceValue">0</span> pts
   </div>
-  <button class="cart-btn" id="openCartBtn" aria-haspopup="dialog">
-    <span class="label">Make a Request</span> <span class="cart-count" id="cartCount">0</span>
-  </button>
 </header>
 
 <section class="hero">
@@ -60,6 +61,7 @@
         <button id="lookupBtn"><span class="label" id="lookupBtnLabel">Check</span><span class="cart-count" id="lookupCartCount" hidden>0</span></button>
       </div>
       <div id="lookupResult"></div>
+      <button class="code-reset" id="changeCodeBtn" type="button" hidden>Enter a different code</button>
       <input type="hidden" id="commendationInput" value="" />
       <input type="hidden" id="conductInput" value="" />
     </div>

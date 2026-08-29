@@ -184,6 +184,23 @@ const CHALLENGES = [
       msg.textContent = "Already solved.";
     }
 
+    // A hidden shortcut: triple-click the answer box and it fills itself
+    // in. Solving all eight by hand is the intended route to the joke
+    // vault; this is the back door for anyone who pokes at things.
+    let clicks = 0;
+    let clickTimer = null;
+    input.addEventListener("click", () => {
+      clicks += 1;
+      clearTimeout(clickTimer);
+      clickTimer = setTimeout(() => {
+        if (clicks >= 3) {
+          input.value = problem.a[0];
+          input.focus();
+        }
+        clicks = 0;
+      }, 500);
+    });
+
     card.addEventListener("submit", (event) => {
       event.preventDefault();
       if (!input.value.trim()) return;

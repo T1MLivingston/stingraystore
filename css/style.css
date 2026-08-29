@@ -687,18 +687,25 @@ button.checkout-btn:disabled { background: var(--border); cursor: not-allowed; }
   pointer-events: none;
 }
 
+/* Size, shape, spin, sway and speed are all set per piece in app.js,
+   so every burst looks different. */
 .confetti-piece {
   position: absolute;
   top: -14px;
-  width: 8px;
-  height: 14px;
   opacity: 0.95;
   animation: confettiFall 1.8s ease-in forwards;
 }
 
+.confetti-piece--rect { height: 9px !important; border-radius: 1px; }
+.confetti-piece--dot { border-radius: 50%; }
+.confetti-piece--sq { border-radius: 1px; }
+
 @keyframes confettiFall {
-  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(360px) rotate(560deg); opacity: 0; }
+  0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 1; }
+  100% {
+    transform: translateY(360px) translateX(var(--sway, 0)) rotate(var(--spin, 560deg));
+    opacity: 0;
+  }
 }
 
 .points-modal__body { position: relative; z-index: 1; margin-bottom: 18px; }
@@ -942,22 +949,6 @@ ul.note-prompts li + li { margin-top: 0.3rem; }
   0% { transform: scale(1); }
   40% { transform: scale(1.18); }
   100% { transform: scale(1); }
-}
-
-/* ---- two taps: an emoji pops out of the heading ---- */
-
-.egg-emote {
-  position: absolute;
-  pointer-events: none;
-  font-size: 1.6rem;
-  animation: egg-emote-rise 1.4s ease-out forwards;
-  z-index: 60;
-}
-
-@keyframes egg-emote-rise {
-  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
-  20% { transform: translate(0, -10px) scale(1.15); opacity: 1; }
-  100% { transform: translate(var(--drift, 0), -70px) scale(1); opacity: 0; }
 }
 
 /* ---- three taps: the cards spin ---- */
@@ -1461,3 +1452,31 @@ textarea::placeholder { color: var(--text-muted); opacity: 0.75; }
 }
 
 .joke-box__punch[hidden] { display: none; }
+
+/* Small button under the lookup card for swapping a locked-in code. */
+.code-reset {
+  margin-top: 10px;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+
+.code-reset:hover { color: var(--text); border-color: var(--blue-light); }
+.code-reset[hidden] { display: none; }
+
+/* a locked code reads as settled rather than editable */
+.lookup-row input[readonly] {
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: default;
+}
+
+/* the lookup button is the only cart button now, so it takes the pulse */
+.lookup-row button.bump { animation: cartBump 0.35s ease; }

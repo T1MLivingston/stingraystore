@@ -26,15 +26,14 @@
     lookupBtn: document.getElementById("lookupBtn"),
     lookupBtnLabel: document.getElementById("lookupBtnLabel"),
     lookupCartCount: document.getElementById("lookupCartCount"),
+    changeCodeBtn: document.getElementById("changeCodeBtn"),
     lookupResult: document.getElementById("lookupResult"),
     miniBalance: document.getElementById("miniBalance"),
     miniBalanceValue: document.getElementById("miniBalanceValue"),
     catalog: document.getElementById("catalog"),
-    openCartBtn: document.getElementById("openCartBtn"),
     closeCartBtn: document.getElementById("closeCartBtn"),
     cartDrawer: document.getElementById("cartDrawer"),
     overlay: document.getElementById("overlay"),
-    cartCount: document.getElementById("cartCount"),
     cartBody: document.getElementById("cartBody"),
     summaryItems: document.getElementById("summaryItems"),
     summaryTotal: document.getElementById("summaryTotal"),
@@ -112,6 +111,35 @@
   }
 
   // ---- Theme ----
+  // Dark mode is the reward for finding every easter egg. Until then the
+  // switch is not in the top bar at all, which is what makes finding it
+  // worth something.
+  function darkUnlocked() {
+    try {
+      return window.localStorage.getItem("stingray.darkUnlocked") === "1";
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function unlockDark() {
+    try {
+      window.localStorage.setItem("stingray.darkUnlocked", "1");
+    } catch (err) {
+      /* the switch just won't survive a reload */
+    }
+    els.themeToggle.hidden = false;
+  }
+
+  function refreshThemeSwitch() {
+    const unlocked = darkUnlocked() || (window.Eggs && window.Eggs.allFound());
+    els.themeToggle.hidden = !unlocked;
+    if (unlocked) unlockDark();
+    // A locked-out student should never be left sitting in dark mode.
+    if (!unlocked && currentTheme() === "dark") applyTheme("light");
+  }
+
+
   // The stored choice is applied by an inline script in index.html before
   // first paint; this only keeps the button in sync and handles clicks.
   function currentTheme() {
@@ -176,10 +204,8 @@
         <div class="lookup-msg ok">
           Verified. You have <strong>${record.commendations} commendation pts</strong> and
           <strong>${record.conduct} conduct pts</strong> this month.
-          <button class="link-btn" id="clearLookupBtn">Not you? Clear</button>
         </div>
       `;
-      document.getElementById("clearLookupBtn").addEventListener("click", resetLookup);
       openPointsModal(record);
     } else {
       clearVerification();
@@ -207,14 +233,25 @@
 
   function launchConfetti(record) {
     const colors = ["#e63946", "#2d6cdf", "#f59f00", "#2f9e44", "#7048e8", "#0c8599"];
+    const shapes = ["sq", "rect", "dot"];
     const total = confettiPieceCount(record);
     els.confettiLayer.innerHTML = "";
     for (let i = 0; i < total; i++) {
       const piece = document.createElement("div");
-      piece.className = "confetti-piece";
+      // Small pieces, and a different mix of shapes, sizes, spins and
+      // speeds every burst, so no two celebrations look the same.
+      const size = 3 + Math.random() * 4;
+      piece.className = `confetti-piece confetti-piece--${
+        shapes[Math.floor(Math.random() * shapes.length)]
+      }`;
       piece.style.left = `${Math.random() * 100}%`;
       piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-      piece.style.animationDelay = `${Math.random() * 0.3}s`;
+      piece.style.width = `${size}px`;
+      piece.style.height = `${size}px`;
+      piece.style.animationDelay = `${Math.random() * 0.6}s`;
+      piece.style.animationDuration = `${1.1 + Math.random() * 1.1}s`;
+      piece.style.setProperty("--spin", `${(Math.random() - 0.5) * 900}deg`);
+      piece.style.setProperty("--sway", `${(Math.random() - 0.5) * 90}px`);
       els.confettiLayer.appendChild(piece);
     }
     setTimeout(() => {
@@ -278,17 +315,12 @@
     const asRequest = lookupButtonIsRequest();
     els.lookupBtnLabel.textContent = asRequest ? "Make a Request" : "Check";
     els.lookupBtn.classList.toggle("as-request", asRequest);
+    // An accepted code is locked in. Swapping it takes the small button
+    // underneath, so it cannot happen by accident mid-request.
+    els.lookupCode.readOnly = asRequest;
+    els.changeCodeBtn.hidden = !asRequest;
     els.lookupCartCount.hidden = !asRequest;
     els.lookupCartCount.textContent = state.cart.length;
-    updateTopCartButton();
-  }
-
-  // Once a code is in, the lookup card carries the request button and the
-  // top-bar copy goes away for good. Reaching the cart from down in the
-  // catalog means scrolling back to the card, which is the tradeoff for
-  // keeping the top bar clear.
-  function updateTopCartButton() {
-    els.openCartBtn.classList.toggle("is-hidden", lookupButtonIsRequest());
   }
 
   function updateMiniBalance() {
@@ -408,11 +440,13 @@
     }
   }
 
+  // The lookup card's button is the only cart button now, so that is
+  // what pulses when something is added.
   function bumpCartButton() {
-    els.openCartBtn.classList.remove("bump");
+    els.lookupBtn.classList.remove("bump");
     // force reflow so the animation can restart on rapid adds
-    void els.openCartBtn.offsetWidth;
-    els.openCartBtn.classList.add("bump");
+    void els.lookupBtn.offsetWidth;
+    els.lookupBtn.classList.add("bump");
   }
 
   function removeFromCart(id) {
@@ -421,7 +455,6 @@
   }
 
   function renderCart() {
-    els.cartCount.textContent = state.cart.length;
 
     if (state.cart.length === 0) {
       els.cartBody.innerHTML = '<p class="cart-empty">Your cart is empty. Add a reward to get started!</p>';
@@ -786,7 +819,6 @@
       performLookup();
     }
   });
-  els.openCartBtn.addEventListener("click", openCart);
   els.closeCartBtn.addEventListener("click", closeCart);
   els.overlay.addEventListener("click", closeCart);
   els.checkoutBtn.addEventListener("click", () => {
@@ -800,6 +832,7 @@
   els.detailModalCloseBtn.addEventListener("click", closeDetailModal);
   els.quoteSubmitBtn.addEventListener("click", submitQuote);
   els.themeToggle.addEventListener("click", toggleTheme);
+  els.changeCodeBtn.addEventListener("click", resetLookup);
 
   applyConfig();
   applyTheme(currentTheme());
@@ -811,7 +844,8 @@
   }
   if (window.Jokes) window.Jokes.init();
   renderAll();
-  if (window.Eggs) window.Eggs.init();
+  if (window.Eggs) window.Eggs.init(refreshThemeSwitch);
+  refreshThemeSwitch();
   els.wallOfFamePolicy.textContent = CONFIG.wallOfFamePolicyNote;
   els.wallOfFameSubmit.hidden = !CONFIG.wallOfFameFormUrl;
   loadWallOfFame();
