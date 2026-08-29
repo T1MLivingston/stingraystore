@@ -4,6 +4,7 @@
   const state = {
     cart: [], // array of item ids
     verified: false, // true once a code has resolved against data/points.json
+    lookupOnScreen: true, // is the lookup card currently in view
   };
 
   const els = {
@@ -13,8 +14,6 @@
     mottoText: document.getElementById("mottoText"),
     heroTitle: document.getElementById("heroTitle"),
     themeToggle: document.getElementById("themeToggle"),
-    themeToggleIcon: document.getElementById("themeToggleIcon"),
-    themeToggleLabel: document.getElementById("themeToggleLabel"),
     footMotto: document.getElementById("footMotto"),
     footSchoolName: document.getElementById("footSchoolName"),
     footWebsite: document.getElementById("footWebsite"),
@@ -24,6 +23,9 @@
     conductInput: document.getElementById("conductInput"),
     lookupCode: document.getElementById("lookupCode"),
     lookupBtn: document.getElementById("lookupBtn"),
+    lookupBtnLabel: document.getElementById("lookupBtnLabel"),
+    lookupCartCount: document.getElementById("lookupCartCount"),
+    lookupSection: document.querySelector(".lookup-section"),
     lookupResult: document.getElementById("lookupResult"),
     miniBalance: document.getElementById("miniBalance"),
     miniBalanceValue: document.getElementById("miniBalanceValue"),
@@ -118,10 +120,7 @@
     } catch (err) {
       /* the choice just won't survive a reload */
     }
-    const goingTo = theme === "dark" ? "Light" : "Dark";
-    els.themeToggleIcon.textContent = theme === "dark" ? "☀" : "☾";
-    els.themeToggleLabel.textContent = goingTo;
-    els.themeToggle.setAttribute("aria-label", `Switch to ${goingTo.toLowerCase()} mode`);
+    els.themeToggle.setAttribute("aria-checked", theme === "dark" ? "true" : "false");
   }
 
   function toggleTheme() {
@@ -240,6 +239,46 @@
     els.conductInput.value = "";
     clearVerification();
     renderAll();
+  }
+
+  // Once a code checks out, the lookup card's own button becomes the way
+  // to open the cart, so the call to action sits where the student is
+  // already looking instead of up in the corner.
+  function lookupButtonIsRequest() {
+    return state.verified;
+  }
+
+  function updateLookupButton() {
+    const asRequest = lookupButtonIsRequest();
+    els.lookupBtnLabel.textContent = asRequest ? "Make a Request" : "Check";
+    els.lookupBtn.classList.toggle("as-request", asRequest);
+    els.lookupCartCount.hidden = !asRequest;
+    els.lookupCartCount.textContent = state.cart.length;
+    updateTopCartButton();
+  }
+
+  // The top-bar button is the fallback: it hides only while the lookup
+  // card's own request button is on screen, so there is never a moment
+  // with no way to reach the cart.
+  function updateTopCartButton() {
+    const duplicated = lookupButtonIsRequest() && state.lookupOnScreen;
+    els.openCartBtn.classList.toggle("is-hidden", duplicated);
+  }
+
+  function watchLookupVisibility() {
+    if (!els.lookupSection || !("IntersectionObserver" in window)) {
+      state.lookupOnScreen = false;
+      updateTopCartButton();
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        state.lookupOnScreen = entries[0].isIntersecting;
+        updateTopCartButton();
+      },
+      { threshold: 0.35 }
+    );
+    observer.observe(els.lookupSection);
   }
 
   function updateMiniBalance() {
@@ -416,6 +455,7 @@
     renderCatalog();
     renderCart();
     updateMiniBalance();
+    updateLookupButton();
   }
 
   function openCart() {
@@ -674,7 +714,10 @@
   // Wiring
   els.commendationInput.addEventListener("input", renderAll);
   els.conductInput.addEventListener("input", renderAll);
-  els.lookupBtn.addEventListener("click", performLookup);
+  els.lookupBtn.addEventListener("click", () => {
+    if (lookupButtonIsRequest()) openCart();
+    else performLookup();
+  });
   els.lookupCode.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -701,6 +744,7 @@
   if (window.Challenges) window.Challenges.init(renderAll);
   renderAll();
   if (window.Eggs) window.Eggs.init();
+  watchLookupVisibility();
   els.wallOfFamePolicy.textContent = CONFIG.wallOfFamePolicyNote;
   els.wallOfFameSubmit.hidden = !CONFIG.wallOfFameFormUrl;
   loadWallOfFame();

@@ -1137,34 +1137,64 @@ img.egg-school-ray {
    THEME TOGGLE
    ============================================================ */
 
-.theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin-right: 10px;
-  padding: 8px 14px;
-  border: 1px solid var(--border);
+.theme-switch {
+  margin-right: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.theme-switch__track {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
   border-radius: 999px;
   background: var(--surface-2);
-  color: var(--text);
-  font: inherit;
-  font-size: 0.82rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  border: 1px solid var(--border);
+  transition: background 0.25s ease, border-color 0.25s ease;
 }
 
-.theme-toggle:hover {
-  background: var(--surface);
-  border-color: var(--blue-light);
-  transform: translateY(-2px);
+.theme-switch:hover .theme-switch__track { border-color: var(--blue-light); }
+
+.theme-switch:focus-visible .theme-switch__track {
+  outline: 2px solid var(--blue-light);
+  outline-offset: 2px;
 }
 
-.theme-toggle__icon { font-size: 0.95rem; line-height: 1; }
+/* both glyphs sit on the track; the knob slides over one of them */
+.theme-switch__glyph {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.72rem;
+  line-height: 1;
+  opacity: 0.75;
+  pointer-events: none;
+}
 
-@media (max-width: 620px) {
-  .theme-toggle__label { display: none; }
-  .theme-toggle { padding: 8px 11px; margin-right: 6px; }
+.theme-switch__glyph--sun { left: 7px; color: #f0a500; }
+.theme-switch__glyph--moon { right: 7px; color: #9fbdf4; }
+
+.theme-switch__knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--white);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+/* checked means dark, so the knob rests over the moon */
+.theme-switch[aria-checked="true"] .theme-switch__knob { transform: translateX(24px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-switch__knob { transition: none; }
 }
 
 /* ============================================================
@@ -1328,3 +1358,41 @@ img.egg-school-ray {
 /* placeholders, so they read as hints in both themes */
 input::placeholder,
 textarea::placeholder { color: var(--text-muted); opacity: 0.75; }
+
+/* ============================================================
+   THE REQUEST BUTTON MOVES INTO THE LOOKUP CARD
+   Once a code is verified, the card's own Check button becomes
+   "Make a Request", and the top-bar copy steps aside while that
+   one is on screen.
+   ============================================================ */
+
+.lookup-row button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.lookup-row button.as-request {
+  background: var(--red);
+}
+
+.lookup-row button.as-request:hover {
+  background: var(--red-dark);
+  box-shadow: 0 8px 18px rgba(230, 57, 70, 0.4);
+}
+
+.lookup-row button .cart-count[hidden] { display: none; }
+
+.cart-btn {
+  transition: background 0.18s ease, transform 0.18s ease,
+    box-shadow 0.18s ease, opacity 0.22s ease;
+}
+
+/* kept in the layout rather than removed, so the top bar does not
+   reflow every time the lookup card scrolls in and out of view */
+.cart-btn.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px);
+}

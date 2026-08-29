@@ -28,9 +28,12 @@
     <div class="store" id="storeNameLabel">Stingray Store</div>
   </div>
   <div class="topbar__spacer"></div>
-  <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch between dark and light">
-    <span class="theme-toggle__icon" id="themeToggleIcon">☾</span>
-    <span class="theme-toggle__label" id="themeToggleLabel">Dark</span>
+  <button class="theme-switch" id="themeToggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode">
+    <span class="theme-switch__track" aria-hidden="true">
+      <span class="theme-switch__glyph theme-switch__glyph--sun">☀</span>
+      <span class="theme-switch__glyph theme-switch__glyph--moon">☾</span>
+      <span class="theme-switch__knob"></span>
+    </span>
   </button>
   <div class="mini-balance" id="miniBalance" hidden>
     <span id="miniBalanceValue">0</span> pts
@@ -54,7 +57,7 @@
       <h2>Check My Points <img class="lookup-card__sammy" src="assets/sammy-backpack.png" alt="Backpack Sammy" /></h2>
       <div class="lookup-row">
         <input type="text" id="lookupCode" placeholder="Enter your store code" autocomplete="off" />
-        <button id="lookupBtn">Check</button>
+        <button id="lookupBtn"><span class="label" id="lookupBtnLabel">Check</span><span class="cart-count" id="lookupCartCount" hidden>0</span></button>
       </div>
       <div id="lookupResult"></div>
       <input type="hidden" id="commendationInput" value="" />

@@ -253,8 +253,9 @@ this structure exists to prevent.
 
 ### Dark and light mode
 
-The store opens in dark mode. The toggle sits in the top bar, and the
-choice is remembered per browser in `localStorage`. A small inline script
+The store opens in dark mode. A small unlabelled switch sits in the top
+bar (knob right means dark), and the choice is remembered per browser in
+`localStorage`. A small inline script
 in `index.html` applies the saved theme before the stylesheet paints, so a
 returning student never sees a flash of the wrong theme — if you move that
 script, keep it in `<head>` and ahead of the stylesheet.
@@ -364,6 +365,20 @@ schoolwide dress-down day, 1,500 → a themed day with the theme voted on by
 students), not per-student rewards. This static site has no shared counter
 to track those totals live — staff need to tally donations from submitted
 requests and announce progress separately.
+
+### Where the request button lives
+
+Before a code is checked, the lookup card's button says **Check** and the
+top bar carries **Make a Request**. Once a code verifies, the lookup
+card's own button turns into **Make a Request** (red, with the cart
+count), because that is where the student is already looking.
+
+The top-bar button does not simply disappear — it hides only while the
+lookup card's version is actually on screen, and slides back in as soon
+as the student scrolls into the catalog. Otherwise a student browsing 28
+items would have no way to reach their cart without scrolling back to the
+top. Clearing the code ("Not you? Clear") puts both buttons back the way
+they started.
 
 ## Math challenges
 
