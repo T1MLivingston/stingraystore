@@ -38,6 +38,8 @@
     modalSummary: document.getElementById("modalSummary"),
     studentCode: document.getElementById("studentCode"),
     studentNote: document.getElementById("studentNote"),
+    studentNoteLabel: document.getElementById("studentNoteLabel"),
+    notePrompts: document.getElementById("notePrompts"),
     sendRequestBtn: document.getElementById("sendRequestBtn"),
     copyStatus: document.getElementById("copyStatus"),
     hiddenFormFrame: document.getElementById("hiddenFormFrame"),
@@ -176,7 +178,9 @@
 
   function openDetailModal(item) {
     els.detailModalTitle.textContent = item.name;
-    els.detailModalText.textContent = item.detail;
+    els.detailModalText.textContent = item.approval
+      ? `${item.detail}\n\nPending approval: ${item.approval}.`
+      : item.detail;
     els.detailModalWrap.classList.add("open");
   }
 
@@ -206,6 +210,12 @@
     return typeof item.maxConduct === "number" && getConduct() > item.maxConduct;
   }
 
+  // Items that can't be acted on unless the student writes something
+  // specific in the note (which teacher agreed, what the act is, and so on).
+  function cartItemsNeedingNote() {
+    return state.cart.map(itemById).filter((item) => item && item.notePrompt);
+  }
+
   function cartTotal() {
     return state.cart.reduce((sum, id) => sum + (itemById(id)?.cost || 0), 0);
   }
@@ -226,6 +236,7 @@
     });
 
     section.appendChild(grid);
+    if (window.Eggs) window.Eggs.bind(title, cat, grid);
     return section;
   }
 
@@ -263,6 +274,7 @@
     card.innerHTML = `
       <h3>${item.name}</h3>
       <p class="desc">${item.desc}</p>
+      ${item.approval ? `<div class="approval-badge" title="${escapeAttr(item.approval)}">Pending approval</div>` : ""}
       ${item.detail ? `<button class="detail-link">Learn more</button>` : ""}
       <div class="cost">${item.cost} pts</div>
       ${locked ? `<div class="restriction">Unavailable. Requires ${item.maxConduct} or fewer conduct points.</div>` : ""}
@@ -370,7 +382,8 @@
     const note = els.studentNote.value.trim();
     const items = state.cart.map((id) => {
       const item = itemById(id);
-      return `${item.name} (${item.cost} pts)`;
+      const flag = item.approval ? ` [PENDING APPROVAL: ${item.approval}]` : "";
+      return `${item.name} (${item.cost} pts)${flag}`;
     });
 
     return {
@@ -436,6 +449,15 @@
       <div class="line"><span>Total cost</span><span>${total} pts</span></div>
       <div class="line"><span>Your balance</span><span>${getCommendations()} pts ${state.verified ? "(verified)" : "(not checked)"}</span></div>
     `;
+    const needNote = cartItemsNeedingNote();
+    els.notePrompts.hidden = needNote.length === 0;
+    els.notePrompts.innerHTML = needNote
+      .map((item) => `<li><strong>${escapeHtml(item.name)}:</strong> ${escapeHtml(item.notePrompt)}</li>`)
+      .join("");
+    els.studentNoteLabel.textContent = needNote.length
+      ? "Note to staff (required for what you picked)"
+      : "Note to staff (optional)";
+
     els.falseClaimField.hidden = total <= getCommendations();
     els.falseClaimCheck.checked = false;
     els.copyStatus.textContent = "";
@@ -469,6 +491,13 @@
     if (!els.studentCode.value.trim()) {
       els.studentCode.focus();
       els.copyStatus.textContent = "Please enter your redemption code first.";
+      els.copyStatus.style.color = "#c42836";
+      return;
+    }
+    if (cartItemsNeedingNote().length > 0 && !els.studentNote.value.trim()) {
+      els.studentNote.focus();
+      els.copyStatus.textContent =
+        "One of your rewards needs details in the note. See the list above it.";
       els.copyStatus.style.color = "#c42836";
       return;
     }
@@ -514,6 +543,10 @@
     const div = document.createElement("div");
     div.textContent = s;
     return div.innerHTML;
+  }
+
+  function escapeAttr(s) {
+    return escapeHtml(s).replace(/"/g, "&quot;");
   }
 
   function renderWallOfFame(rows) {
@@ -600,6 +633,7 @@
 
   applyConfig();
   renderAll();
+  if (window.Eggs) window.Eggs.init();
   els.wallOfFamePolicy.textContent = CONFIG.wallOfFamePolicyNote;
   els.wallOfFameSubmit.hidden = !CONFIG.wallOfFameFormUrl;
   loadWallOfFame();

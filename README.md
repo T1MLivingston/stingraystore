@@ -192,8 +192,10 @@ Everything you're likely to change lives in two files:
 - **`js/config.js`** — school name, motto, logo path, website link, and
   the conduct-points explainer text.
 - **`js/items.js`** — the reward catalog. Add/remove/edit items, set the
-  point cost, and optionally set `maxConduct` to lock an item above a
-  certain conduct-point total.
+  point cost, and optionally set `maxConduct` (lock the item above a
+  conduct-point total), `approval` (who has to say yes), or `notePrompt`
+  (what the student must write in the note).
+- **`js/eggs.js`** — the hidden tap animations. See "Easter eggs" below.
 
 Colors and layout live in `css/style.css`, controlled by CSS variables at
 the top (`--blue-dark`, `--blue`, `--blue-light`, `--red`).
@@ -235,29 +237,105 @@ Costs are ballparked off Ms. Malca's examples (3 pts for an untucked-shirt
 pass) — treat every number here as a starting point to tune once you see
 real monthly point totals.
 
+A ⏳ marks an item that shows a **Pending approval** badge, and 📝 one that
+makes the note box required at checkout.
+
 | Category | Item | Cost |
 |---|---|---|
 | Dress Code | Untucked Shirt Pass | 3 |
 | Dress Code | Fancy Shoes Pass | 5 |
 | Dress Code | Wear a Hat Pass | 5 |
-| Dress Code | Full Dress-Down Day (locked above 2 conduct pts) | 15 |
+| Dress Code | Full Dress-Down Day (locked above 3 conduct pts) | 15 |
 | Privileges | Early Locker Pass | 4 |
 | Privileges | Tardy Pass | 5 |
+| Privileges | Stuffed Animal Buddy | 10 |
+| Privileges | Elevator Pass, you and a friend ⏳📝 | 12 |
+| Privileges | Chair Swap With a Teacher ⏳📝 | 20 |
+| Privileges | You Pick the P.E. Game ⏳📝 | 20 |
+| Privileges | Erase One Conduct Point ⏳ | 40 |
 | Food & Social | Lunch With a Teacher | 8 |
 | Food & Social | Group Lunch With a Teacher | 30 |
 | Recognition | Positive Call Home | 6 |
 | Recognition | Positive Email Home | 4 |
+| Recognition | Shout-Out on the PA 📝 | 15 |
+| Recognition | Inspirational Quote on the PA 📝 | 15 |
+| Recognition | Celebration Board Square 📝 | 25 |
+| Recognition | Read the Announcements ⏳ | 30 |
+| Big Ticket Events | Performance at Lunch ⏳📝 | 35 |
+| Big Ticket Events | Electronics Day ⏳ | 50 |
+| Big Ticket Events | Dance Party Upstairs ⏳ | 75 |
+| Big Ticket Events | Pie a Teacher ⏳📝 | 100 |
 | Collectibles | Collectible Card (locked above 2 conduct pts) | 50 |
 | Collectibles | VeeFriends Comic (locked above 2 conduct pts) | 100 |
 | Collectibles | Pizza Party | 100 |
 | Donation Bin | Dress Down Day Fund | 10 |
 | Donation Bin | Themed Day Fund | 10 |
 
+**Dress-down and conduct points.** A student above 3 conduct points cannot
+dress down, either way it is offered: `maxConduct: 3` locks the Full
+Dress-Down Day card in the store, and `CONFIG.dressDownMaxConduct` (also 3)
+decides who sees the free monthly Dress-Down Day banner. Change both
+together or the two will disagree.
+
+**Pending approval** is a label, not a workflow. The badge tells the student
+up front that someone has to say yes, and the words ride along into the
+sheet's Items column as `[PENDING APPROVAL: ...]` so staff see it there too.
+The actual yes or no still happens the way everything else here does — a
+person typing into the Status column.
+
+**Note-required items** won't submit with an empty note. The checkout screen
+lists exactly what to write for each one ("Name the teacher and the class
+period"), and Submit is refused until the box has something in it. This is
+what makes "the teacher has to agree first" enforceable at all: the student
+has to name them, and staff can check.
+
+**A word on food.** New items deliberately avoid food. Anything edible drags
+in allergies, dietary restrictions, and parent permission, none of which
+this site can track. The two food items that predate this (Lunch With a
+Teacher, Pizza Party) were left alone — worth a look if you want the rule
+applied consistently.
+
 **Donation Bin** items are running group goals (e.g. 1,000 points → a
 schoolwide dress-down day, 1,500 → a themed day with the theme voted on by
 students), not per-student rewards. This static site has no shared counter
 to track those totals live — staff need to tally donations from submitted
 requests and announce progress separately.
+
+## Easter eggs
+
+Kids poke at things. `js/eggs.js` gives them something to find: **triple-tap
+a category heading and its cards flip; quadruple-tap and the section does
+something of its own.** Each section has its own pair, so finding one
+doesn't spoil the rest.
+
+| Section | Triple-tap | Quadruple-tap |
+|---|---|---|
+| Dress Code Passes | cards spin on their Y axis | cards change outfits (colors cycle) |
+| Privileges | cards spin on their X axis | cards take a hall pass across the room |
+| Food & Social | cards spin flat | a case of the wiggles |
+| Recognition | cards flip one after another | each card gets a turn in the spotlight |
+| Big Ticket Events | cards tumble | the whole section throws a dance party |
+| Collectibles | cards spin on their Y axis | the cards go foil |
+| Donation Bin | cards spin on their X axis | points drop into the bin |
+| Sammy (hero image) | Sammy spins | a school of stingrays swims across |
+
+A counter in the footer keeps score ("Secrets found: 3 of 16") once a
+student finds their first one. It is stored in that browser's
+`localStorage` — nothing is sent anywhere, nothing is tied to a student,
+and clearing site data resets it. The total counts only the sections
+actually on the page, so deleting a category can't strand it at an
+unreachable number.
+
+Taps are counted in one burst and judged when the burst ends, which is why
+a quadruple-tap doesn't set off the triple on its way past three. A
+double-tap does nothing at all. Anyone whose device asks for reduced
+motion gets a quiet fade instead of the animation, and still gets the
+count.
+
+To add, change, or remove one, edit the `EGGS` map at the top of
+`js/eggs.js` — the values are CSS class names defined at the bottom of
+`css/style.css`. A category with no entry falls back to a plain flip and a
+wiggle.
 
 ## Wall of Fame: a moderated public quote board
 

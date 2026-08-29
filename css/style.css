@@ -735,3 +735,232 @@ footer .foot-motto {
   .topbar { flex-wrap: wrap; }
   .cart-btn span.label { display: none; }
 }
+
+/* ============================================================
+   PENDING APPROVAL + REQUIRED NOTES
+   ============================================================ */
+
+.card .approval-badge {
+  align-self: flex-start;
+  margin: 0.1rem 0 0.35rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: #fff4e6;
+  border: 1px solid #ffd8a8;
+  color: #b25000;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: help;
+}
+
+.detail-modal-text,
+#detailModalText {
+  /* the popup joins the description and the approval line with blank
+     lines, so keep them */
+  white-space: pre-line;
+}
+
+ul.note-prompts {
+  margin: 0 0 0.5rem;
+  padding: 0.5rem 0.75rem 0.5rem 1.6rem;
+  border-radius: 10px;
+  background: #fff4e6;
+  border: 1px solid #ffd8a8;
+  color: #7a3b00;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+ul.note-prompts li + li { margin-top: 0.3rem; }
+
+/* ============================================================
+   EASTER EGGS
+   Triple-tap a section heading and its cards flip; quadruple-tap
+   and the section does its own thing. Every one of these is
+   decoration only, and all of them sit still under
+   prefers-reduced-motion.
+   ============================================================ */
+
+.egg-target {
+  /* stops a triple-tap from selecting the heading text instead */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.egg-counter {
+  margin: 0.6rem auto 0;
+  padding: 0.3rem 0.85rem;
+  display: inline-block;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.egg-counter.pop { animation: egg-pop 0.5s ease; }
+
+@keyframes egg-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+/* -- triple taps: a flip per section -- */
+
+.egg-flip-y .card { animation: egg-spin-y 1s ease both; }
+.egg-flip-x .card { animation: egg-spin-x 1s ease both; }
+.egg-flip-spin .card,
+img.egg-flip-spin { animation: egg-spin-z 1s ease both; }
+.egg-flip-cascade .card { animation: egg-spin-y 0.9s ease both; }
+.egg-flip-tumble .card { animation: egg-tumble 1.1s ease both; }
+
+/* cascade and tumble stagger down the grid instead of firing at once */
+.egg-flip-cascade .card:nth-child(2) { animation-delay: 0.08s; }
+.egg-flip-cascade .card:nth-child(3) { animation-delay: 0.16s; }
+.egg-flip-cascade .card:nth-child(4) { animation-delay: 0.24s; }
+.egg-flip-cascade .card:nth-child(5) { animation-delay: 0.32s; }
+.egg-flip-cascade .card:nth-child(6) { animation-delay: 0.4s; }
+.egg-flip-tumble .card:nth-child(even) { animation-delay: 0.14s; }
+
+@keyframes egg-spin-y {
+  from { transform: perspective(600px) rotateY(0); }
+  to { transform: perspective(600px) rotateY(360deg); }
+}
+
+@keyframes egg-spin-x {
+  from { transform: perspective(600px) rotateX(0); }
+  to { transform: perspective(600px) rotateX(360deg); }
+}
+
+@keyframes egg-spin-z {
+  from { transform: rotate(0); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes egg-tumble {
+  0% { transform: perspective(600px) rotate3d(1, 1, 0, 0deg) scale(1); }
+  50% { transform: perspective(600px) rotate3d(1, 1, 0, 180deg) scale(0.88); }
+  100% { transform: perspective(600px) rotate3d(1, 1, 0, 360deg) scale(1); }
+}
+
+/* -- quadruple taps: one trick per section -- */
+
+/* Dress Code Passes: the cards change outfits */
+.egg-costume .card { animation: egg-costume-cycle 0.5s steps(1) 4; }
+
+@keyframes egg-costume-cycle {
+  0% { background: #ffe3e3; }
+  25% { background: #e3fafc; }
+  50% { background: #fff3bf; }
+  75% { background: #e6fcf5; }
+  100% { background: var(--white); }
+}
+
+/* Privileges: the cards take a hall pass across the room */
+.egg-hallpass .card { animation: egg-slide 1.1s ease both; }
+.egg-hallpass .card:nth-child(even) { animation-delay: 0.12s; }
+
+@keyframes egg-slide {
+  0% { transform: translateX(0); }
+  35% { transform: translateX(22px) rotate(2deg); }
+  70% { transform: translateX(-14px) rotate(-2deg); }
+  100% { transform: translateX(0); }
+}
+
+/* Food & Social: a plain case of the wiggles */
+.egg-wiggle .card { animation: egg-wiggle-kf 0.55s ease 3; }
+.egg-wiggle .card:nth-child(odd) { animation-delay: 0.1s; }
+
+@keyframes egg-wiggle-kf {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(2.5deg); }
+  75% { transform: rotate(-2.5deg); }
+}
+
+/* Recognition: everybody gets a turn in the spotlight */
+.egg-spotlight .card { animation: egg-spotlight-kf 1.6s ease both; }
+.egg-spotlight .card:nth-child(2) { animation-delay: 0.18s; }
+.egg-spotlight .card:nth-child(3) { animation-delay: 0.36s; }
+.egg-spotlight .card:nth-child(4) { animation-delay: 0.54s; }
+.egg-spotlight .card:nth-child(5) { animation-delay: 0.72s; }
+.egg-spotlight .card:nth-child(6) { animation-delay: 0.9s; }
+
+@keyframes egg-spotlight-kf {
+  0%, 100% { box-shadow: var(--shadow); transform: scale(1); }
+  40% {
+    box-shadow: 0 0 0 4px #ffd43b, 0 18px 40px rgba(240, 180, 0, 0.5);
+    transform: scale(1.05);
+  }
+}
+
+/* Big Ticket Events: the whole section throws a dance party */
+.egg-disco { animation: egg-disco-kf 0.42s linear 5; }
+.egg-disco .card { animation: egg-bounce 0.42s ease 5; }
+.egg-disco .card:nth-child(even) { animation-delay: 0.21s; }
+
+@keyframes egg-disco-kf {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+@keyframes egg-bounce {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-14px) rotate(-3deg); }
+}
+
+/* Collectibles: the cards go foil */
+.egg-foil .card {
+  background-image: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0) 20%,
+    rgba(180, 230, 255, 0.85) 42%,
+    rgba(255, 210, 240, 0.85) 52%,
+    rgba(255, 255, 255, 0) 74%
+  );
+  background-size: 260% 100%;
+  animation: egg-foil-kf 1.6s ease 2;
+}
+
+@keyframes egg-foil-kf {
+  from { background-position: 210% 0; }
+  to { background-position: -110% 0; }
+}
+
+/* Donation Bin: the points drop into the bin */
+.egg-coins .card { animation: egg-drop 0.85s ease both; }
+.egg-coins .card:nth-child(even) { animation-delay: 0.15s; }
+
+@keyframes egg-drop {
+  0% { transform: translateY(-26px); opacity: 0.35; }
+  60% { transform: translateY(6px); opacity: 1; }
+  100% { transform: translateY(0); }
+}
+
+/* Sammy: a whole school of stingrays swims by */
+.egg-school-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 900;
+}
+
+img.egg-school-ray {
+  position: absolute;
+  left: -140px;
+  animation: egg-swim 4s linear both;
+}
+
+@keyframes egg-swim {
+  from { transform: translateX(0) rotate(-6deg); }
+  to { transform: translateX(calc(100vw + 200px)) rotate(6deg); }
+}
+
+/* The quiet version, for anyone who asked their device for less motion. */
+.egg-quiet { transition: opacity 0.25s ease; opacity: 0.45; }
+
+@media (prefers-reduced-motion: reduce) {
+  .egg-counter.pop { animation: none; }
+}

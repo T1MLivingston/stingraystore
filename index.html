@@ -120,7 +120,8 @@
       </div>
 
       <div class="field">
-        <label for="studentNote">Note to staff (optional)</label>
+        <label for="studentNote" id="studentNoteLabel">Note to staff (optional)</label>
+        <ul class="note-prompts" id="notePrompts" hidden></ul>
         <textarea id="studentNote" rows="2" placeholder="e.g. Which class period, or which teacher for a lunch pass"></textarea>
       </div>
 
@@ -199,6 +200,7 @@
     <a id="footCodeOfConduct" href="#" target="_blank" rel="noopener">Code of Conduct</a> ·
     <a id="footUniformPolicy" href="#" target="_blank" rel="noopener">Uniform Policy</a>
   </p>
+  <div class="egg-counter" id="eggCounter" hidden></div>
   <p style="opacity:0.8;">No student data is stored by this site. Point balances come from an anonymous code lookup and are confirmed by staff before any reward is given.</p>
 </footer>
 
@@ -206,6 +208,7 @@
 <script src="js/items.js"></script>
 <script src="js/csv.js"></script>
 <script src="js/points.js"></script>
+<script src="js/eggs.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
