@@ -548,3 +548,24 @@ Set up:
 `CONFIG.wallOfFamePolicyNote` is shown right at the submission box: quotes
 are reviewed before posting, and an offensive one won't be approved and may
 carry consequences — adjust the wording to match your actual policy.
+
+## Groups & Timer (teacher tool)
+
+`groups.html`, linked from the footer, is a classroom page for making groups
+and running a timer, a stripped-down CHAMPS board:
+
+- **Class list.** Paste names (one per line, or one comma-separated line),
+  or upload a `.txt`/`.csv` file (first column, a "Name" header is skipped).
+  Tap a name to mark that student absent so they're left out.
+- **Groups.** Pairs, groups of N, or N groups, shuffled at random. A single
+  leftover student joins an existing group; two or more become one more
+  group, so sizes stay even. Tap two names to swap them, **Reshuffle** for a
+  new draw, **Copy** to paste the groups somewhere else.
+- **CHAMPS-lite.** A task line and a 0–4 voice level picker.
+- **Timer.** 1–15 minute presets, ±1 minute, start/pause (or the spacebar),
+  reset. It turns amber for the last 30 seconds and red with a chime at zero.
+- **Present** hides the setup panel, enlarges everything and goes fullscreen
+  for the projector.
+
+Like the rest of the site, it keeps no student data: names exist only in the
+open tab and are gone when it's closed or refreshed.

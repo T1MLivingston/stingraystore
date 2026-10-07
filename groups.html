@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Groups &amp; Timer</title>
+<link rel="icon" href="assets/school-seal.png" type="image/png" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/groups.css" />
+<script>
+  // Same pre-paint theme check as the store, so an unlocked dark mode
+  // carries over to this page too.
+  (function () {
+    var theme = "light";
+    try {
+      var unlocked = localStorage.getItem("stingray.darkUnlocked") === "1";
+      if (unlocked && localStorage.getItem("stingray.theme") === "dark") theme = "dark";
+    } catch (e) {
+      /* fall through to light */
+    }
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+</head>
+<body>
+
+<header class="topbar">
+  <img class="topbar__logo" id="logoImg" src="assets/school-seal.png" alt="School logo" />
+  <div class="topbar__titles">
+    <div class="school" id="schoolNameLabel">Your School Name</div>
+    <div class="store">Groups &amp; Timer</div>
+  </div>
+  <div class="topbar__spacer"></div>
+  <button class="g-btn g-btn--ghost" id="presentBtn" type="button">Present</button>
+  <a class="cart-btn g-back" href="index.html">Back to Store</a>
+</header>
+<div class="accent-line"></div>
+
+<main class="g-page" id="gPage">
+
+  <!-- ---------- Setup: roster + grouping ---------- -->
+  <section class="g-card g-setup" id="setupCard">
+    <h2>1. Class list</h2>
+    <div class="field">
+      <label for="rosterInput">Paste names, one per line (or separated by commas)</label>
+      <textarea id="rosterInput" rows="7" placeholder="Ava&#10;Ben&#10;Carlos&#10;Dani"></textarea>
+      <div class="hint">
+        Or upload a <strong>.txt</strong> or <strong>.csv</strong> file (first column is used; a "Name" header is skipped).
+        Names stay in this tab only and are never saved or sent anywhere.
+      </div>
+    </div>
+    <div class="g-row">
+      <label class="g-btn g-btn--ghost g-file">
+        Upload file
+        <input type="file" id="rosterFile" accept=".txt,.csv,text/plain,text/csv" />
+      </label>
+      <button class="g-btn g-btn--ghost" id="clearRosterBtn" type="button">Clear</button>
+      <span class="g-count" id="rosterCount">0 students</span>
+    </div>
+
+    <div class="g-chips" id="rosterChips" aria-label="Tap a name to mark absent"></div>
+    <p class="g-tip" id="chipsTip" hidden>Tap a name to mark them absent. Absent students are left out of groups.</p>
+
+    <h2>2. Make groups</h2>
+    <div class="g-modes" role="radiogroup" aria-label="Grouping mode">
+      <label><input type="radio" name="mode" value="pairs" checked /> Pairs</label>
+      <label><input type="radio" name="mode" value="size" /> Groups of
+        <input type="number" id="sizeInput" min="2" max="20" value="3" /></label>
+      <label><input type="radio" name="mode" value="count" />
+        <input type="number" id="countInput" min="2" max="30" value="4" /> groups</label>
+    </div>
+    <p class="g-tip">Uneven numbers are balanced out, so nobody ends up alone. Tap two names in the groups to swap them.</p>
+    <button class="checkout-btn" id="makeGroupsBtn" type="button">Shuffle into groups</button>
+  </section>
+
+  <!-- ---------- Board: CHAMPS-lite + timer + groups ---------- -->
+  <section class="g-board" id="board">
+    <div class="g-card g-champs">
+      <div class="g-task">
+        <label for="taskInput">Task</label>
+        <input type="text" id="taskInput" placeholder="What are we working on?" />
+      </div>
+      <div class="g-voice">
+        <span class="g-voice__label">Voice level</span>
+        <div class="g-voice__levels" id="voiceLevels" role="radiogroup" aria-label="Voice level"></div>
+        <div class="g-voice__name" id="voiceName"></div>
+      </div>
+    </div>
+
+    <div class="g-card g-timer" id="timerCard">
+      <div class="g-timer__display" id="timerDisplay" aria-live="polite">05:00</div>
+      <div class="g-timer__presets" id="timerPresets"></div>
+      <div class="g-row g-row--center">
+        <button class="g-btn g-btn--ghost" id="minusBtn" type="button" aria-label="Subtract one minute">&minus;1 min</button>
+        <button class="g-btn g-btn--primary" id="startBtn" type="button">Start</button>
+        <button class="g-btn g-btn--ghost" id="resetBtn" type="button">Reset</button>
+        <button class="g-btn g-btn--ghost" id="plusBtn" type="button" aria-label="Add one minute">+1 min</button>
+      </div>
+      <label class="g-sound"><input type="checkbox" id="soundCheck" checked /> Chime when time is up</label>
+    </div>
+
+    <div class="g-card g-groups">
+      <div class="g-groups__head">
+        <h2>Groups</h2>
+        <div class="g-row">
+          <button class="g-btn g-btn--ghost" id="reshuffleBtn" type="button" disabled>Reshuffle</button>
+          <button class="g-btn g-btn--ghost" id="copyGroupsBtn" type="button" disabled>Copy</button>
+        </div>
+      </div>
+      <p class="g-tip" id="groupsTip">Add a class list and press <strong>Shuffle into groups</strong>.</p>
+      <div class="g-groups__grid" id="groupsGrid"></div>
+      <div class="copy-status" id="groupsStatus"></div>
+    </div>
+  </section>
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/csv.js"></script>
+<script src="js/groups.js"></script>
+</body>
+</html>
