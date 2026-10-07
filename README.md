@@ -569,3 +569,15 @@ and running a timer, a stripped-down CHAMPS board:
 
 Like the rest of the site, it keeps no student data: names exist only in the
 open tab and are gone when it's closed or refreshed.
+
+## Carrera de Banderas (flag race)
+
+`flags/index.html`, served at `/flags/` and linked from the footer, is a
+timed game: students are shown a country and pick its flag from all 21
+Spanish-speaking countries' flags. Every miss adds 10 seconds. The flag
+images are embedded in the file, so it needs nothing else from the repo.
+
+It keeps a race log (name, time, misses) in the browser's `localStorage`
+on that device only, with buttons to download it as CSV or clear it. Nothing
+is sent anywhere, but on a shared classroom computer the next student can
+see earlier names and times, so clear it between classes if that matters.
