@@ -6,6 +6,22 @@
 <title>Stingray Store</title>
 <link rel="icon" href="assets/school-seal.png" type="image/png" />
 <link rel="stylesheet" href="css/style.css" />
+<script>
+  // Runs before the stylesheet paints, so a returning student never sees
+  // a flash of the other theme.
+  (function () {
+    var theme = "light";
+    try {
+      // Dark mode is a reward for finding every easter egg, so it only
+      // applies when it has been unlocked AND chosen.
+      var unlocked = localStorage.getItem("stingray.darkUnlocked") === "1";
+      if (unlocked && localStorage.getItem("stingray.theme") === "dark") theme = "dark";
+    } catch (e) {
+      /* fall through to light */
+    }
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
 </head>
 <body>
 
@@ -16,16 +32,29 @@
     <div class="store" id="storeNameLabel">Stingray Store</div>
   </div>
   <div class="topbar__spacer"></div>
+  <button class="theme-switch" id="themeToggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode" hidden>
+    <span class="theme-switch__track" aria-hidden="true">
+      <span class="theme-switch__glyph theme-switch__glyph--sun">☀</span>
+      <span class="theme-switch__glyph theme-switch__glyph--moon">☾</span>
+      <span class="theme-switch__knob"></span>
+    </span>
+  </button>
   <div class="mini-balance" id="miniBalance" hidden>
     <span id="miniBalanceValue">0</span> pts
   </div>
-  <button class="cart-btn" id="openCartBtn" aria-haspopup="dialog">
-    <span class="label">Make a Request</span> <span class="cart-count" id="cartCount">0</span>
+  <button class="cart-btn" id="openCartBtn" aria-haspopup="dialog" aria-label="Open your cart">
+    <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false">
+      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            d="M2 3h3l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.55L21 7H6" />
+      <circle cx="10" cy="20" r="1.4" fill="currentColor" />
+      <circle cx="18" cy="20" r="1.4" fill="currentColor" />
+    </svg>
+    <span class="cart-count" id="cartCount">0</span>
   </button>
 </header>
 
 <section class="hero">
-  <h1>Welcome to the <span>Stingray Store</span> <img class="hero__sammy" src="assets/sammy-monitor.png" alt="Sammy the Stingray" /></h1>
+  <h1 id="heroTitle"><img class="hero__sammy" src="assets/sammy-monitor.png" alt="Sammy the Stingray" /></h1>
   <p class="motto" id="mottoText">
     We support each other, contribute to our community, and strive for excellence in all we do.
   </p>
@@ -35,46 +64,46 @@
 <section class="lookup-section">
   <div class="lookup-grid">
     <div class="lookup-card">
-      <h2>Check My Points <img class="lookup-card__sammy" src="assets/sammy-backpack.png" alt="Backpack Sammy" /></h2>
-      <p class="lookup-lead">This is the private code Mr. McGaha gave you.</p>
-      <p class="lookup-sub">It stores your points without keeping any student data.</p>
-      <div class="lookup-row">
-        <input type="text" id="lookupCode" placeholder="e.g. SR-4821-BLUE" autocomplete="off" />
-        <button id="lookupBtn">Check</button>
+      <h2>Check My Points <img class="lookup-card__sammy" src="assets/sammy-medal.png" alt="Sammy with a medal" /></h2>
+      <div class="lookup-row" id="lookupRow">
+        <input type="text" id="lookupCode" placeholder="Enter your store code" autocomplete="off" />
+        <button id="lookupBtn"><span class="label" id="lookupBtnLabel">Check</span><span class="cart-count" id="lookupCartCount" hidden>0</span></button>
       </div>
       <div id="lookupResult"></div>
+      <button class="code-reset" id="changeCodeBtn" type="button" hidden>Enter a different code</button>
+      <p class="lookup-fineprint" id="lookupFinePrint" hidden></p>
       <input type="hidden" id="commendationInput" value="" />
       <input type="hidden" id="conductInput" value="" />
     </div>
 
     <div class="steps-wrap">
-      <ol class="steps-list">
-        <li>
+      <ol class="steps-list" id="stepsList">
+        <li data-step="1">
           <span class="steps-list__num">1</span>
           <div>
             <h3>Check your points</h3>
-            <p>Enter your code, or your points.</p>
+            <p>Enter your store code.</p>
           </div>
         </li>
-        <li>
+        <li data-step="2">
           <span class="steps-list__num">2</span>
           <div>
             <h3>Pick your rewards</h3>
             <p>Add anything you can afford.</p>
           </div>
         </li>
-        <li>
+        <li data-step="3">
           <span class="steps-list__num">3</span>
           <div>
             <h3>Send your request</h3>
             <p>Include your code and a note.</p>
           </div>
         </li>
-        <li>
+        <li data-step="4">
           <span class="steps-list__num">4</span>
           <div>
-            <h3>Get it fulfilled</h3>
-            <p>Staff confirm and let you know.</p>
+            <h3>Wait for staff to confirm</h3>
+            <p>Once confirmed, your points are deducted.</p>
           </div>
         </li>
       </ol>
@@ -115,14 +144,17 @@
 
       <div class="field">
         <label for="studentCode">Your Redemption Code</label>
-        <input type="text" id="studentCode" placeholder="e.g. SR-4821-BLUE" autocomplete="off" />
+        <input type="text" id="studentCode" placeholder="Enter your store code" autocomplete="off" />
         <div class="hint">Don't have a code? Ask your teacher or the front office. We never ask for your name here.</div>
       </div>
 
       <div class="field">
-        <label for="studentNote">Note to staff (optional)</label>
+        <label for="studentNote" id="studentNoteLabel">Note to staff (optional)</label>
+        <ul class="note-prompts" id="notePrompts" hidden></ul>
         <textarea id="studentNote" rows="2" placeholder="e.g. Which class period, or which teacher for a lunch pass"></textarea>
       </div>
+
+      <div class="fineprint" id="modalFinePrint"></div>
 
       <div class="field" id="falseClaimField" hidden>
         <label class="checkbox-label">
@@ -143,7 +175,8 @@
      in the background, so the student never sees the Form itself. -->
 <iframe name="hiddenFormFrame" id="hiddenFormFrame" style="display: none" aria-hidden="true" tabindex="-1"></iframe>
 <form id="requestSubmitForm" method="POST" target="hiddenFormFrame" style="display: none">
-  <input type="hidden" id="requestSubmitField" name="entry.0" />
+  <!-- Inputs are built at submit time, one per configured field in
+       CONFIG.requestsFormFields, by sendRequest() in js/app.js. -->
 </form>
 
 <div class="modal-wrap points-modal-wrap" id="pointsModalWrap" role="dialog" aria-label="Your points">
@@ -168,6 +201,28 @@
   </div>
 </div>
 
+<section class="challenges" id="challengeSection">
+  <div class="challenges__head">
+    <h2>Stingray Math Challenge</h2>
+    <p id="challengeLead"></p>
+  </div>
+  <div class="challenges__grid" id="challengeGrid"></div>
+  <div class="challenges__status" id="challengeStatus" hidden></div>
+</section>
+
+<section class="jokes" id="jokeSection" hidden>
+  <div class="jokes__head">
+    <h2>The Vault</h2>
+    <p>You beat every grade. Here are <span id="jokeCount">55</span> dad jokes as your reward. Sorry.</p>
+  </div>
+  <div class="joke-box">
+    <p class="joke-box__setup" id="jokeSetup"></p>
+    <button class="joke-box__reveal" id="jokeRevealBtn" type="button" hidden>Tap for the punchline</button>
+    <p class="joke-box__punch" id="jokePunch" hidden></p>
+    <button class="checkout-btn" id="jokeBtn" type="button">Tell me a joke</button>
+  </div>
+</section>
+
 <section class="wall-of-fame" id="wallOfFameSection" hidden>
   <h2>Wall of Fame</h2>
   <p class="wall-of-fame__intro">Quotes shared and approved by students.</p>
@@ -190,14 +245,17 @@
 </section>
 
 <footer>
-  <img class="footer__sammy" src="assets/sammy-medal.png" alt="" />
+  <img class="footer__sammy" src="assets/sammy-backpack.png" alt="" />
   <div class="foot-motto" id="footMotto">"We support each other, contribute to our community, and strive for excellence in all we do."</div>
   <p>
     <span id="footSchoolName">Your School Name</span> ·
     <a id="footWebsite" href="#" target="_blank" rel="noopener">School Website</a> ·
     <a id="footCodeOfConduct" href="#" target="_blank" rel="noopener">Code of Conduct</a> ·
-    <a id="footUniformPolicy" href="#" target="_blank" rel="noopener">Uniform Policy</a>
+    <a id="footUniformPolicy" href="#" target="_blank" rel="noopener">Uniform Policy</a><span id="footDressCodeItem"> ·
+    <a id="footDressCode" href="#" target="_blank" rel="noopener">Dress-Down Dress Code</a></span> ·
+    <a href="groups.html">Groups &amp; Timer</a>
   </p>
+  <div class="egg-counter" id="eggCounter" hidden></div>
   <p style="opacity:0.8;">No student data is stored by this site. Point balances come from an anonymous code lookup and are confirmed by staff before any reward is given.</p>
 </footer>
 
@@ -205,6 +263,9 @@
 <script src="js/items.js"></script>
 <script src="js/csv.js"></script>
 <script src="js/points.js"></script>
+<script src="js/eggs.js"></script>
+<script src="js/challenges.js"></script>
+<script src="js/jokes.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

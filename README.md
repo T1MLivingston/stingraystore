@@ -34,9 +34,10 @@ anywhere in the app**.
    in-store "Full Dress-Down Day" pass anyone can buy with points, any day).
    Requesting more than your known balance covers requires checking a box
    acknowledging `CONFIG.falseClaimPenalty` first.
-5. **Request, don't auto-redeem.** "Submit Request" copies the request to
-   the clipboard and opens a Google Form, so submissions collect as rows in
-   a sheet you review directly (see "Request queue" below). Staff still do
+5. **Request, don't auto-redeem.** "Submit Request" posts the request to a
+   Google Form in the background, so submissions collect as rows in a
+   sheet you review directly — code, points used, items, and balance each
+   in their own column (see "Request queue" below). Staff still do
    a final human check before fulfilling — there's no live inventory/
    redemption ledger tracking what's already been spent.
 
@@ -110,25 +111,104 @@ the row, so no credential capable of writing to your Sheet or repo ever
 has to live in this public site's code, and there's nothing for the
 student to paste or submit themselves. To set it up:
 
-1. Create a Google Form with one field (a paragraph/long-answer question,
-   e.g. "Request details") and turn on **Responses → link a Sheet** —
-   Google auto-creates it and timestamps every submission.
+1. Create a Google Form with one question per piece of a request, so each
+   lands in its own column of the response sheet. Add them in this order,
+   and mark every one **not** required (a student's note is often empty,
+   and one empty required question rejects the whole submission):
+
+   | Question title | Type | Maps to |
+   | --- | --- | --- |
+   | Redemption Code | Short answer | `code` |
+   | Points Used | Short answer | `pointsUsed` |
+   | Items Requested | Paragraph | `items` (one reward per line) |
+   | Student Balance | Short answer | `balance` |
+   | Conduct Points | Short answer | `conduct` (optional) |
+   | Verified? | Short answer | `verified` (optional) |
+   | Note From Student | Paragraph | `note` (optional) |
+   | Full Request | Paragraph | `details` (optional) |
+
+   Then turn on **Responses → link a Sheet** — Google auto-creates it and
+   timestamps every submission.
 2. Add a `Status` column to that response sheet yourself. Approve or deny a
    request by typing into that column directly, in the sheet.
-3. Share the response sheet the same "Anyone with the link → Viewer" way as
-   the points sheet, and set `requestsSheetCsvUrl` in `js/config.js` to its
-   CSV export URL (kept for your own reference; the site itself doesn't
-   read it — there is no in-site requests table).
-4. Set `requestsFormUrl` to the form's own public responder link (click
+3. Add a **`Status`** column of your own to the right of the form's
+   columns (the form writes A through G, so `Status` goes in **H1**).
+   Google only ever appends rows and never touches a column it did not
+   create, so anything you type there is safe. This is where you approve
+   or deny — see "Working the request queue" below.
+4. Set `requestsSheetCsvUrl` and `requestsSheetEditUrl` in `js/config.js`
+   to that sheet. Both are kept for your own reference; the site itself
+   reads neither, and there is no in-site requests table.
+5. Set `requestsFormUrl` to the form's own public responder link (click
    **Publish**, top right of the form editor, then copy the link from
    there).
-5. Find the field's internal name for `requestsFormFieldId`: in the form
-   editor, three-dot menu → **Get pre-filled link** → type any answer →
-   **Get Link** → copy the generated URL. It contains `entry.` followed
-   by a number (e.g. `entry.1989281097`) — that's the value to set.
+6. Find each question's internal name for `requestsFormFields`: in the
+   form editor, three-dot menu → **Get pre-filled link** → type a
+   throwaway answer into **every** question → **Get Link** → copy the
+   generated URL. It lists one `entry.<number>=` per question, in the
+   same top-to-bottom order as the form, e.g.
 
-Review submissions and match codes against your private roster directly in
-the sheet.
+   ```
+   ...viewform?usp=pp_url&entry.1111111=A&entry.2222222=B&entry.3333333=C
+   ```
+
+   Paste each number into the matching key of `requestsFormFields` in
+   `js/config.js`. Leave a key blank to skip that question entirely.
+
+   `requestsFormFieldId` below it is the old single-question setup, where
+   the whole request arrived as one blob of text in one column. It is
+   only used while every key in `requestsFormFields` is still blank, so
+   an existing form keeps working until you finish wiring up the new
+   one — filling in even one named field is what flips the site over.
+
+### Working the request queue
+
+Everything happens in that one sheet. There is no admin screen, no login,
+and no button anywhere that changes a student's points — a person reading
+rows is the entire approval system, on purpose.
+
+A submitted request lands as one row:
+
+| A | B | C | D | E | F | G | H |
+|---|---|---|---|---|---|---|---|
+| Timestamp | Redemption Code | Points Used | Items | Student Balance | Conduct Points | Note From Student | **Status** |
+
+Columns A–G are written by Google. Column H is yours. For each new row:
+
+1. **Identify the student.** Column B holds their code, not their name.
+   Look it up in your private roster sheet — the one this site never
+   touches. That split is the whole privacy model: the sheet the site can
+   reach has no names in it.
+2. **Check the balance is real.** Column E is whatever the student's
+   browser had at submit time, so treat it as a claim, not a fact. Compare
+   it against this month's points upload. A student who overstated it
+   already had to tick a box acknowledging `CONFIG.falseClaimPenalty`
+   before the site would send the request.
+3. **Check the conduct gate.** Column F is their conduct points. Some
+   items are capped (Full Dress-Down Day is unavailable above 3), and the
+   site enforces that with whatever the student entered — which is worth
+   re-checking here against the real number.
+4. **Handle anything marked pending.** An item in column D tagged
+   `[PENDING APPROVAL: ...]` names who has to say yes first. Get that yes
+   before you approve the row. For items that required it, column G holds
+   the detail you need — the teacher who agreed to the chair swap, the
+   act for the lunch performance, the quote to read on the PA.
+5. **Type your decision in column H.** `Approved`, `Denied`, or anything
+   else that means something to you — it is a free-text column and nothing
+   reads it but you.
+6. **Deduct the points in your real system.** The site never does this.
+   Column C is the amount.
+7. **Tell the student.** However you normally would.
+
+The site never learns any of this. It cannot read the sheet, so a student
+refreshing the page will not see a status — approving a row is a message
+to your staff, not to the student.
+
+Typing into a Status column, rather than building real approve/deny
+buttons, was deliberate. Buttons that actually wrote back would need a
+Google Apps Script deployed by hand as a Web App — a real option later,
+just more setup and one more moving part than "open the sheet you already
+have open anyway."
 
 Because the response comes back inside a hidden iframe, the site can't
 actually read whether Google accepted it (cross-origin content can't be
@@ -136,13 +216,6 @@ inspected by client-side JS) — it shows "Request submitted" either once
 the iframe finishes loading or after a few seconds either way. This is the
 same fire-and-forget tradeoff as the rest of this static site: staff still
 do a final human check in the sheet before fulfilling anything.
-
-Approving or denying by typing into a Status column, rather than building
-real buttons for it, was a deliberate choice: buttons that actually write
-back would need a small script (Google Apps Script) deployed by hand as a
-"Web App" — a real option later, just more setup than this needed to be
-useful today, and one more moving part than "open the sheet you already
-have open anyway."
 
 I could not create the Form itself here — Google Drive's file-creation tool
 only makes native Docs, Sheets, and Slides, not Forms — so step 1 above is
@@ -162,11 +235,42 @@ Everything you're likely to change lives in two files:
 - **`js/config.js`** — school name, motto, logo path, website link, and
   the conduct-points explainer text.
 - **`js/items.js`** — the reward catalog. Add/remove/edit items, set the
-  point cost, and optionally set `maxConduct` to lock an item above a
-  certain conduct-point total.
+  point cost, and optionally set `maxConduct` (lock the item above a
+  conduct-point total), `approval` (who has to say yes), or `notePrompt`
+  (what the student must write in the note).
+- **`js/eggs.js`** — the hidden tap animations. See "Easter eggs" below.
+- **`js/challenges.js`** — the grade-level math problems. See "Math
+  challenges" below.
+- **`js/jokes.js`** — the dad joke bank. See "The Vault" below.
 
-Colors and layout live in `css/style.css`, controlled by CSS variables at
-the top (`--blue-dark`, `--blue`, `--blue-light`, `--red`).
+Colors and layout live in `css/style.css`. The top of that file holds the
+theme tokens: a short block of fixed brand colors (`--blue`, `--red`), then
+one block per theme defining the semantic tokens everything else uses —
+`--surface`, `--text`, `--border`, `--heading`, and so on.
+
+**Adding a rule?** Reach for a semantic token, not a hex value. A literal
+color will look wrong in one of the two themes, which is the one mistake
+this structure exists to prevent.
+
+### Dark and light mode
+
+**The store opens in light mode, and dark mode has to be earned.** The
+switch is not in the top bar at all until a student has found every easter
+egg on the page (see "Easter eggs" below); after that it appears, and the
+choice is remembered per browser in `localStorage`. Someone who has not
+unlocked it never sees dark mode, and a browser that loses its saved
+unlock falls back to light rather than stranding a student in a theme they
+cannot switch out of.
+
+A small inline script in `index.html` applies the saved theme before the
+stylesheet paints, so a returning student never sees a flash of the wrong
+theme — if you move that script, keep it in `<head>` and ahead of the
+stylesheet.
+
+Both themes were checked against WCAG AA contrast on every text style on
+the page. If you retint something, re-check it rather than eyeballing it:
+dark text on a dark surface is easy to ship by accident and hard to
+notice on the one bright monitor you happen to be testing on.
 
 ### Branding assets
 `assets/` holds the real school seal (`school-seal.png`, used as the logo
@@ -205,29 +309,218 @@ Costs are ballparked off Ms. Malca's examples (3 pts for an untucked-shirt
 pass) — treat every number here as a starting point to tune once you see
 real monthly point totals.
 
+A ⏳ marks an item that shows a **Pending approval** badge, and 📝 one that
+makes the note box required at checkout.
+
 | Category | Item | Cost |
 |---|---|---|
 | Dress Code | Untucked Shirt Pass | 3 |
 | Dress Code | Fancy Shoes Pass | 5 |
 | Dress Code | Wear a Hat Pass | 5 |
-| Dress Code | Full Dress-Down Day (locked above 2 conduct pts) | 15 |
+| Dress Code | Full Dress-Down Day (locked above 3 conduct pts) | 15 |
 | Privileges | Early Locker Pass | 4 |
 | Privileges | Tardy Pass | 5 |
+| Privileges | Stuffed Animal Buddy | 10 |
+| Privileges | Chair Swap With a Teacher ⏳📝 | 20 |
+| Privileges | You Pick the P.E. Game ⏳📝 | 20 |
+| Privileges | Elevator Pass, you and a friend ⏳📝 | 30 |
+| Privileges | Erase One Conduct Point ⏳ | 40 |
 | Food & Social | Lunch With a Teacher | 8 |
+| Food & Social | Lunch With a Teacher and a Friend 📝 | 20 |
 | Food & Social | Group Lunch With a Teacher | 30 |
-| Recognition | Positive Call Home | 6 |
+| Food & Social | Pizza Party ⏳ | 100 |
 | Recognition | Positive Email Home | 4 |
-| Collectibles | Collectible Card (locked above 2 conduct pts) | 50 |
-| Collectibles | VeeFriends Comic (locked above 2 conduct pts) | 100 |
-| Collectibles | Pizza Party | 100 |
+| Recognition | Positive Call Home | 6 |
+| Recognition | Shout-Out on the PA 📝 | 15 |
+| Recognition | Inspirational Quote on the PA 📝 | 15 |
+| Recognition | Celebration Board Square 📝 | 25 |
+| Recognition | Read the Announcements ⏳ | 30 |
+| Big Ticket Events | Performance at Lunch ⏳📝 | 35 |
+| Big Ticket Events | Electronics Day ⏳ | 50 |
+| Big Ticket Events | Dance Party Upstairs ⏳ | 75 |
+| Big Ticket Events | Pie a Teacher ⏳📝 | 100 |
+| Collectibles | Robot Super Sticker | 5 |
+| Collectibles | Topps Chrome Card | 10 |
+| Collectibles | Stingray Character Card | 20 |
+| Collectibles | Insert Card (locked above 3 conduct pts) | 50 |
+| Collectibles | VeeFriends Comic: Empathy (locked above 3 conduct pts) | 100 |
+| Collectibles | Tier One Card (locked above 2 conduct pts) ⏳ | 150 |
 | Donation Bin | Dress Down Day Fund | 10 |
 | Donation Bin | Themed Day Fund | 10 |
+
+**Collectibles are a ladder on purpose.** A sticker at 5 points means a
+student having an ordinary month can still walk away holding something;
+the Tier One Card at 150 is meant to be saved for, and rare enough that
+the one you want may already be gone. The tiers in between (Chrome card,
+character card, insert) give the ladder rungs so the jump from 5 to 150
+isn't a cliff.
+
+**Dress-down and conduct points.** A student above 3 conduct points cannot
+dress down, either way it is offered: `maxConduct: 3` locks the Full
+Dress-Down Day card in the store, and `CONFIG.dressDownMaxConduct` (also 3)
+decides who sees the free monthly Dress-Down Day banner. Change both
+together or the two will disagree.
+
+**Pending approval** is a label, not a workflow. The badge tells the student
+up front that someone has to say yes, and the words ride along into the
+sheet's Items column as `[PENDING APPROVAL: ...]` so staff see it there too.
+The actual yes or no still happens the way everything else here does — a
+person typing into the Status column.
+
+**Note-required items** won't submit with an empty note. The checkout screen
+lists exactly what to write for each one ("Name the teacher and the class
+period"), and Submit is refused until the box has something in it. This is
+what makes "the teacher has to agree first" enforceable at all: the student
+has to name them, and staff can check.
+
+**A word on food.** New items deliberately avoid food. Anything edible drags
+in allergies, dietary restrictions, and parent permission, none of which
+this site can track. The two food items that predate this (Lunch With a
+Teacher, Pizza Party) were left alone — worth a look if you want the rule
+applied consistently.
 
 **Donation Bin** items are running group goals (e.g. 1,000 points → a
 schoolwide dress-down day, 1,500 → a themed day with the theme voted on by
 students), not per-student rewards. This static site has no shared counter
 to track those totals live — staff need to tally donations from submitted
 requests and announce progress separately.
+
+### Where the request button lives
+
+Before a code is checked, the lookup card's button says **Check** and the
+top bar carries **Make a Request**. Once a code verifies, the lookup
+card's own button turns into **Make a Request** (red, with the cart
+count), because that is where the student is already looking.
+
+The top-bar button does not simply disappear — it hides only while the
+lookup card's version is actually on screen, and slides back in as soon
+as the student scrolls into the catalog. Otherwise a student browsing 28
+items would have no way to reach their cart without scrolling back to the
+top. Clearing the code ("Not you? Clear") puts both buttons back the way
+they started.
+
+## Math challenges
+
+Seminole Science is a STEM school, so the bottom of the page carries eight
+math problems — one each for 5th through 12th grade. There are two prizes:
+
+- **Solve any single one** and the Donation Bin unlocks in the store. A
+  student only has to beat their own grade.
+- **Solve all eight** and the dad joke vault opens (see below).
+
+- Which category is gated is `CONFIG.challengeUnlocksCategory` in
+  `js/config.js`. Set it to `""` to switch the whole thing off and show
+  every category from the start.
+- The problems live in the `CHALLENGES` array at the top of
+  `js/challenges.js`. Each grade has a **pool**, and one problem is drawn
+  from it at random per page load, so an answer going around the lunch
+  table stops working tomorrow. Add more to a pool and it gets harder to
+  pass around.
+- Answers are compared as trimmed, lowercased, space-stripped text, so
+  `36pi`, `36 PI`, and ` 36pi ` all pass the same problem. When a problem
+  has more than one reasonable form, list them all: `a: ["10", "x=10",
+  "x = 10"]`.
+- **Triple-clicking a question turns it into a riddle.** Three riddles
+  sit in the `RIDDLES` array in `js/challenges.js`; one is drawn at
+  random, and answering it counts exactly the same as the math would
+  have. A card already solved ignores the click.
+- **Triple-clicking an answer box fills in the answer.** A deliberate
+  back door, on the theory that a student who pokes at an input box until
+  it gives up its answer has earned the jokes as much as one who did the
+  algebra. Remove the `input.addEventListener("click", ...)` block in
+  `js/challenges.js` to close it.
+- Which grades a student has beaten is stored in that browser's
+  `localStorage`. It is a motivator, not a security boundary — anyone who opens dev tools can
+  clear or set it, and that is fine. Nothing behind it is sensitive; the
+  reward is seeing two more cards.
+
+## The Vault (dad jokes)
+
+Solving all eight challenges reveals a joke generator holding 55 clean dad
+jokes. The setup shows first and the punchline waits for a tap, because
+that is how a dad joke works. The same joke never comes up twice in a row.
+
+Edit the `DAD_JOKES` array in `js/jokes.js` to add or cut. Keep them
+school appropriate — this sits on a public page with the school's name at
+the top of it.
+
+## Entering a code, and the four steps
+
+The top bar holds a shopping cart (with its count) that opens the drawer
+from anywhere on the page. It is not the request button — sending a
+request always goes through the lookup card, so a code is attached to
+every row staff receive.
+
+Before a code is checked, the lookup card's button sits beside the input
+and says **Check**. Once a code is accepted the button drops below the
+input, runs the full width of the card in red, and reads **Make a
+Request** with the cart count. The code input locks at the same time;
+swapping codes takes the small **Enter a different code** button, which
+resets the whole card.
+
+The numbered list beside the card is a live progress tracker, not
+decoration. `currentStep()` in `js/app.js` decides which of the four is
+active: no code yet is 1, a verified code with an empty cart is 2, items
+in the cart is 3, and a sent request is 4. Steps behind the student turn
+green with a check.
+
+## The request window
+
+Requests are collected **one day a week**, set by `CONFIG.requestDay`
+(`5` = Friday; `null` turns the rule off). On any other day the checkout
+screen shows a warning above the fine print — but **it still sends**.
+Whether a late row counts is a staff decision made in the sheet, not
+something a student's browser should decide on its own, and a hard block
+would also mean a clock or timezone quirk could silently cost someone
+their week.
+
+`CONFIG.requestCooldownHours` (168, one week) then holds that code from
+sending again. Like every other gate here it lives in the student's own
+browser, so a different browser or cleared site data gets past it — the
+code and timestamp on every sheet row remain the real check.
+
+`CONFIG.requestFinePrint` is the list of rules, rendered in two places
+from that one array: under the request button in the lookup card, and
+again on the checkout screen right before the student sends.
+
+## Easter eggs
+
+Kids poke at things. `js/eggs.js` gives them something to find, in two
+tiers on every section heading: **three taps spins the cards, four taps
+sets off that section's own trick.** Each section has its own pair, so
+finding one doesn't spoil the rest.
+
+| Section | Three taps | Four taps |
+|---|---|---|
+| Dress Code Passes | spin on the Y axis | cards fall off and climb back |
+| Privileges | spin on the X axis | an outline traces around each card |
+| Food & Social | flat spin | a case of the wiggles |
+| Recognition | spins in order across the row | each card takes the spotlight |
+| Big Ticket Events | tumble | confetti streams across the screen |
+| Collectibles | spin on the Y axis | an outline traces around each card |
+| Donation Bin | spin on the X axis | points drop into the bin |
+| Sammy (hero image) | Sammy spins | a school of stingrays swims across |
+
+**Finding every one unlocks dark mode.** See below.
+
+A counter in the footer keeps score ("Secrets found: 7 of 16") once a
+student finds their first one. The Donation Bin's two secrets only count
+toward the total once the math challenge has unlocked that section, so the
+number goes up when it appears rather than showing an unreachable goal. It
+is stored in that browser's `localStorage` — nothing is sent anywhere,
+nothing is tied to a student, and clearing site data resets it.
+
+Taps are counted in one burst and judged when the burst ends, which is why
+four taps doesn't set off the three-tap spin on its way past. One or two
+taps do nothing at all. Anyone whose device asks for reduced motion gets a
+quiet fade instead of the animation, and still gets the count.
+
+Every effect uses flat color — there are no gradients anywhere in this
+file, by design. To add, change, or remove one, edit the `EGGS` map at the
+top of `js/eggs.js`; the values are CSS class names defined in the easter
+egg block of `css/style.css`, except `egg-streamers` and `egg-school`,
+which are full-screen effects drawn in JS. A category with no entry falls
+back to a plain spin and a wiggle.
 
 ## Wall of Fame: a moderated public quote board
 
@@ -255,3 +548,24 @@ Set up:
 `CONFIG.wallOfFamePolicyNote` is shown right at the submission box: quotes
 are reviewed before posting, and an offensive one won't be approved and may
 carry consequences — adjust the wording to match your actual policy.
+
+## Groups & Timer (teacher tool)
+
+`groups.html`, linked from the footer, is a classroom page for making groups
+and running a timer, a stripped-down CHAMPS board:
+
+- **Class list.** Paste names (one per line, or one comma-separated line),
+  or upload a `.txt`/`.csv` file (first column, a "Name" header is skipped).
+  Tap a name to mark that student absent so they're left out.
+- **Groups.** Pairs, groups of N, or N groups, shuffled at random. A single
+  leftover student joins an existing group; two or more become one more
+  group, so sizes stay even. Tap two names to swap them, **Reshuffle** for a
+  new draw, **Copy** to paste the groups somewhere else.
+- **CHAMPS-lite.** A task line and a 0–4 voice level picker.
+- **Timer.** 1–15 minute presets, ±1 minute, start/pause (or the spacebar),
+  reset. It turns amber for the last 30 seconds and red with a chime at zero.
+- **Present** hides the setup panel, enlarges everything and goes fullscreen
+  for the projector.
+
+Like the rest of the site, it keeps no student data: names exist only in the
+open tab and are gone when it's closed or refreshed.

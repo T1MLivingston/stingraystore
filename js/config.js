@@ -6,8 +6,16 @@
 
 const CONFIG = {
   schoolName: "Seminole Science STEM Charter School",
-  storeName: "Stingray Store",
+  storeName: "Stingray Commendation Store",
   motto: "We support each other, contribute to our community, and strive for excellence in all we do.",
+
+  // ---- Math challenge gate ----
+  // The category hidden in the store until a student solves any one of
+  // the grade-level problems at the bottom of the page. Every grade's
+  // challenge unlocks this same category, so a student only has to beat
+  // their own grade. Set to "" to turn the whole thing off and show
+  // every category from the start. Edit the problems in js/challenges.js.
+  challengeUnlocksCategory: "Donation Bin",
 
   // ---- Request submission ----
   // "Submit Request" posts the request text straight to this Google
@@ -16,19 +24,50 @@ const CONFIG = {
   // itself. No backend, no email, and nothing to paste. See README.md
   // for how to find requestsFormFieldId below for your own form.
   requestsFormUrl:
-    "https://docs.google.com/forms/d/e/1FAIpQLScYm1e2RswURXJGdlW6FCQgtas27P5Cfn7kMsXbfDxDzqeTsQ/viewform",
+    "https://docs.google.com/forms/d/e/1FAIpQLSf8EOiBpJOhWVSDixgdnbiw0MMX4USlHS4Jenu0MXAe4khsTQ/viewform",
 
-  // The Form's internal field name for its one text question, e.g.
-  // "entry.123456789". Find it via the Form editor's three-dot menu ->
-  // "Get pre-filled link" -> type any answer -> Get Link -> the entry.
-  // number in the generated URL.
+  // The Form's internal field names, one "entry.123456789" per question.
+  // Each key below is a separate question on the Form, so each lands in
+  // its own column of the response sheet instead of all being crammed
+  // into a single blob of text.
+  //
+  // Find every entry number at once: in the Form editor, three-dot menu
+  // -> "Get pre-filled link" -> type a throwaway answer into EVERY
+  // question -> Get Link -> the generated URL lists each question's
+  // "entry.<number>=" in the same top-to-bottom order as the Form.
+  //
+  // Leave any key blank ("") to skip it -- the site simply won't send
+  // that field. Any question you do map must NOT be marked "Required"
+  // unless it is always filled in (a student's note, for instance, is
+  // often empty), or Google will reject the whole submission.
+  requestsFormFields: {
+    code: "entry.1214264987", // Redemption Code (short answer) -- which student this is
+    pointsUsed: "entry.407241922", // Points Used (short answer) -- total cost of the request
+    items: "entry.216679292", // Items Requested (paragraph) -- one reward per line
+    balance: "entry.1167893473", // Student Balance (short answer) -- commendation points on hand
+    conduct: "entry.1425404857", // Conduct Points (short answer, optional)
+    verified: "", // Verified? (short answer, optional) -- did the code check out
+    note: "entry.999526134", // Note From Student (paragraph, optional)
+    details: "", // Full Request (paragraph, optional) -- the whole thing as text
+  },
+
+  // Legacy single-question setup: the entry id of one paragraph question
+  // that receives the entire request as one block of text. Only used if
+  // every key in requestsFormFields above is left blank, so filling in
+  // requestsFormFields is what switches the site over to separate
+  // columns. Keep this set until the new Form is ready.
   requestsFormFieldId: "entry.1989281097",
 
   // CSV export URL of that form's response sheet. Not read by this site;
   // just open the sheet directly to review submissions and approve or
   // deny them.
   requestsSheetCsvUrl:
-    "https://docs.google.com/spreadsheets/d/1MYX75By-rqXhXbGsTY3mlvCtABVesfQuB1Po0qXfw6A/gviz/tq?tqx=out:csv",
+    "https://docs.google.com/spreadsheets/d/1ATTaHooIHiuO0pYvWVCy3Q4ZUDrZD1xWF-5fLpCn7DU/gviz/tq?tqx=out:csv",
+
+  // The same sheet as a normal Google Sheets link, which is the one staff
+  // actually open to work the queue. Not read by the site either.
+  requestsSheetEditUrl:
+    "https://docs.google.com/spreadsheets/d/1ATTaHooIHiuO0pYvWVCy3Q4ZUDrZD1xWF-5fLpCn7DU/edit",
 
   // School seal, shown in the top bar.
   logoPath: "assets/school-seal.png",
@@ -41,6 +80,12 @@ const CONFIG = {
     "https://seminolescience.org/images/media/sscs/2627/2026-2027_SSCS_Student_Handbook_and_Code_of_Conduct.pdf",
   uniformPolicyUrl:
     "https://seminolescience.org/images/media/sscs/2024-25/StudentHandbook/SSCS_Uniform_Policy.pdf",
+
+  // Explains what a dress-down day actually allows. Linked in the footer
+  // and from the dress-down banner, since that is where a student is most
+  // likely to wonder. Leave blank to drop both links.
+  dressCodeDocUrl:
+    "https://docs.google.com/document/d/1kykbCfuidQ_fTAVexV8Ca_BzSig7ZiBiylCPbpeAWE8/edit",
 
   // Conduct points: set what your school's scale means so the note
   // on the page matches your actual conduct system.
@@ -108,8 +153,47 @@ const CONFIG = {
   // Dress-Down Day on the announced day each month. This is NOT a store
   // item — it's shown as a shoutout banner, not something to "buy".
   dressDownMaxConduct: 3,
-  dressDownNote:
-    "You qualify for a free Dress-Down Day this month. This is separate from the Full Dress-Down Day pass below, which anyone can redeem with points any day.",
+  dressDownNote: "You qualify for Dress-Down Day this month.",
+
+  // ---- Request window ----
+  // Requests are collected on one day a week. 0 is Sunday, 5 is Friday.
+  // The site warns on any other day but still sends, because whether a
+  // late row counts is a staff decision made in the sheet, not something
+  // a student's browser should be deciding. Set to null to drop the rule.
+  requestDay: 5,
+
+  // After a request is sent, that code is held for this many hours before
+  // the site will send another (168 = one week, matching the window
+  // above). It is a courtesy guard, not a real limit: it lives in the
+  // student's own browser, so a different browser or a cleared cache gets
+  // around it. Duplicate codes and timestamps in the response sheet are
+  // the actual check. Set to 0 to turn it off.
+  requestCooldownHours: 168,
+
+  // Shown wherever a student is about to send. Each line renders as its
+  // own bullet.
+  requestFinePrint: [
+    "One request per person per week, on Fridays.",
+    "Anything sent on another day will not be counted.",
+    "If you send more than one, only your last one counts.",
+    "No guarantees. A request may be fulfilled before you send another.",
+    "Points are deducted only after staff confirm.",
+  ],
+
+  // ---- Confetti on a verified lookup ----
+  // How big the celebration is scales with the student's month. More
+  // commendations, more confetti; a conduct total above the cutoff pulls
+  // it back to a small burst rather than replacing it with anything
+  // discouraging.
+  confetti: {
+    minPieces: 12,
+    maxPieces: 60,
+    piecesPerCommendation: 2,
+    // Above this many conduct points, the burst shrinks.
+    conductCutoff: 5,
+    // What is left of the burst once past the cutoff (0.35 = about a third).
+    reducedFraction: 0.35,
+  },
 
   // Penalty for requesting more than your real balance covers. Shown to
   // students before they can send a request that exceeds their known

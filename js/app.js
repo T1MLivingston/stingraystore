@@ -4,6 +4,7 @@
   const state = {
     cart: [], // array of item ids
     verified: false, // true once a code has resolved against data/points.json
+    submitted: false, // true once a request has actually been sent
   };
 
   const els = {
@@ -11,24 +12,35 @@
     schoolNameLabel: document.getElementById("schoolNameLabel"),
     storeNameLabel: document.getElementById("storeNameLabel"),
     mottoText: document.getElementById("mottoText"),
+    heroTitle: document.getElementById("heroTitle"),
+    themeToggle: document.getElementById("themeToggle"),
     footMotto: document.getElementById("footMotto"),
     footSchoolName: document.getElementById("footSchoolName"),
     footWebsite: document.getElementById("footWebsite"),
     footCodeOfConduct: document.getElementById("footCodeOfConduct"),
     footUniformPolicy: document.getElementById("footUniformPolicy"),
+    footDressCode: document.getElementById("footDressCode"),
+    footDressCodeItem: document.getElementById("footDressCodeItem"),
     commendationInput: document.getElementById("commendationInput"),
     conductInput: document.getElementById("conductInput"),
     lookupCode: document.getElementById("lookupCode"),
     lookupBtn: document.getElementById("lookupBtn"),
+    lookupBtnLabel: document.getElementById("lookupBtnLabel"),
+    lookupCartCount: document.getElementById("lookupCartCount"),
+    changeCodeBtn: document.getElementById("changeCodeBtn"),
+    lookupRow: document.getElementById("lookupRow"),
+    lookupFinePrint: document.getElementById("lookupFinePrint"),
+    stepsList: document.getElementById("stepsList"),
+    modalFinePrint: document.getElementById("modalFinePrint"),
+    openCartBtn: document.getElementById("openCartBtn"),
+    cartCount: document.getElementById("cartCount"),
     lookupResult: document.getElementById("lookupResult"),
     miniBalance: document.getElementById("miniBalance"),
     miniBalanceValue: document.getElementById("miniBalanceValue"),
     catalog: document.getElementById("catalog"),
-    openCartBtn: document.getElementById("openCartBtn"),
     closeCartBtn: document.getElementById("closeCartBtn"),
     cartDrawer: document.getElementById("cartDrawer"),
     overlay: document.getElementById("overlay"),
-    cartCount: document.getElementById("cartCount"),
     cartBody: document.getElementById("cartBody"),
     summaryItems: document.getElementById("summaryItems"),
     summaryTotal: document.getElementById("summaryTotal"),
@@ -38,11 +50,12 @@
     modalSummary: document.getElementById("modalSummary"),
     studentCode: document.getElementById("studentCode"),
     studentNote: document.getElementById("studentNote"),
+    studentNoteLabel: document.getElementById("studentNoteLabel"),
+    notePrompts: document.getElementById("notePrompts"),
     sendRequestBtn: document.getElementById("sendRequestBtn"),
     copyStatus: document.getElementById("copyStatus"),
     hiddenFormFrame: document.getElementById("hiddenFormFrame"),
     requestSubmitForm: document.getElementById("requestSubmitForm"),
-    requestSubmitField: document.getElementById("requestSubmitField"),
     closeModalBtn: document.getElementById("closeModalBtn"),
     falseClaimField: document.getElementById("falseClaimField"),
     falseClaimCheck: document.getElementById("falseClaimCheck"),
@@ -70,17 +83,83 @@
     els.schoolNameLabel.textContent = CONFIG.schoolName;
     els.storeNameLabel.textContent = CONFIG.storeName;
     els.mottoText.textContent = CONFIG.motto;
+    renderHeroTitle();
     els.footMotto.textContent = `"${CONFIG.motto}"`;
     els.footSchoolName.textContent = CONFIG.schoolName;
     els.footWebsite.href = CONFIG.websiteUrl;
     els.footCodeOfConduct.href = CONFIG.codeOfConductUrl;
     els.footUniformPolicy.href = CONFIG.uniformPolicyUrl;
+    if (CONFIG.dressCodeDocUrl) {
+      els.footDressCode.href = CONFIG.dressCodeDocUrl;
+    } else {
+      els.footDressCodeItem.hidden = true;
+    }
     els.falseClaimPenaltyText.textContent = CONFIG.falseClaimPenalty;
     els.requestSubmitForm.action = CONFIG.requestsFormUrl.replace(/\/viewform.*$/, "/formResponse");
-    els.requestSubmitField.name = CONFIG.requestsFormFieldId;
     if (CONFIG.logoPath) {
       els.logoImg.src = CONFIG.logoPath;
     }
+  }
+
+  // The store name renders as one solid color. It stays a single config
+  // value rather than being split across the markup.
+  function renderHeroTitle() {
+    const words = CONFIG.storeName.trim().split(/\s+/);
+    const first = words.shift() || "";
+    const rest = words.join(" ");
+    const sammy = els.heroTitle.querySelector(".hero__sammy");
+    els.heroTitle.textContent = rest ? `${first} ${rest}` : first;
+    if (sammy) els.heroTitle.appendChild(sammy);
+  }
+
+  // ---- Theme ----
+  // Dark mode is the reward for finding every easter egg. Until then the
+  // switch is not in the top bar at all, which is what makes finding it
+  // worth something.
+  function darkUnlocked() {
+    try {
+      return window.localStorage.getItem("stingray.darkUnlocked") === "1";
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function unlockDark() {
+    try {
+      window.localStorage.setItem("stingray.darkUnlocked", "1");
+    } catch (err) {
+      /* the switch just won't survive a reload */
+    }
+    els.themeToggle.hidden = false;
+  }
+
+  function refreshThemeSwitch() {
+    const unlocked = darkUnlocked() || (window.Eggs && window.Eggs.allFound());
+    els.themeToggle.hidden = !unlocked;
+    if (unlocked) unlockDark();
+    // A locked-out student should never be left sitting in dark mode.
+    if (!unlocked && currentTheme() === "dark") applyTheme("light");
+  }
+
+
+  // The stored choice is applied by an inline script in index.html before
+  // first paint; this only keeps the button in sync and handles clicks.
+  function currentTheme() {
+    return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    try {
+      window.localStorage.setItem("stingray.theme", theme);
+    } catch (err) {
+      /* the choice just won't survive a reload */
+    }
+    els.themeToggle.setAttribute("aria-checked", theme === "dark" ? "true" : "false");
+  }
+
+  function toggleTheme() {
+    applyTheme(currentTheme() === "dark" ? "light" : "dark");
   }
 
   function getConduct() {
@@ -127,10 +206,8 @@
         <div class="lookup-msg ok">
           Verified. You have <strong>${record.commendations} commendation pts</strong> and
           <strong>${record.conduct} conduct pts</strong> this month.
-          <button class="link-btn" id="clearLookupBtn">Not you? Clear</button>
         </div>
       `;
-      document.getElementById("clearLookupBtn").addEventListener("click", resetLookup);
       openPointsModal(record);
     } else {
       clearVerification();
@@ -139,15 +216,44 @@
     renderAll();
   }
 
-  function launchConfetti() {
+  // A bigger month earns a bigger burst. Past the conduct cutoff it
+  // shrinks rather than turning into anything discouraging — a small
+  // celebration is still a celebration.
+  function confettiPieceCount(record) {
+    const cfg = CONFIG.confetti || {};
+    const min = cfg.minPieces || 12;
+    const max = cfg.maxPieces || 60;
+    const per = cfg.piecesPerCommendation || 2;
+    const commendations = record ? record.commendations : 0;
+    let pieces = Math.min(max, Math.max(min, min + commendations * per));
+    const conduct = record ? record.conduct : 0;
+    if (typeof cfg.conductCutoff === "number" && conduct > cfg.conductCutoff) {
+      pieces = Math.max(min, Math.round(pieces * (cfg.reducedFraction || 0.35)));
+    }
+    return pieces;
+  }
+
+  function launchConfetti(record) {
     const colors = ["#e63946", "#2d6cdf", "#f59f00", "#2f9e44", "#7048e8", "#0c8599"];
+    const shapes = ["sq", "rect", "dot"];
+    const total = confettiPieceCount(record);
     els.confettiLayer.innerHTML = "";
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < total; i++) {
       const piece = document.createElement("div");
-      piece.className = "confetti-piece";
+      // Small pieces, and a different mix of shapes, sizes, spins and
+      // speeds every burst, so no two celebrations look the same.
+      const size = 3 + Math.random() * 4;
+      piece.className = `confetti-piece confetti-piece--${
+        shapes[Math.floor(Math.random() * shapes.length)]
+      }`;
       piece.style.left = `${Math.random() * 100}%`;
       piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-      piece.style.animationDelay = `${Math.random() * 0.3}s`;
+      piece.style.width = `${size}px`;
+      piece.style.height = `${size}px`;
+      piece.style.animationDelay = `${Math.random() * 0.6}s`;
+      piece.style.animationDuration = `${1.1 + Math.random() * 1.1}s`;
+      piece.style.setProperty("--spin", `${(Math.random() - 0.5) * 900}deg`);
+      piece.style.setProperty("--sway", `${(Math.random() - 0.5) * 90}px`);
       els.confettiLayer.appendChild(piece);
     }
     setTimeout(() => {
@@ -156,9 +262,12 @@
   }
 
   function openPointsModal(record) {
+    const dressCodeLink = CONFIG.dressCodeDocUrl
+      ? ` <a href="${CONFIG.dressCodeDocUrl}" target="_blank" rel="noopener">What can I wear?</a>`
+      : "";
     const dressDown =
       record.conduct <= CONFIG.dressDownMaxConduct
-        ? `<div class="dress-down-banner">${CONFIG.dressDownNote}</div>`
+        ? `<div class="dress-down-banner">${escapeHtml(CONFIG.dressDownNote)}${dressCodeLink}</div>`
         : "";
     els.pointsModalBody.innerHTML = `
       <h2>You're verified!</h2>
@@ -169,7 +278,7 @@
       ${dressDown}
     `;
     els.pointsModalWrap.classList.add("open");
-    launchConfetti();
+    launchConfetti(record);
   }
 
   function closePointsModal() {
@@ -178,7 +287,9 @@
 
   function openDetailModal(item) {
     els.detailModalTitle.textContent = item.name;
-    els.detailModalText.textContent = item.detail;
+    els.detailModalText.textContent = item.approval
+      ? `${item.detail}\n\nPending approval: ${item.approval}.`
+      : item.detail;
     els.detailModalWrap.classList.add("open");
   }
 
@@ -187,12 +298,81 @@
   }
 
   function resetLookup() {
+    state.submitted = false;
     els.lookupCode.value = "";
     els.lookupResult.innerHTML = "";
     els.commendationInput.value = "";
     els.conductInput.value = "";
     clearVerification();
     renderAll();
+  }
+
+  // Once a code checks out, the lookup card's own button becomes the way
+  // to open the cart, so the call to action sits where the student is
+  // already looking instead of up in the corner.
+  function lookupButtonIsRequest() {
+    return state.verified;
+  }
+
+  function updateLookupButton() {
+    const asRequest = lookupButtonIsRequest();
+    els.lookupBtnLabel.textContent = asRequest ? "Make a Request" : "Check";
+    els.lookupBtn.classList.toggle("as-request", asRequest);
+    // An accepted code is locked in. Swapping it takes the small button
+    // underneath, so it cannot happen by accident mid-request.
+    els.lookupCode.readOnly = asRequest;
+    els.changeCodeBtn.hidden = !asRequest;
+    els.lookupCartCount.hidden = !asRequest;
+    // Verified, the button drops below the input and runs the full width
+    // of the card, so the next thing to do is unmistakable.
+    els.lookupRow.classList.toggle("stacked", asRequest);
+    els.lookupFinePrint.hidden = !asRequest;
+    if (asRequest && !els.lookupFinePrint.innerHTML) {
+      els.lookupFinePrint.innerHTML = finePrintList();
+    }
+    els.lookupCartCount.textContent = state.cart.length;
+    els.cartCount.textContent = state.cart.length;
+  }
+
+  // 1 enter a code, 2 add rewards, 3 send, 4 wait for staff. The list
+  // marks everything behind the student as done and the current one as
+  // active, so the card doubles as a progress bar.
+  function currentStep() {
+    if (state.submitted) return 4;
+    if (!state.verified) return 1;
+    return state.cart.length === 0 ? 2 : 3;
+  }
+
+  function renderSteps() {
+    if (!els.stepsList) return;
+    const now = currentStep();
+    els.stepsList.querySelectorAll("li").forEach((li) => {
+      const step = Number(li.dataset.step);
+      li.classList.toggle("is-active", step === now);
+      li.classList.toggle("is-done", step < now);
+    });
+  }
+
+  // The rules a student is agreeing to when they send. Same list in the
+  // lookup card and at checkout, from one place in the config.
+  function finePrintList() {
+    const lines = CONFIG.requestFinePrint || [];
+    if (lines.length === 0) return "";
+    return `<ul>${lines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>`;
+  }
+
+  const DAY_NAMES = [
+    "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
+  ];
+
+  function isRequestDay() {
+    const day = CONFIG.requestDay;
+    if (day === null || day === undefined) return true;
+    return new Date().getDay() === day;
+  }
+
+  function requestDayName() {
+    return DAY_NAMES[CONFIG.requestDay] || "the collection day";
   }
 
   function updateMiniBalance() {
@@ -206,6 +386,12 @@
 
   function isLocked(item) {
     return typeof item.maxConduct === "number" && getConduct() > item.maxConduct;
+  }
+
+  // Items that can't be acted on unless the student writes something
+  // specific in the note (which teacher agreed, what the act is, and so on).
+  function cartItemsNeedingNote() {
+    return state.cart.map(itemById).filter((item) => item && item.notePrompt);
   }
 
   function cartTotal() {
@@ -223,16 +409,29 @@
     const grid = document.createElement("div");
     grid.className = "grid";
 
-    ITEMS.filter((i) => i.category === cat).forEach((item) => {
+    visibleItems().filter((i) => i.category === cat).forEach((item) => {
       grid.appendChild(renderCard(item));
     });
 
     section.appendChild(grid);
+    if (window.Eggs) window.Eggs.bind(title, cat, grid);
     return section;
   }
 
+  // A category named by CONFIG.challengeUnlocksCategory stays out of the
+  // catalog until a student solves one of the grade-level problems.
+  function categoryIsLocked(cat) {
+    if (!CONFIG.challengeUnlocksCategory) return false;
+    if (cat !== CONFIG.challengeUnlocksCategory) return false;
+    return !(window.Challenges && window.Challenges.isUnlocked());
+  }
+
+  function visibleItems() {
+    return ITEMS.filter((item) => !categoryIsLocked(item.category));
+  }
+
   function renderCatalog() {
-    const categories = [...new Set(ITEMS.map((i) => i.category))];
+    const categories = [...new Set(visibleItems().map((i) => i.category))];
     els.catalog.innerHTML = "";
 
     // Categories with only one or two items are paired side by side to
@@ -240,7 +439,7 @@
     let i = 0;
     while (i < categories.length) {
       const cat = categories[i];
-      const isSmall = (c) => ITEMS.filter((item) => item.category === c).length <= 2;
+      const isSmall = (c) => visibleItems().filter((item) => item.category === c).length <= 2;
 
       if (isSmall(cat) && i + 1 < categories.length && isSmall(categories[i + 1])) {
         const row = document.createElement("div");
@@ -265,6 +464,7 @@
     card.innerHTML = `
       <h3>${item.name}</h3>
       <p class="desc">${item.desc}</p>
+      ${item.approval ? `<div class="approval-badge" title="${escapeAttr(item.approval)}">Pending approval</div>` : ""}
       ${item.detail ? `<button class="detail-link">Learn more</button>` : ""}
       <div class="cost">${item.cost} pts</div>
       ${locked ? `<div class="restriction">Unavailable. Requires ${item.maxConduct} or fewer conduct points.</div>` : ""}
@@ -292,11 +492,15 @@
     }
   }
 
+  // Both the top-bar cart and the lookup card's button show the count,
+  // so both pulse when something is added.
   function bumpCartButton() {
-    els.openCartBtn.classList.remove("bump");
-    // force reflow so the animation can restart on rapid adds
-    void els.openCartBtn.offsetWidth;
-    els.openCartBtn.classList.add("bump");
+    [els.openCartBtn, els.lookupBtn].forEach((el) => {
+      el.classList.remove("bump");
+      // force reflow so the animation can restart on rapid adds
+      void el.offsetWidth;
+      el.classList.add("bump");
+    });
   }
 
   function removeFromCart(id) {
@@ -305,7 +509,6 @@
   }
 
   function renderCart() {
-    els.cartCount.textContent = state.cart.length;
 
     if (state.cart.length === 0) {
       els.cartBody.innerHTML = '<p class="cart-empty">Your cart is empty. Add a reward to get started!</p>';
@@ -349,6 +552,8 @@
     renderCatalog();
     renderCart();
     updateMiniBalance();
+    updateLookupButton();
+    renderSteps();
   }
 
   function openCart() {
@@ -360,17 +565,35 @@
     els.overlay.classList.remove("open");
   }
 
-  function buildRequestText() {
+  // Every piece of a request, as its own string. Each key here lines up
+  // with a key in CONFIG.requestsFormFields, so a request can be posted
+  // as separate Form questions (one column per piece in the response
+  // sheet) instead of one wall of text.
+  function buildRequestValues() {
     const total = cartTotal();
     const balance = getCommendations();
     const conduct = getConduct();
     const code = els.studentCode.value.trim() || "(no code entered)";
     const note = els.studentNote.value.trim();
-    const lines = state.cart.map((id) => {
+    const items = state.cart.map((id) => {
       const item = itemById(id);
-      return `  - ${item.name}, ${item.cost} pts`;
+      const flag = item.approval ? ` [PENDING APPROVAL: ${item.approval}]` : "";
+      return `${item.name} (${item.cost} pts)${flag}`;
     });
 
+    return {
+      code: code,
+      pointsUsed: String(total),
+      items: items.join("\n"),
+      balance: String(balance),
+      conduct: String(conduct),
+      verified: state.verified ? "Verified" : "Not checked",
+      note: note,
+      details: "", // filled in below, once the rest is known
+    };
+  }
+
+  function buildRequestText(v) {
     const verificationLine = state.verified
       ? `Verification: VERIFIED via store lookup against this month's points upload`
       : `Verification: NOT CHECKED, please confirm this code and balance before fulfilling`;
@@ -380,20 +603,35 @@
       `School: ${CONFIG.schoolName}`,
       `Submitted: ${new Date().toLocaleString()}`,
       ``,
-      `Redemption Code: ${code}`,
+      `Redemption Code: ${v.code}`,
       verificationLine,
-      `Commendation points on request: ${balance}`,
-      `Conduct points on request: ${conduct}`,
+      `Commendation points on request: ${v.balance}`,
+      `Conduct points on request: ${v.conduct}`,
       ``,
-      `Requested rewards (total ${total} pts):`,
-      ...lines,
+      `Requested rewards (total ${v.pointsUsed} pts):`,
+      ...v.items.split("\n").filter(Boolean).map((line) => `  - ${line}`),
       ``,
-      note ? `Note from student: ${note}` : ``,
+      v.note ? `Note from student: ${v.note}` : ``,
       ``,
       `-- Staff: please confirm this code and balance in the roster before fulfilling. --`,
-    ]
-      .filter((l) => l !== undefined)
-      .join("\n");
+    ].join("\n");
+  }
+
+  // Which Form question each piece of the request goes to. Falls back to
+  // the old single-question setup (whole request as one blob of text)
+  // when requestsFormFields has nothing filled in yet, so an existing
+  // Form keeps working until the new one is wired up.
+  function requestFieldMap() {
+    const named = CONFIG.requestsFormFields || {};
+    const configured = {};
+    Object.keys(named).forEach((key) => {
+      const entryId = String(named[key] || "").trim();
+      if (entryId) configured[key] = entryId;
+    });
+    if (Object.keys(configured).length > 0) return configured;
+
+    const legacy = String(CONFIG.requestsFormFieldId || "").trim();
+    return legacy ? { details: legacy } : {};
   }
 
   function openModal() {
@@ -406,6 +644,20 @@
       <div class="line"><span>Total cost</span><span>${total} pts</span></div>
       <div class="line"><span>Your balance</span><span>${getCommendations()} pts ${state.verified ? "(verified)" : "(not checked)"}</span></div>
     `;
+    const needNote = cartItemsNeedingNote();
+    els.notePrompts.hidden = needNote.length === 0;
+    els.notePrompts.innerHTML = needNote
+      .map((item) => `<li><strong>${escapeHtml(item.name)}:</strong> ${escapeHtml(item.notePrompt)}</li>`)
+      .join("");
+    els.studentNoteLabel.textContent = needNote.length
+      ? "Note to staff (required for what you picked)"
+      : "Note to staff (optional)";
+
+    const offDay = !isRequestDay()
+      ? `<p class="fineprint__warn">Today is not ${requestDayName()}. You can still send this, but it will not be counted.</p>`
+      : "";
+    els.modalFinePrint.innerHTML = offDay + finePrintList();
+
     els.falseClaimField.hidden = total <= getCommendations();
     els.falseClaimCheck.checked = false;
     els.copyStatus.textContent = "";
@@ -427,10 +679,11 @@
   function confirmSubmitted() {
     if (!awaitingSubmitConfirmation) return;
     awaitingSubmitConfirmation = false;
-    els.copyStatus.style.color = "#1c6b3a";
+    setStatusTone(els.copyStatus, "ok");
     els.copyStatus.textContent = "Request submitted! Staff will review it soon.";
     els.sendRequestBtn.disabled = false;
     state.cart = [];
+    state.submitted = true;
     renderAll();
     setTimeout(closeModal, 1800);
   }
@@ -439,18 +692,54 @@
     if (!els.studentCode.value.trim()) {
       els.studentCode.focus();
       els.copyStatus.textContent = "Please enter your redemption code first.";
-      els.copyStatus.style.color = "#c42836";
+      setStatusTone(els.copyStatus, "err");
+      return;
+    }
+    const waiting = cooldownRemaining(els.studentCode.value);
+    if (waiting > 0) {
+      els.copyStatus.textContent =
+        `This code already sent a request. Try again in ${describeWait(waiting)}.`;
+      setStatusTone(els.copyStatus, "err");
+      return;
+    }
+    if (cartItemsNeedingNote().length > 0 && !els.studentNote.value.trim()) {
+      els.studentNote.focus();
+      els.copyStatus.textContent =
+        "One of your rewards needs details in the note. See the list above it.";
+      setStatusTone(els.copyStatus, "err");
       return;
     }
     if (requiresFalseClaimAck()) {
       els.copyStatus.textContent = "Please confirm your points balance is accurate first.";
-      els.copyStatus.style.color = "#c42836";
+      setStatusTone(els.copyStatus, "err");
       return;
     }
 
-    els.requestSubmitField.value = buildRequestText();
+    const fields = requestFieldMap();
+    if (Object.keys(fields).length === 0) {
+      els.copyStatus.textContent =
+        "This store isn't set up to receive requests yet. Please tell a staff member.";
+      setStatusTone(els.copyStatus, "err");
+      return;
+    }
+
+    const values = buildRequestValues();
+    values.details = buildRequestText(values);
+
+    // One hidden input per configured question, rebuilt each submit so a
+    // second request never carries over the first one's values.
+    els.requestSubmitForm.innerHTML = "";
+    Object.keys(fields).forEach((key) => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = fields[key];
+      input.value = values[key] || "";
+      els.requestSubmitForm.appendChild(input);
+    });
+
+    markRequested(els.studentCode.value);
     els.sendRequestBtn.disabled = true;
-    els.copyStatus.style.color = "#1c6b3a";
+    setStatusTone(els.copyStatus, "ok");
     els.copyStatus.textContent = "Submitting...";
     awaitingSubmitConfirmation = true;
     els.requestSubmitForm.submit();
@@ -459,10 +748,71 @@
     setTimeout(confirmSubmitted, 4000);
   }
 
+  // ---- One request per code per day ----
+  // Recorded in the student's own browser, so it is a courtesy guard
+  // rather than a real limit — a different browser or a cleared cache
+  // gets past it. Duplicate codes in the response sheet are the real
+  // check, which is why the code and timestamp ride along on every row.
+  function cooldownKey(code) {
+    return `stingray.lastRequest.${code.trim().toUpperCase()}`;
+  }
+
+  function cooldownMs() {
+    const hours = Number(CONFIG.requestCooldownHours);
+    return Number.isFinite(hours) && hours > 0 ? hours * 60 * 60 * 1000 : 0;
+  }
+
+  // Milliseconds still to wait for this code, or 0 if it is free to go.
+  function cooldownRemaining(code) {
+    const holdMs = cooldownMs();
+    if (!holdMs || !code.trim()) return 0;
+    let last = 0;
+    try {
+      last = Number(localStorage.getItem(cooldownKey(code))) || 0;
+    } catch (err) {
+      return 0;
+    }
+    const elapsed = Date.now() - last;
+    return elapsed >= 0 && elapsed < holdMs ? holdMs - elapsed : 0;
+  }
+
+  function markRequested(code) {
+    if (!cooldownMs()) return;
+    try {
+      localStorage.setItem(cooldownKey(code), String(Date.now()));
+    } catch (err) {
+      /* the hold just won't survive a reload */
+    }
+  }
+
+  function plural(n, word) {
+    return `${n} ${word}${n === 1 ? "" : "s"}`;
+  }
+
+  // A week-long hold reads as "7 days", not "167 hours".
+  function describeWait(ms) {
+    const minutes = Math.ceil(ms / (60 * 1000));
+    if (minutes < 60) return plural(minutes, "minute");
+    const hours = Math.round(ms / (60 * 60 * 1000));
+    if (hours < 24) return plural(hours, "hour");
+    return plural(Math.round(ms / (24 * 60 * 60 * 1000)), "day");
+  }
+
+  // Status lines read as green or red, but the exact shade has to come
+  // from the active theme, so it is a class rather than an inline color.
+  function setStatusTone(el, tone) {
+    el.classList.remove("ok", "err");
+    el.classList.add(tone);
+  }
+
   function escapeHtml(s) {
     const div = document.createElement("div");
     div.textContent = s;
     return div.innerHTML;
+  }
+
+  function escapeAttr(s) {
+    return escapeHtml(s).replace(/"/g, "&quot;");
   }
 
   function renderWallOfFame(rows) {
@@ -497,7 +847,7 @@
     const code = els.quoteCode.value.trim();
     const quote = els.quoteText.value.trim();
     if (!code || !quote) {
-      els.quoteStatus.style.color = "#c42836";
+      setStatusTone(els.quoteStatus, "err");
       els.quoteStatus.textContent = "Enter your code and a quote first.";
       return;
     }
@@ -513,11 +863,11 @@
     navigator.clipboard
       .writeText(text)
       .then(() => {
-        els.quoteStatus.style.color = "#1c6b3a";
+        setStatusTone(els.quoteStatus, "ok");
         els.quoteStatus.textContent = "Copied. Paste it into the form that just opened, then submit there.";
       })
       .catch(() => {
-        els.quoteStatus.style.color = "#c42836";
+        setStatusTone(els.quoteStatus, "err");
         els.quoteStatus.textContent = "Could not copy automatically. Copy your quote and code, then paste them into the form that just opened.";
       });
     window.open(CONFIG.wallOfFameFormUrl, "_blank", "noopener");
@@ -526,14 +876,16 @@
   // Wiring
   els.commendationInput.addEventListener("input", renderAll);
   els.conductInput.addEventListener("input", renderAll);
-  els.lookupBtn.addEventListener("click", performLookup);
+  els.lookupBtn.addEventListener("click", () => {
+    if (lookupButtonIsRequest()) openCart();
+    else performLookup();
+  });
   els.lookupCode.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
       performLookup();
     }
   });
-  els.openCartBtn.addEventListener("click", openCart);
   els.closeCartBtn.addEventListener("click", closeCart);
   els.overlay.addEventListener("click", closeCart);
   els.checkoutBtn.addEventListener("click", () => {
@@ -546,9 +898,22 @@
   els.pointsModalCloseBtn.addEventListener("click", closePointsModal);
   els.detailModalCloseBtn.addEventListener("click", closeDetailModal);
   els.quoteSubmitBtn.addEventListener("click", submitQuote);
+  els.themeToggle.addEventListener("click", toggleTheme);
+  els.changeCodeBtn.addEventListener("click", resetLookup);
+  els.openCartBtn.addEventListener("click", openCart);
 
   applyConfig();
+  applyTheme(currentTheme());
+  if (window.Challenges) {
+    window.Challenges.init(() => {
+      renderAll();
+      if (window.Jokes) window.Jokes.refresh();
+    });
+  }
+  if (window.Jokes) window.Jokes.init();
   renderAll();
+  if (window.Eggs) window.Eggs.init(refreshThemeSwitch);
+  refreshThemeSwitch();
   els.wallOfFamePolicy.textContent = CONFIG.wallOfFamePolicyNote;
   els.wallOfFameSubmit.hidden = !CONFIG.wallOfFameFormUrl;
   loadWallOfFame();
